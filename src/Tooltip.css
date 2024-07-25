@@ -1,0 +1,66 @@
+/* Tooltip.css */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.question-mark {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #000000;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.tooltip {
+  visibility: visible;
+  width: 220px;
+  background-color: #000000;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 5px 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Position the tooltip above the question mark */
+  left: 50%;
+  margin-left: -115px; /* Center the tooltip */
+  opacity: 0.9;
+  transition: opacity 0.3s;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #000000 transparent transparent transparent;
+}
+
+@media screen and (max-width: 500px) {
+    .tooltip {
+        visibility: visible;
+        width: 150px;
+        background-color: #000000;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 1px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position the tooltip above the question mark */
+        left: 50%;
+        margin-left: -77px; /* Center the tooltip */
+        opacity: 0.9;
+        transition: opacity 0.3s;
+      }
+}

@@ -1,0 +1,271 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity)) /* #f3f4f6 */;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  overflow-x: hidden;
+}
+.qr-width{
+  width: 17rem
+}
+.show-link{
+  display: block;
+  width: 70px;
+}
+@keyframes loading{
+  0%{
+    transform: scale(0.7);
+  }
+  50%{
+    transform: scale(0.9);
+  }
+  100%{
+    transform: scale(0.7);
+  }
+}
+
+.grid-qrcode{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8rem
+}
+.px-100{
+  padding-left: 25%;
+  padding-right: 25%;
+}
+.loading-animation{
+  animation: loading 3s forwards infinite linear;
+
+}
+.text-adjust{
+  font-size: 5rem /* 72px */;
+  line-height: 1;
+  color: green;
+}
+.form-size {
+  max-width: 900px;
+  overflow-y: scroll;
+  height: 100vh;
+  padding-left: 5rem;
+  padding-right: 5rem
+}
+.header-grid{
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    top: 0;
+}
+
+
+.login-homepage-button{
+  margin: 20px;
+  margin-right: 0;
+}
+.signup-homepage-button{
+  margin: 20px;
+}
+.thefront{
+  z-index: 1;
+  position: relative;
+  backface-visibility: hidden;
+}
+.thecard{
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.5s ease;
+  z-index: 1;
+  max-width: 300px;
+}
+.w-120{
+    max-width: 27.5rem /* 384px */;
+}
+.background-notfound{
+
+  background-image: url('src/notfound.png');
+  background-position: fixed;
+  background-size: cover;
+}
+.notfound{
+  background-color: rgb(0, 0, 0, 0.5);
+}
+.thecard:hover{
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+.theback{
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+  background-color: rgb(6, 224, 6);
+  height: 100%;
+}
+.bar{
+  display: none;
+}
+.max-w-8xl{
+  max-width: 90rem;
+}
+.max-w-9xl{
+  max-width: 91.8rem;
+}
+.max-w-10xl{
+  max-width: 95rem;
+}
+@media screen and (min-width: 1200px) {
+.width-adjust{
+  width: 105%;
+}
+
+
+}
+@media screen and (min-width: 425px) {
+  .flex-qr{
+    display: flex;
+    justify-content: center;
+ }
+}
+@media screen and (max-width: 1250px) {
+.px-100{
+  padding-left: 20%;
+  padding-right: 20%;
+}}
+@media screen and (max-width: 1024px) {
+  .correct-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .px-100{
+    padding-left: 15%;
+    padding-right: 15%;
+  }
+}
+@media screen and (min-width: 900px) {
+.pt-120{
+  padding-top: 1.5rem;
+  
+}}
+.pl-120{
+  padding-left: 7%;
+}
+@media screen and (max-width: 900px) {
+  .form-size {
+    overflow-y: initial;
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+  .grid-qrcode{
+    display: grid;
+    grid-auto-flow: row;
+   gap: 0;
+  }
+ 
+  .buttons{
+    display: none;
+  }
+}
+@media screen and (max-width: 767px) {
+.bar{
+  display: block; 
+  position: fixed;
+  left: 93%;
+}
+.profile-picture{
+  width: 2rem;
+  min-width: 2rem;
+}
+.px-100{
+  padding-left: 10%;
+  padding-right: 10%;
+}
+.smaller-text{
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
+}
+.small-text{
+  font-size: 2.25rem /* 36px */;
+  line-height: 2.5rem /* 40px */;
+}
+
+}
+
+@media screen and (max-width: 620px) {
+  .bar{
+    display: block; 
+    position: fixed;
+    left: 91.5%;
+  }
+  .show-link{
+  display: none;
+  }
+  .notfound-header{
+    font-size: 2.5rem;
+    line-height: 1;
+}
+  .notfound-body{
+      font-size: 1.7rem ;
+      line-height: 1;
+  }
+}
+@media screen and (max-width: 550px) {
+  .bar{
+    display: block; 
+    position: fixed;
+    left: 90%;
+  }
+}
+@media screen and (max-width: 475px) {
+  .bar{
+    display: block; 
+    position: fixed;
+    left: 88%;
+  }
+  .text-adjust{
+    font-size: 3rem /* 72px */;
+    line-height: 1;
+  }
+.mxx-10{
+  margin-left: 2rem /* 80px */;
+  margin-right: 2rem /* 80px */;
+}
+.smaller-text{
+    font-size: 1.125rem /* 18px */;
+    line-height: 1.75rem /* 28px */;
+  }
+  .small-text{
+    font-size: 2rem /* 36px */;
+    line-height: 2.25rem /* 40px */;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .bar{
+    display: block; 
+    position: fixed;
+    left: 85%;
+  }
+  .qr-width{
+    padding: 1rem;
+    width: 15rem;
+  }
+  
+  }
+  @media screen and (max-width: 350px) {.qr-width{
+    padding: 0.75rem;
+    width: 14rem;
+  }
+  .pp{
+    margin-left: 5px;
+  }
+  }

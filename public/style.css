@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+a:active{
+    color: red;
+}
+
+a{
+    color: rgb(161, 87, 230);
+}
+.max-w-screen-md{
+    max-width: 768px;
+}
+.text-2xl{
+    font-size: 1.5rem /* 24px */;
+    line-height: 2rem /* 32px */;
+}
+.text-3xl{
+    font-size: 1.875rem /* 30px */;
+    line-height: 2.25rem /* 36px */;
+}
+.text-4xl {
+    font-size: 2.25rem /* 36px */;
+    line-height: 2.5rem /* 40px */;
+}
+.px-5{
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+.grid-cols-2{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-coln{
+    grid-template-columns: 750px auto;
+    overflow-x: hidden; 
+}
+.moving-fish {
+    animation: move 5s infinite alternate;
+}
+.spacious{
+    word-spacing: 0;
+}
+@keyframes move {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(100px); }
+}
+/* .body{
+    width: 100%;
+} */
+.font-700{
+    font-weight: 700;
+}
+.text-center {
+    text-align: center;
+  }
+/* .center{
+    align-self: center;
+    margin-left: 27%;
+} */
+.inline-content {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+}
+.inline-content p {
+    display: inline-block;
+    margin: 0 10px;
+}
+.inline{
+    display: inline;
+}
+.line{
+   
+        height: 0;
+        /* 1 */
+        color: inherit;
+        /* 2 */
+        border-top-width: 2px;
+        /* 3 */
+        max-width: 47.5%;
+        margin-top: -0.1%;
+        
+        /* 4 */
+  
+}
+
+.font-comic {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+.correct-line{
+    margin-left: 52.5%;
+    margin-top: -0.26%;
+    margin-bottom: -16px;
+    
+}
+.m-space{
+    margin-bottom: 20px;
+}
+#root {
+    font-family: 'Grotesk', sans-serif;
+  }
+.grotesk-font{
+    font-family: 'Grotesk', sans-serif;
+}
+@media screen and (max-width: 900px) {
+    .grid-coln{
+        grid-template-columns: auto;
+        overflow-x: hidden; 
+    }
+}
