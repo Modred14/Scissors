@@ -247,11 +247,11 @@ const Policy: React.FC = () => {
         </p>
       </div>
       <div className="flex items-center justify-center">
-        <img src="src/Scissors_logo.png" alt="Scissors" className="w-48 my-24 animate-bounce duration-1000 ease-linear" style={{animationDuration:"3s"}}/>
+        <img src="/Scissors_logo.png" alt="Scissors" className="w-48 my-24 animate-bounce duration-1000 ease-linear" style={{animationDuration:"3s"}}/>
         
       </div>
       <div className="flex items-center justify-center mb-16">
-        <img src="src/Scissors_logo.png" alt="Scissors" className="sm:w-32 w-20" />
+        <img src="/Scissors_logo.png" alt="Scissors" className="sm:w-32 w-20" />
         <p className="font-extrabold text-adjust">Scissors</p>
         </div>
     </div>

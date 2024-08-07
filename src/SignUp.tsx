@@ -16,6 +16,7 @@ const Signup: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -31,6 +32,21 @@ const Signup: React.FC = () => {
       setLoading(false);
     }
   }, [navigate]);
+  useEffect(() => {
+    // Clear the message after 5 seconds with a fade-out effect
+    if (message) {
+      const timer = setTimeout(() => {
+        setIsFadingOut(true); // Trigger the fade-out effect
+        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
+      }, 4500); // Start fade-out before 5 seconds
+
+      // Clear timeout if component unmounts or message changes
+      return () => {
+        clearTimeout(timer);
+        setIsFadingOut(false); // Reset the fade-out state
+      };
+    }
+  }, [message]);
 
   const validatePassword = (password: string) => {
     const minLength = 6;
@@ -147,7 +163,7 @@ const Signup: React.FC = () => {
           <Link to="/">
             <img
               alt="Scissors"
-              src="src/Scissors_logo.png"
+              src="/Scissors_logo.png"
               className="h-8 w-auto"
             />
           </Link>
@@ -158,50 +174,60 @@ const Signup: React.FC = () => {
         <p className="text-4xl mb-5 font-extrabold text-green-700 text-center">
           Sign up
         </p>
-
-        <form
-          className="max-w-screen-md w-full min-w-fit"
-          onSubmit={step === 1 ? handleEmailSubmit : handleDetailsSubmit}
-        >
+        <div className="max-w-screen-md w-full min-w-fit">
           {step === 1 && (
-            <>
-              <GoogleLogin
-                clientId={clientId}
-                onSuccess={handleSignUp}
-                onFailure={handleFailure}
-                cookiePolicy={"single_host_origin"}
-                render={(renderProps) => (
+            <GoogleLogin
+              clientId={clientId}
+              onSuccess={handleSignUp}
+              onFailure={handleFailure}
+              cookiePolicy={"single_host_origin"}
+              render={(renderProps) => (
+                <div
+                  onClick={renderProps.onClick}
+                  disabled={renderProps.disabled}
+                >
+                  <button className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl">
+                    Continue with Google
+                  </button>
+                </div>
+              )}
+            />
+          )}
+          <form onSubmit={step === 1 ? handleEmailSubmit : handleDetailsSubmit}>
+            {step === 1 && (
+              <>
+                <div className="m-space">
+                  <div className="inline">
+                    <div className="line"></div>
+                    <div className="line correct-line"></div>
+                    <div className="text-center">or</div>
+                  </div>
+                </div>
+                {message && (
                   <div
-                    onClick={renderProps.onClick}
-                    disabled={renderProps.disabled}
+                    className={`flex justify-center transition-opacity duration-500 ${
+                      isFadingOut ? "opacity-0" : "opacity-100"
+                    }`}
                   >
-                    <button className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl">
-                      Continue with Google
-                    </button>
+                    <div
+                      className="fixed animate-message bg-black p-4 mx-4 rounded"
+                      style={{ top: "10%" }}
+                    >
+                      <p className=" text-red-100">{message}</p>
+                    </div>{" "}
                   </div>
                 )}
-              />
-              <div className="m-space">
-                <div className="inline">
-                  <div className="line"></div>
-                  <div className="line correct-line"></div>
-                  <div className="text-center">or</div>
-                </div>
-              </div>
-              {message && (
-                <p className="my-4 text-red-500 text-center">{message}</p>
-              )}
-              <label className="block">
-                <span className="block text-base font-medium text-slate-700">
-                  Email address
-                </span>
-                <input
-                  type="email"
-                  placeholder="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`peer h-12 mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                <label className="block">
+                  <span className="block text-base font-bold text-slate-700">
+                    Email address
+                  </span>
+                  <input
+                    type="email"
+                    placeholder="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`peer h-12 mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                   ${
                     email && !hasAt && hasEmailSymbol
                       ? "border-pink-500 text-pink-600"
@@ -214,120 +240,132 @@ const Signup: React.FC = () => {
                         ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
                         : ""
                     }`}
-                />
-                {email && !hasAt && hasEmailSymbol && (
-                  <p className="mt-1 -mb-2 peer-invalid:visible text-pink-600 text-sm">
-                    Please provide a valid email address.
+                  />
+                  {email && !hasAt && hasEmailSymbol && (
+                    <p className="mt-1 -mb-2 peer-invalid:visible text-pink-600 text-sm">
+                      Please provide a valid email address.
+                    </p>
+                  )}
+                  <p className="mt-3 text-center" style={{ maxWidth: "570px" }}>
+                    By signing up for Scissors you acknowledge that you agree to
+                    Scissors'{" "}
+                    <a
+                      href="/terms-of-service"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
                   </p>
-                )}
-                <p className="mt-3 text-center" style={{ maxWidth: "570px" }}>
-                  By signing up for Scissors you acknowledge that you agree to
-                  Scissors'{" "}
-                  <a
-                    href="/terms-of-service"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="/privacy-policy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Privacy Policy
-                  </a>
-                  .
-                </p>
-              </label>
+                </label>
 
-              <button
-                type="submit"
-                className="mt-4 h-12 w-full text-center  my-7 font-medium bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-xl"
-              >
-                Sign up
-              </button>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              {message && (
-                <p className="my-4 text-red-500 text-center">{message}</p>
-              )}
-              <label className="block">
-                <span className="block text-base font-medium text-slate-700">
-                  First Name
-                </span>
-                <input
-                  required
-                  type="text"
-                  placeholder="Favour"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                <button
+                  type="submit"
+                  className="mt-4 h-12 w-full text-center  my-7 font-medium bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-xl"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+            {step === 2 && (
+              <>
+                {message && (
+                  <div
+                    className={`flex justify-center transition-opacity duration-500 ${
+                      isFadingOut ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
+                    <div
+                      className="fixed animate-message bg-black p-4 mx-4 rounded"
+                      style={{ top: "10%" }}
+                    >
+                      <p className=" text-red-100">{message}</p>
+                    </div>{" "}
+                  </div>
+                )}
+                <label className="block">
+                  <span className="block  text-base font-bold text-slate-700">
+                    First Name
+                  </span>
+                  <input
+                    required
+                    type="text"
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
               "
-                />
-              </label>
-              <label className="block">
-                <span className="block text-base font-medium text-slate-700">
-                  Last Name
-                </span>
-                <input
-                  required
-                  type="text"
-                  placeholder="Omirin"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                  />
+                </label>
+                <label className="block">
+                  <span className="block text-base font-bold text-slate-700">
+                    Last Name
+                  </span>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
               "
-                />
-              </label>
-              <label className="block">
-                <span className="block text-base font-medium text-slate-700">
-                  Password
-                </span>
-                <input
-                  required
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                  />
+                </label>
+                <label className="block">
+                  <span className="block text-base font-bold text-slate-700">
+                    Password
+                  </span>
+                  <input
+                    required
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
               "
-                />
-              </label>
-              <label className="block">
-                <span className="block text-base font-medium text-slate-700">
-                  Confirm Password
-                </span>
-                <input
-                  required
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                  />
+                </label>
+                <label className="block">
+                  <span className="block text-base font-bold text-slate-700">
+                    Confirm Password
+                  </span>
+                  <input
+                    required
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
               "
-                />
-              </label>
-              <button
-                type="submit"
-                className="mt-4 h-12 w-full text-center my-7 font-medium bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-xl"
-              >
-                Sign up
-              </button>
-            </>
-          )}
-        </form>
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="mt-4 h-12 w-full text-center my-7 font-medium bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-xl"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </form>
+        </div>
         <div className="center">
           <div className="mt-5 justify-center items-center text-center place-content-center">
             <p className="place-content-center">
@@ -337,7 +375,7 @@ const Signup: React.FC = () => {
         </div>
         <div className="flex items-center justify-center">
           <img
-            src="src/Scissors_logo.png"
+            src="/Scissors_logo.png"
             alt="Scissors"
             className="h-32 my-8 animate-pulse"
           />

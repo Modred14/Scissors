@@ -8,10 +8,12 @@ import Terms from "./Terms of Service.tsx";
 import Policy from "./Privacy Policy.tsx";
 import Links from "./Links.tsx";
 import Profile from "./profile.tsx";
-import Settings from "./Settings.tsx";
+import SettingsParent from "./SettingsParent.tsx";
 import NotFound from "./NotFound.tsx";
 import Loading from "./Loading.tsx";
 import CreateLink from "./CreateLink.tsx";
+import EditLink from "./EditLink"
+import LinkDetails from "./LinkDetails"
 
 const AppRouter: React.FC = () => {
   return (
@@ -25,10 +27,12 @@ const AppRouter: React.FC = () => {
         <Route path="/privacy-policy" element={<Policy />} />
         <Route path="/links" element={<Links />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings" element={<SettingsParent />} />
         <Route path="/create-link" element={<CreateLink />} />
         <Route path="/loading" element={<Loading />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/link/:id" element={<LinkDetails />} />
+        <Route path="/edit-link/:id" element={<EditLink />} />
       </Routes>
     </Router>
   );

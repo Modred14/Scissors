@@ -11,15 +11,15 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Loading from "./Loading";
-import { Link } from "react-router-dom";
-import TruncatedWord from "./TruncatedWord";
+import { Link, useParams } from "react-router-dom";
 import useWindowWidth from "./useWindowWidth";
-import LinkOptions from "./LinkOptions";
+import TruncatedWord from "./TruncatedWord";
+import Confirm from "./Confirm";
 
 interface User {
-  id: string;
   firstName: string;
   lastName: string;
+  id: string;
   profileImg: string;
   password: string;
 }
@@ -38,7 +38,7 @@ type Link = {
 const navigation = (isLoggedIn: boolean) => [
   { name: "Home", href: "/", current: false },
   { name: "Dashboard", href: "/dashboard", current: false },
-  { name: "Links", href: "/links", current: true },
+  { name: "Links", href: "/links", current: false },
   ...(!isLoggedIn
     ? [
         { name: "Sign In", href: "/login", current: false },
@@ -51,17 +51,38 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Links: React.FC = () => {
+const LinkDetails: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [links, setLinks] = useState<Link[]>([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { id } = useParams<{ id: string }>();
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
+  const [link, setLink] = useState<Link | null>(null);
 
-  const handleCopyClick = async (index: number) => {
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+      const userData = JSON.parse(user);
+      fetchUserData(userData.token);
+    } else {
+      setLoading(false);
+      fetchLinksFromLocalStorage();
+    }
+  }, []);
+
+  const handleCopyClick = async (id: string) => {
     try {
-      const textToCopy = links[index].customLink || links[index].shortenedLink;
+      // Find the link with the given id
+      const link = links.find((link) => link.id === id);
+      if (!link) {
+        throw new Error("Link not found");
+      }
+
+      const textToCopy = link.customLink || link.shortenedLink;
       await navigator.clipboard.writeText(textToCopy);
       console.log(textToCopy);
       setMessage("You have successfully copied the link.");
@@ -88,42 +109,134 @@ const Links: React.FC = () => {
     }
   }, [message]);
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      const userData = JSON.parse(user);
-      fetchUserData(userData.token);
+  const handleDelete = async (enteredPassword: string) => {
+    if (isLoggedIn) {
+      if (enteredPassword === user?.password) {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/users/${userId}/links/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+
+          // Handle successful deletion (e.g., update state, show a message, redirect)
+
+          setLink(null);
+          setIsModalOpen(false);
+          setMessage(`You have successfully deleted the link with ID ${id}.`);
+          console.log("Link deleted successfully");
+        } catch (error) {
+          setIsModalOpen(false);
+          console.error("Error deleting link:", error);
+          setMessage("Oops!! Couldn't delete the link.");
+        }
+      } else {
+        setIsModalOpen(false);
+        setMessage("Incorrect password. Please try again.");
+      }
     } else {
-      setLoading(false);
-      fetchLinksFromLocalStorage();
+      const links = localStorage.getItem("links");
+      if (links) {
+        const linksArray = JSON.parse(links);
+        const updatedLinks = linksArray.filter((link: any) => link.id !== id);
+        setIsModalOpen(false);
+        window.location.reload();
+        localStorage.setItem("links", JSON.stringify(updatedLinks));
+        setMessage(`You have successfully deleted the link with ID ${id}.`);
+        console.log(`Removed link with ID ${id}`);
+      } else {
+        // console.log("No links found in localStorage");
+        setMessage("Oops!! Couldn't delete the link.");
+      }
     }
-  }, []);
+  };
+  // Use useParams to get link ID from URL
+  const userId = user?.id;
+  useEffect(() => {
+    const fetchLinkDetails = async () => {
+      if (isLoggedIn) {
+        try {
+          const userId = user?.id;
+          const response = await fetch(
+            `http://localhost:5000/users/${userId}/links/${id}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const data = await response.json();
+          console.log(data || null);
+          setLink(data);
+        } catch (error) {
+          console.error("Error fetching link details from database:", error);
+        }
+      } else {
+        // Retrieve all links from local storage
+        const links: Link[] = JSON.parse(localStorage.getItem("links") || "[]");
+        // Find the link with the matching ID
+        const foundLink = links.find((link) => link.id === id);
+        setLink(foundLink || null);
+      }
+      setLoading(false);
+    };
+
+    fetchLinkDetails();
+  }, [id, isLoggedIn, userId]);
+
   const windowWidth = useWindowWidth();
 
   const getMaxLength = (width: number): number => {
-    if (width >= 1300) return 80;
-    if (width >= 1160) return 65;
-    if (width >= 790) return 55;
-    if (width >= 680) return 45;
-    if (width >= 510) return 35;
-    if (width >= 370) return 22;
+    if (width >= 1250) return 50;
+    if (width >= 1170) return 40;
+    if (width >= 690) return 30;
+    if (width >= 460) return 20;
+    if (width >= 350) return 15;
 
-    return 18;
+    return 10;
+  };
+  const getOtherMaxLinkLength = (width: number): number => {
+    if (width >= 1000) return 60;
+    if (width >= 768) return 40;
+    if (width >= 650) return 50;
+    if (width >= 500) return 40;
+    if (width >= 400) return 30;
+
+    return 20;
+  };
+  const getMaxLinkLength = (width: number): number => {
+    // if (width >= 1000) return 40;
+    if (width >= 800) return 35;
+    if (width >= 760) return 30;
+    if (width >= 600) return 40;
+    if (width >= 500) return 40;
+    if (width >= 400) return 30;
+
+    return 20;
   };
 
   const maxLength = getMaxLength(windowWidth);
 
-  const getMaxLinkLength = (width: number): number => {
-    if (width >= 1250) return 84;
-    if (width >= 1100) return 74;
-    if (width >= 750) return 60;
-    if (width >= 600) return 49;
-    if (width >= 470) return 35;
-    if (width >= 370) return 27;
-    return 23;
-  };
   const maxLinkLength = getMaxLinkLength(windowWidth);
+  const maxOtherLinkLength = getOtherMaxLinkLength(windowWidth);
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+      fetchUserData();
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -400,14 +513,12 @@ const Links: React.FC = () => {
         </Disclosure>
       </div>
       <div style={{ minHeight: "100vh", marginTop: "65px" }}>
-        <header className="bg-white shadow lg:-mr-6 min-w-full">
-          <div className="max-w-9xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl max-w-8xl font-bold tracking-tight text-gray-900">
-              Links
-            </h1>
-          </div>
-        </header>
-        <main>
+        <main className="px-110 main">
+          <Link to="/links">
+            <div className="pt-10 flex gap-1 text-black text-sm">
+              <i className="text-sm material-icons">arrow_back</i> Back to List
+            </div>{" "}
+          </Link>
           {message && (
             <div
               className={`flex justify-center transition-opacity duration-500 ${
@@ -416,186 +527,246 @@ const Links: React.FC = () => {
             >
               <div
                 className="fixed animate-message bg-black p-4 mx-4 rounded"
-                style={{ zIndex: "1500", top: "10%" }}
+                style={{ top: "10%" }}
               >
                 <p className=" text-red-100">{message}</p>
               </div>{" "}
             </div>
           )}
-          {!isLoggedIn && (
-            <div
-              className="fixed rounded-full shadow-2xl outline outline-1  bg-gray-100 font-bold"
-              style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-            >
-              {links.length < 3 ? (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                    {links.length}/3
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                    {links.length}/3
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          <div className="mx-auto py-6 max-w-8xl px-4 sm:px-6 lg:px-8">
-            <div>
-              <p className="mb-3 text-xl font-extrabold">
-                Active ({links.length})
-              </p>
-            </div>
-            <div>
-              {links.length > 0 ? (
-                <ul
-                  className="bg-white shadow p-7 pt-1"
-                  style={{ minHeight: "500px" }}
-                >
-                  {links
-                    .sort(
-                      (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime()
-                    )
-                    .map((link: any, index: number) => (
-                      <li
-                        key={link.id}
-                        className="border sm:m-4 mt-6 sm:mt-10 pl-0  sm:pl-4 p-4 h-auto bg-gray-100"
-                      >
-                        <div className="grid grid-flow-row lg:grid-flow-col">
-                          <div className="flex sm:pb-0 pb-2 gap-4">
-                            <div>
-                              {" "}
-                              <img
-                                src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.mainLink}&size=32`}
-                                className="show-link rounded-3xl"
-                                alt="link"
-                              />
-                            </div>
-                            <div>
-                              <Link
-                                to={`/link/${link.id}`}
-                                className="text-black hover:underline hover:text-black text-xl font-bold"
-                              >
-                                <TruncatedWord
-                                  word={link.title}
-                                  maxLength={maxLength}
-                                />
-                              </Link>
-                              <a
-                                className="hover:underline font-semibold"
-                                href={link.mainLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <TruncatedWord
-                                  word={link.mainLink}
-                                  maxLength={maxLinkLength}
-                                />
-                              </a>
-                              {link.customLink ? (
-                                <p>
-                                  {" "}
-                                  <a
-                                    className="hover:underline  font-semibold"
-                                    href={link.customLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <TruncatedWord
-                                      word={link.customLink}
-                                      maxLength={maxLinkLength}
-                                    />
-                                  </a>
-                                </p>
-                              ) : (
-                                <p>
-                                  {" "}
-                                  <a
-                                    className="hover:underline font-semibold"
-                                    href={link.shortenedLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <TruncatedWord
-                                      word={link.shortenedLink}
-                                      maxLength={maxLinkLength}
-                                    />
-                                  </a>
-                                </p>
-                              )}
-                              <div className="flex gap-2 text-sm pt-3">
-                                <span className="material-icons text-sm">
-                                  calendar_today
-                                </span>
-                                {new Date(link.createdAt).toLocaleString()}
-                              </div>
-                            </div>
-                            <hr
-                              className="my-5 mx-0 md:hidden"
-                              style={{
-                                height: "0.5px",
-                                backgroundColor: "rgb(83, 83, 83, 0.5)",
-                                border: "none",
-                              }}
-                            />
-                          </div>
-                          <div className="flex justify-end">
-                            <div className="relative inline-block">
-                              <div className="flex gap-2">
-                                <button
-                                  className="px-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
-                                  onClick={() => handleCopyClick(index)}
-                                >
-                                  <span className="material-icons pt-2 text-sm font-extrabold">
-                                    content_copy
-                                  </span>
-                                  <p className="pt-2 px-1">Copy</p>
-                                </button>
-                                <Link to={`/edit-link/${link.id}`}>
-                                  <button className="px-2 text-black hover:text-black py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded">
-                                    <span className="material-icons text-sm">
-                                      edit
-                                    </span>
-                                  </button>
-                                </Link>
-                                <LinkOptions
-                                  id={link.id}
-                                  userId={user?.id}
-                                  isLoggedIn={isLoggedIn}
-                                  setMessage={setMessage}
-                                  userPassword={user?.password}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                </ul>
-              ) : (
-                <div
-                  className="bg-white shadow flex flex-col items-center justify-center"
-                  style={{ height: "500px" }}
-                >
-                  <p className="text-xl font-bold text-center mb-4">
-                    No link is available
+          <div>
+            <Confirm
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onDelete={handleDelete}
+              isLoggedIn={isLoggedIn}
+              id={Link?.id}
+            />
+            <div></div>{" "}
+            {link ? (
+              <div>
+                <div className="bg-white shadow-sm p-7 rounded-md mt-7">
+                  <p className="text-3xl font-extrabold">
+                    {" "}
+                    <TruncatedWord word={link.title} maxLength={maxLength} />
                   </p>
-                  <div>
-                    <a href="/create-link">
-                      <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
-                        Create New
-                      </button>
-                    </a>
+                  <div className="flex gap-3 mt-2">
+                    {" "}
+                    <img
+                      src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.mainLink}&size=32`}
+                      className="rounded-3xl block w-10 sm:w-16"
+                      alt="link"
+                    />
+                    <div className="flex text-sm items-center">
+                      <div>
+                        <p>
+                          {" "}
+                          <a
+                            className="hover:underline text-base font-semibold"
+                            href={link.mainLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <TruncatedWord
+                              word={link.mainLink}
+                              maxLength={maxOtherLinkLength}
+                            />
+                          </a>
+                        </p>
+                        {link.customLink ? (
+                          <p>
+                            {" "}
+                            <a
+                              className="hover:underline hover:text-black text-black font-semibold"
+                              href={link.customLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedWord
+                                word={link.customLink}
+                                maxLength={maxOtherLinkLength}
+                              />
+                            </a>
+                          </p>
+                        ) : (
+                          <p>
+                            {" "}
+                            <a
+                              className="hover:underline hover:text-black text-black font-semibold"
+                              href={link.shortenedLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedWord
+                                word={link.shortenedLink}
+                                maxLength={maxOtherLinkLength}
+                              />
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <hr
+                    className="my-5 mx-0"
+                    style={{
+                      height: "1px",
+                      backgroundColor: "rgb(83, 83, 83, 0.1)",
+                      border: "none",
+                    }}
+                  />
+                  <div className="grid  grid-flow-col gap-5">
+                    <div className="flex w-20 sm:pt-3 sm:w-auto gap-2 text-sm">
+                      <span className="material-icons text-sm">
+                        calendar_today
+                      </span>
+                      {new Date(link.createdAt).toLocaleString()}
+                    </div>
+                    <div className="flex justify-end">
+                      <div className="flex gap-2">
+                        <button
+                          className="px-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
+                          onClick={() => handleCopyClick(link.id)}
+                        >
+                          <span className="material-icons pt-2 text-sm font-extrabold">
+                            content_copy
+                          </span>
+                          <p className="pt-2 px-1">Copy</p>
+                        </button>
+                        <Link to={`/edit-link/${link.id}`}>
+                          <button className="px-2 text-black hover:text-black py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded">
+                            <span className="material-icons text-sm">edit</span>
+                          </button>
+                        </Link>
+
+                        <button
+                          className="px-2 text-black gap hover:text-black py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
+                          onClick={() => {
+                            setIsModalOpen(true); // Open modal to confirm deletion
+                          }}
+                        >
+                          <span className="material-icons text-sm">delete</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
+                <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+                  <div className="flex items-center md:pb-0 pb-10 justify-center text-lg">
+                    <div>
+                      <p>
+                        <strong className="text-xl font-extrabold ">
+                          Original Link:
+                        </strong>
+                        <a
+                          className="hover:underline hover:text-black text-black font-semibold"
+                          href={link.mainLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TruncatedWord
+                            word={link.mainLink}
+                            maxLength={maxLinkLength}
+                          />
+                        </a>
+                      </p>
+                      <p className=" pt-4">
+                        <strong className="text-xl font-extrabold">
+                          Shortened Link:
+                        </strong>
+                        <a
+                          className="hover:underline hover:text-black text-black font-semibold"
+                          href={link.shortenedLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TruncatedWord
+                            word={link.shortenedLink}
+                            maxLength={maxLinkLength}
+                          />
+                        </a>
+                      </p>
+
+                      {link.customLink && (
+                        <>
+                          <p className=" pt-4">
+                            <strong className="text-xl font-extrabold">
+                              Custom Link:
+                            </strong>{" "}
+                            <a
+                              className="hover:underline hover:text-black text-black font-semibold"
+                              href={link.customLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedWord
+                                word={link.customLink}
+                                maxLength={maxLinkLength}
+                              />
+                            </a>
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className=" text-center text-xl font-extrabold flex justify-center">
+                      QR Code
+                    </p>
+
+                    {link.qrcode ? (
+                      <>
+                        <div className="flex text-center items-center justify-center">
+                          <img src={link.qrcode} alt="QR Code" />
+                        </div>
+                        <div className="mt-3 flex text-center items-center  justify-center ">
+                          <button className="flex font-bold ml-5 px-2 py-1 gap-1 text-white bg-green-700">
+                            <a
+                              className="flex font-bold px-2 py-1 gap-1 hover:text-white text-white bg-green-700"
+                              href={link.qrcode}
+                              download={`${link.title} qrcode`}
+                            >
+                              <i className="material-icons">download</i>Download
+                            </a>
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-base text-center items-center justify-center font-bold">
+                        No QR code found with this Link.
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+                  <div>
+                    <p className=" text-center text-xl font-extrabold flex">
+                      Analystics
+                    </p>
+                    {isLoggedIn ? (
+                      <div>
+                        <div></div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+                  <div>
+                    <p className="font-bold ">
+                      Oops!!! There’s no link associated with this ID. The link
+                      may have been deleted or may not exist.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -603,4 +774,4 @@ const Links: React.FC = () => {
   );
 };
 
-export default Links;
+export default LinkDetails;

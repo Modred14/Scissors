@@ -14,6 +14,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const navigate = useNavigate();
   const clientId = "YOUR_GOOGLE_CLIENT_ID";
 
@@ -29,6 +30,22 @@ const Login: React.FC = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    // Clear the message after 5 seconds with a fade-out effect
+    if (message) {
+      const timer = setTimeout(() => {
+        setIsFadingOut(true); // Trigger the fade-out effect
+        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
+      }, 4500); // Start fade-out before 5 seconds
+
+      // Clear timeout if component unmounts or message changes
+      return () => {
+        clearTimeout(timer);
+        setIsFadingOut(false); // Reset the fade-out state
+      };
+    }
+  }, [message]);
+
   const handleLogin = (
     response: GoogleLoginResponse | GoogleLoginResponseOffline
   ) => {
@@ -43,7 +60,7 @@ const Login: React.FC = () => {
       console.log("ID Token: " + id_token);
 
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", "http://localhost:5000");
+      xhr.open("POST", "http://localhost:5000/users");
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onload = function () {
         console.log("Signed in as: " + xhr.responseText);
@@ -95,16 +112,16 @@ const Login: React.FC = () => {
 
   return (
     <div className="grid grid-coln body">
-      <div className="" style={{ maxWidth: "100%" }}>
-        <form
-          onSubmit={handleEmailLogin}
-          className="max-w-screen-md w-full min-w-fit form-size"
-        >
+      <div
+        className="max-w-screen-md w-full min-w-fit form-size"
+        style={{ maxWidth: "100%" }}
+      >
+        <form onSubmit={handleEmailLogin} className="">
           <div className="mt-32 grid grid-flow-col w-40">
             <Link to="/">
               <img
                 alt="Scissors"
-                src="src/Scissors_logo.png"
+                src="/Scissors_logo.png"
                 className="h-8 w-auto"
               />
             </Link>
@@ -138,12 +155,25 @@ const Login: React.FC = () => {
               <div className="text-center">or</div>
             </div>
           </div>
+        </form>
+        <form onSubmit={handleEmailLogin}>
           {message && (
-            <p className="text-center my-4 text-red-600">{message}</p>
+            <div
+              className={`flex justify-center transition-opacity duration-500 ${
+                isFadingOut ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <div
+                className="fixed animate-message bg-black p-4 mx-4 rounded"
+                style={{ top: "10%" }}
+              >
+                <p className=" text-red-100">{message}</p>
+              </div>{" "}
+            </div>
           )}{" "}
           {/* Display login message */}
           <label className="block">
-            <span className="block text-base font-medium text-slate-700">
+            <span className="block text-base font-bold text-slate-700">
               Email address
             </span>
             <input
@@ -173,7 +203,7 @@ const Login: React.FC = () => {
             )}
           </label>
           <label className="block mt-4">
-            <span className="block text-base font-medium text-slate-700">
+            <span className="block text-base font-bold text-slate-700">
               Password
             </span>
             <input
@@ -212,7 +242,7 @@ const Login: React.FC = () => {
           </div>
           <div className="flex items-center justify-center animate-pulse">
             <img
-              src="src/Scissors_logo.png"
+              src="/Scissors_logo.png"
               alt="Scissors"
               className="h-32 my-8"
             />

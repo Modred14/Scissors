@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./style.css";
 import {
   Disclosure,
@@ -56,10 +55,14 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get<User[]>("http://localhost:5000/users");
-      if (response.status === 200 && response.data.length > 0) {
-        setUser(response.data[0]);
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        // Parse the user data from local storage and use it
+        const user = JSON.parse(storedUserData);
+        setUser(user);
       } else {
         console.error("Failed to fetch user data or no user data found");
       }
@@ -76,7 +79,7 @@ const LandingPage: React.FC = () => {
     setUser(null);
     window.location.reload();
   };
-  
+
   if (loading) {
     return <Loading />;
   }
@@ -85,7 +88,7 @@ const LandingPage: React.FC = () => {
     <>
       <div
         className="fixed header-grid w-full min-w-fit "
-        style={{ zIndex: 1000 }}
+        style={{ zIndex: 1200 }}
       >
         <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto px-2 md:px-6 lg:px-8">
@@ -97,7 +100,7 @@ const LandingPage: React.FC = () => {
                     <Link to="/">
                       <img
                         alt="Scissors"
-                        src="src/Scissors_logo.png"
+                        src="/Scissors_logo.png"
                         className="h-8 w-auto"
                       />
                     </Link>
@@ -345,8 +348,9 @@ const LandingPage: React.FC = () => {
                 <div className="thefront">
                   <img src="src/random.png" alt="Url shortner" />
                   <div>
-                    <p className="font-bold text-2xl py-3 px-3">
-                      🔗 URL Shortner
+                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                      <span className="material-icons pt-1">link</span> URL
+                      Shortner
                     </p>
                     <p className="font-bold text-sm pb-3 px-3">
                       A full-service approach to help strengthen each and every
@@ -373,7 +377,9 @@ const LandingPage: React.FC = () => {
                 <div className="thefront">
                   <img src="src/qrcode.png" alt="QR Code" />
                   <div>
-                    <p className="font-bold text-2xl py-3 px-3">🀫 QR Codes</p>
+                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                      <span className="material-icons pt-1">qr_code</span> QR Codes
+                    </p>
                   </div>
                   <p className="font-bold text-sm pb-3 px-3">
                     QR Code solutions for every brand, business, and customer

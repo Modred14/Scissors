@@ -1,16 +1,77 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Link } from "react-router-dom";
+import Confirm from "./Confirm";
 
-const LinkOptions: React.FC = () => {
+type Link = {
+  id: string;
+  userId: string;
+  isLoggedIn: boolean;
+  setMessage: (message: string) => void;
+  userPassword: string;
+};
+
+const LinkOptions: React.FC<Link> = ({
+  id,
+  userId,
+  isLoggedIn,
+  setMessage,
+  userPassword,
+}) => {
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
 
-  const handleDelete = () => {
-    localStorage.removeItem("links");
+  const handleDelete = async (enteredPassword: string) => {
+    if (isLoggedIn) {
+      if (enteredPassword === userPassword) {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/users/${userId}/links/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+
+          console.log(`Removed link with ID ${id} from the server`);
+          setIsModalOpen(false);
+          window.location.reload();
+          setMessage(`You have successfully deleted the link with ID ${id}`);
+        } catch (error) {
+          console.error("Error deleting link from the server:", error);
+          setIsModalOpen(false);
+        }
+      } else {
+        setIsModalOpen(false);
+        setMessage("Incorrect password. Please try again.");
+      }
+    } else {
+      const links = localStorage.getItem("links");
+      if (links) {
+        
+          const linksArray = JSON.parse(links);
+          const updatedLinks = linksArray.filter((link: any) => link.id !== id);
+          localStorage.setItem("links", JSON.stringify(updatedLinks));
+          setIsModalOpen(false);
+          console.log(`Removed link with ID ${id} from localStorage`);
+          window.location.reload();
+          setMessage(`You have successfully deleted the link with ID ${id}`);
+      } else {
+        console.log("No links found in localStorage");
+      }
+    }
+    setShowOptions(false); // Close options after deletion
   };
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -32,50 +93,58 @@ const LinkOptions: React.FC = () => {
   }, [handleClickOutside]);
 
   return (
-    <div className="relative inline-block">
-      <div className="flex gap-2">
-        <button className="px-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded">
-          <span className="material-icons pt-2 text-sm font-extrabold">
-            content_copy
-          </span>
-          <p className="pt-2 px-1">Copy</p>
-        </button>
-        <button className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded">
-          <span className="material-icons text-sm">edit</span>
-        </button>
-        <button
-          className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
-          onClick={toggleOptions}
-          ref={buttonRef}
-        >
-          <span className="material-icons text-sm">more_vert</span>
-        </button>
-      </div>
+    <div>
+      <Confirm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDelete={handleDelete}
+        isLoggedIn={isLoggedIn}
+        id={Link?.id}
+      />
+      <button
+        className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
+        onClick={toggleOptions}
+        ref={buttonRef}
+      >
+        <span className="material-icons text-sm">more_vert</span>
+      </button>
       {showOptions && (
         <div
           ref={optionsRef}
           className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-10"
         >
-          <button
-            onClick={handleDelete}
-            className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100"
-          >
-            <div className="flex gap-3">
-              <span className="material-icons ">delete</span>{" "}
-              <p className="pt-1">Delete</p>
-            </div>
-          </button>
-          <button className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
-            <div className="flex gap-3">
+            <button
+              className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100"
+              onClick={() => {
+                setIsModalOpen(true); // Open modal to confirm deletion
+                setShowOptions(false); // Close options
+              }}
+            >
+              <div className="flex gap-3">
+                <span className="material-icons ">delete</span>{" "}
+                <p className="pt-1">Delete</p>
+              </div>
+            </button>
+          
+        
+          <Link to={`/link/${id}`}>
+            <button className="w-full text-left px-2 text-black hover:text-black py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
               {" "}
-              <span className="material-icons" >link</span> View link analystics
-            </div>{" "}
-          </button>
-          <button className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
-            <div className="flex gap-3">
-              <span className="material-icons" >qr_code</span> View QR Code
-            </div>
-          </button>
+              <div className="flex gap-3">
+                {" "}
+                <span className="material-icons">link</span> View link
+                analystics
+              </div>{" "}
+            </button>
+          </Link>
+          <Link to={`/link/${id}`}>
+            {" "}
+            <button className="w-full text-left px-2 text-black hover:text-black py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
+              <div className="flex gap-3">
+                <span className="material-icons">qr_code</span> View QR Code
+              </div>
+            </button>
+          </Link>
         </div>
       )}
     </div>

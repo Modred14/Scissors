@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./style.css";
 import {
   Disclosure,
@@ -13,6 +12,8 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
+import TruncatedWord from "./TruncatedWord";
+import useWindowWidth from "./useWindowWidth";
 
 interface User {
   id: string;
@@ -23,6 +24,18 @@ interface User {
   profileImg: string;
   links: string[];
 }
+
+type Link = {
+  title: string;
+  id: string;
+  mainLink: string;
+  shortenedLink: string;
+  qrcode: string;
+  customLink: string;
+  clicks: number;
+  visits: number;
+  createdAt: string;
+};
 
 const navigation = (isLoggedIn: boolean) => [
   { name: "Home", href: "/", current: false },
@@ -43,32 +56,82 @@ function classNames(...classes: string[]) {
 const Profile: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true)
+  const [links, setLinks] = useState<Link[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchLinks();
+    }
+  }, [isLoggedIn]);
+
+  const windowWidth = useWindowWidth();
+
+  const getMaxLength = (width: number): number => {
+    if (width >= 1300) return 70;
+
+    if (width >= 1150) return 65;
+    if(width >= 850) return 55;
+    // if (width >= 790) return 60;
+    if (width >= 720) return 50;
+    if (width >= 460) return 30;
+    if (width >= 365) return 22;
+
+    return 18;
+  };
+
+  const maxLength = getMaxLength(windowWidth);
+
+  const fetchLinks = async () => {
+    try {
+      const userId = user?.id;
+      const response = await fetch(
+        `http://localhost:5000/users/${userId}/links`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      setLinks(data);
+    } catch (error) {
+      console.error("Error fetching links:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
       setIsLoggedIn(true);
       fetchUserData();
-    }else{
-      setLoading(false)
+    } else {
+      setLoading(false);
     }
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get<User[]>("http://localhost:5000/users");
-      if (response.status === 200 && response.data.length > 0) {
-        setUser(response.data[0]); // Assuming you need the first user
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        // Parse the user data from local storage and use it
+        const user = JSON.parse(storedUserData);
+        setUser(user);
       } else {
         console.error("Failed to fetch user data or no user data found");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
+
   // console.log(user?.profileImg);
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -76,8 +139,8 @@ const Profile: React.FC = () => {
     setUser(null);
     window.location.reload();
   };
-  if(loading){
-    return <Loading/>
+  if (loading) {
+    return <Loading />;
   }
 
   return (
@@ -93,10 +156,10 @@ const Profile: React.FC = () => {
               <div className="logo-placement">
                 <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
                   <div className="flex flex-shrink-0 items-center">
-                  <Link to="/">
+                    <Link to="/">
                       <img
                         alt="Scissors"
-                        src="src/Scissors_logo.png"
+                        src="/Scissors_logo.png"
                         className="h-8 w-auto"
                       />
                     </Link>
@@ -291,8 +354,254 @@ const Profile: React.FC = () => {
           </DisclosurePanel>
         </Disclosure>
       </div>
-      <div style={{ minHeight: "100vh", marginTop: "65px" }}>
-        <main></main>
+      <div style={{ minHeight: "80vh", marginTop: "65px" }}>
+        <main className="px-110 ">
+          <div className="pt-7">
+            <p className="font-extrabold text-4xl"> Profile</p>
+          </div>
+
+          {isLoggedIn ? (
+            <div>
+              <div className="bg-white mb-10 h-full w-full shadow-sm p-7 mt-8 pt-10">
+                <p className="text-3xl -mt-3 pb-5 font-extrabold flex justify-center">
+                  User details
+                </p>
+                <div className="grid md:grid-flow-col gap-7  items-center just">
+                  <div className="grid md:grid-flow-col gap-7  items-center just">
+                    <div className="flex items-center justify-center w-full">
+                      <img
+                        src={user?.profileImg}
+                        alt={user?.firstName}
+                        className="rounded-full h-40 w-44 outline-green-700 outline"
+                      />
+                    </div>
+                    <div className="hidden2 sm:block">
+                      <div className="grid items-center justify-start w-full">
+                        <div className="grid grid-flow-row sm:gap-5 gap-2">
+                          <div className="sm:grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
+                            <div className=" justify-flex">
+                              <div>
+                                <p className="text-xl font-bold">First Name</p>
+                                <input
+                                  disabled
+                                  type="text"
+                                  placeholder={user?.firstName}
+                                  value={user?.firstName}
+                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                                />
+                              </div>
+                            </div>
+                            <div className="m-30 justify-flex">
+                              <div>
+                                <p className="text-xl font-bold  all">
+                                  Last Name
+                                </p>
+                                <input
+                                  disabled
+                                  type="text"
+                                  placeholder={user?.lastName}
+                                  value={user?.lastName}
+                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                                />
+                              </div>{" "}
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
+                            <div className="justify-flex">
+                              <div>
+                                <p className="text-xl font-bold  all">Email</p>
+                                <input
+                                  type="email"
+                                  placeholder="email"
+                                  disabled
+                                  value={user?.email}
+                                  className={`peer h-12 text-xl mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+            
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+                   `}
+                                />
+                              </div>
+                            </div>
+                            <div className="justify-flex">
+                              <div>
+                                <p className="text-xl font-bold  all">
+                                  User Id
+                                </p>
+                                <input
+                                  disabled
+                                  type="text"
+                                  value={user?.id}
+                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="sm:hidden pt-7">
+                  <div className=" w-full">
+                    <div className="grid grid-flow-row sm:gap-5 gap-2">
+                      <div className="sm:grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
+                        <div className="w-full">
+                          <div>
+                            <p className="text-xl font-bold">First Name</p>
+                            <input
+                              disabled
+                              type="text"
+                              placeholder={user?.firstName}
+                              value={user?.firstName}
+                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                            />
+                          </div>
+                        </div>
+                        <div className="m-30 ">
+                          <div>
+                            <p className="text-xl font-bold  all">Last Name</p>
+                            <input
+                              disabled
+                              type="text"
+                              placeholder={user?.lastName}
+                              value={user?.lastName}
+                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                            />
+                          </div>{" "}
+                        </div>
+                      </div>
+                      <div className=" sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
+                        <div className="">
+                          <div>
+                            <p className="text-xl font-bold  all">Email</p>
+                            <input
+                              type="email"
+                              placeholder="email"
+                              disabled
+                              value={user?.email}
+                              className={`peer h-12 text-xl mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none`}
+                            />
+                          </div>
+                        </div>
+                        <div className=" mt-5">
+                          <div>
+                            <p className="text-xl font-bold  all">User Id</p>
+                            <input
+                              disabled
+                              type="text"
+                              value={user?.id}
+                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
+              "
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid items-center justify-normal">
+                  <div className="flex mt-9 mb-2 justify-start text-xl font-extrabold">
+                    Links({links.length})
+                  </div>
+                  {links.length > 0 ? (
+                    <ul
+                      className="bg-gray-200"
+                      style={{ minHeight: "300px" }}
+                    >
+                      {links
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime()
+                        )
+                        .map((link: any) => (
+                          <li
+                            key={link.id}
+                            className="border m-2 p-4 h-auto bg-gray-100"
+                          >
+                            <div className="grid grid-flow-row lg:grid-flow-col">
+                              <div className="flex sm:pb-0 pb-2 gap-4">
+                                <div>
+                                  <Link
+                                    to={`/link/${link.id}`}
+                                    className="text-black hover:underline hover:text-black text-xl font-bold"
+                                  >
+                                    <TruncatedWord
+                                      word={link.title}
+                                      maxLength={maxLength}
+                                    />
+                                  </Link>
+                                </div>{" "}
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <div
+                      className="bg-gray-200 flex flex-col items-center justify-center"
+                      style={{ height: "300px" }}
+                    >
+                      <p className="text-xl font-bold text-center mb-4">
+                        No link is available
+                      </p>
+                      <div>
+                        <a href="/create-link">
+                          <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
+                            Create New
+                          </button>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="  grid ">
+                <div className=" bg-white h-full w-full shadow-sm p-7 pt-10 mt-8">
+                  {" "}
+                  <p className="flex items-center text-xl justify-center text-center font-bold">
+                    You need to log in or sign up first to view your profile
+                    details.
+                  </p>{" "}
+                  <Link to="/login">
+                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base text-white mt-12 rounded-none py-2 px-2  font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                      Login
+                    </button>
+                  </Link>
+                  <Link to="/signup">
+                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base mt-5 text-white rounded-none py-2 px-2 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                      Get Started ➔
+                    </button>
+                  </Link>
+                </div>{" "}
+              </div>
+              <div></div>
+            </div>
+          )}
+        </main>
       </div>
     </>
   );

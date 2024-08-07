@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./style.css";
 import {
   Disclosure,
@@ -56,10 +55,14 @@ const NotFound: React.FC = () => {
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get<User[]>("http://localhost:5000/users");
-      if (response.status === 200 && response.data.length > 0) {
-        setUser(response.data[0]);
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        // Parse the user data from local storage and use it
+        const user = JSON.parse(storedUserData);
+        setUser(user);
       } else {
         console.error("Failed to fetch user data or no user data found");
       }
@@ -96,7 +99,7 @@ const NotFound: React.FC = () => {
                   <Link to="/">
                       <img
                         alt="Scissors"
-                        src="src/Scissors_logo.png"
+                        src="/Scissors_logo.png"
                         className="h-8 w-auto"
                       />
                     </Link>

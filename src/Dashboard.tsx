@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./style.css";
 import {
   Disclosure,
@@ -56,10 +55,14 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get<User[]>("http://localhost:5000/users");
-      if (response.status === 200 && response.data.length > 0) {
-        setUser(response.data[0]); // Assuming you need the first user
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        // Parse the user data from local storage and use it
+        const user = JSON.parse(storedUserData);
+        setUser(user);
       } else {
         console.error("Failed to fetch user data or no user data found");
       }
@@ -76,7 +79,7 @@ const Dashboard: React.FC = () => {
     setUser(null);
     window.location.reload();
   };
-  
+
   if (loading) {
     return <Loading />;
   }
@@ -90,10 +93,10 @@ const Dashboard: React.FC = () => {
               <div className="logo-placement">
                 <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
                   <div className="flex flex-shrink-0 items-center">
-                  <Link to="/">
+                    <Link to="/">
                       <img
                         alt="Scissors"
-                        src="src/Scissors_logo.png"
+                        src="/Scissors_logo.png"
                         className="h-8 w-auto"
                       />
                     </Link>
@@ -323,22 +326,24 @@ const Dashboard: React.FC = () => {
               <div className="md:grid md:grid-cols-3 md:h-64 max-w-full md:gap-10 lg:gap-20 mxx-10 md:m-0 mx-20">
                 <Link to="/create-link">
                   <div className="bg-white shadow hover:shadow-2xl flex flex-col items-center rounded-lg md:w-auto h-64 mb-10 justify-center">
-                    <p className="text-xl p-5 text-gray-500 font-light text-center mb-4">
-                      Create New Link ➕
+                    <p className="text-xl p-5 text-gray-500 flex gap-1 font-light text-center mb-4">
+                      <span className="material-icons">add</span>Create New Link
                     </p>
                   </div>
                 </Link>
                 <Link to="/links">
                   <div className="bg-white shadow hover:shadow-2xl flex flex-col items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 p-5 font-light text-center mb-4">
-                      View all Saved Links 💾
+                    <p className="text-xl text-gray-500 p-5 flex gap-2 font-light text-center mb-4">
+                      <span className="material-icons">save</span> View all
+                      Saved Links
                     </p>
                   </div>
                 </Link>
                 <Link to="/create-link">
                   <div className="bg-white shadow flex flex-col hover:shadow-2xl items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 p-5 font-light text-center mb-4">
-                      Shorten a Link ✂️
+                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
+                      <span className="material-icons">content_cut</span>
+                      Shorten a Link
                     </p>
                   </div>
                 </Link>
@@ -346,22 +351,25 @@ const Dashboard: React.FC = () => {
               <div className="md:grid md:pt-12 lg:pt-12  md:grid-cols-3 md:h-64 max-w-full md:gap-10 lg:gap-20 mxx-10 md:m-0 mx-20">
                 <Link to="/links">
                   <div className="bg-white shadow flex hover:shadow-2xl flex-col items-center rounded-lg md:w-auto h-64 mb-10 justify-center">
-                    <p className="text-xl text-gray-500 p-5 font-light text-center mb-4">
-                      View Links Analystics 🗒️
+                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
+                      <span className="material-icons">analytics</span> View
+                      Links Analystics
                     </p>
                   </div>
                 </Link>
                 <Link to="/create-link">
                   <div className="bg-white shadow flex flex-col hover:shadow-2xl items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 p-5 font-light text-center mb-4">
-                      Generate Qr code for Links 📇
+                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
+                      <span className="material-icons">qr_code</span> Generate
+                      Qr code for Links
                     </p>
                   </div>
                 </Link>
                 <Link to="/links">
                   <div className="bg-white shadow flex flex-col items-center hover:shadow-2xl rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 p-5 font-light text-center mb-4">
-                      Edit Saved Links ✏️
+                    <p className="text-xl flex gap-2 text-gray-500 p-5 font-light text-center mb-4">
+                      <span className="material-icons text-md ">edit</span> Edit
+                      Saved Links
                     </p>
                   </div>
                 </Link>

@@ -11,14 +11,13 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import QRCode from "qrcode.react";
 import ToggleButton from "./ToggleButton";
-import Tooltip from "./Tooltip";
 import styled from "styled-components";
 import { toPng } from "html-to-image";
-import { v4 as uuidv4 } from "uuid";
+import UpdateModal from "./UpdateModal";
 
 interface User {
   id: string;
@@ -31,8 +30,8 @@ interface User {
 }
 
 interface Link {
-  title: string;
   id: string;
+  title: string;
   mainLink: string;
   shortenedLink: string;
   qrcode: string;
@@ -40,6 +39,8 @@ interface Link {
   clicks: number;
   visits: string[];
   createdAt: string;
+  qrcodeLogo: string;
+  qrcodeColor: string;
 }
 
 interface Domain {
@@ -63,46 +64,68 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const generateUniqueId = (): string => {
-  return uuidv4();
-};
-
-const CreateLink: React.FC = () => {
+const EditLink: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [customDomains, setCustomDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
-  const [links, setLinks] = useState<Link[]>([]);
+  const { id } = useParams<{ id: string }>();
+  const [link, setLink] = useState<Partial<Link> | null>(null);
   const [longUrl, setLongUrl] = useState("");
   const [customLink, setCustomLink] = useState("");
+  const [initialLink, setInitialLink] = useState("");
   const [message, setMessage] = useState("");
-  const [color, setColor] = useState("#000000"); // default color black
+  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
+  const [color, setColor] = useState("#000000");
   const [logo, setLogo] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
+  const [customDomains, setCustomDomains] = useState<Domain[]>([]);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
-  const qrRef = useRef(null);
+
   const validLongUrl = longUrl.includes(".") && /^https?:\/\//.test(longUrl);
   const validCustomLink =
     customLink.includes(".") && /^https?:\/\//.test(customLink);
-  const uniqueId = generateUniqueId();
-  const removeProtocol = (url: string) => {
-    return url.replace(/^https?:\/\//, "");
+
+  const fetchUserData = async () => {
+    setLoading(true);
+    try {
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        // Parse the user data from local storage and use it
+        const user = JSON.parse(storedUserData);
+        setUser(user);
+      } else {
+        console.error("Failed to fetch user data or no user data found");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const checkDomain = async (domain: string) => {
-    try {
-      const response = await axios.get("http://localhost:5000/check-domain", {
-        params: { domain },
-      });
-      console.log("Domain check response:", response.data); // Log response data for debugging
-      setIsAvailable(response.data.available);
-    } catch (error) {
-      console.error("Error checking domain:", error);
-      setIsAvailable(false);
+  useEffect(() => {
+    // Clear the message after 5 seconds with a fade-out effect
+    if (message) {
+      const timer = setTimeout(() => {
+        setIsFadingOut(true); // Trigger the fade-out effect
+        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
+      }, 4500); // Start fade-out before 5 seconds
+
+      // Clear timeout if component unmounts or message changes
+      return () => {
+        clearTimeout(timer);
+        setIsFadingOut(false); // Reset the fade-out state
+      };
     }
+  }, [message]);
+
+  const removeProtocol = (url: string) => {
+    return url.replace(/^https?:\/\//, "");
   };
 
   const addDomain = async (domain: string) => {
@@ -124,7 +147,10 @@ const CreateLink: React.FC = () => {
     try {
       const response = await axios.get("http://localhost:5000/get-domains");
       if (response.status === 200) {
-        setCustomDomains(response.data.domains);
+        // Assuming the response contains an array of domains
+        // Example response structure: { domains: [{ id: '1', domain: 'example.com' }, ...] }
+        const domains: Domain[] = response.data.domains; // Extract domains with id and domain
+        setCustomDomains(domains);
       }
     } catch (error) {
       console.error("Error fetching domains:", error);
@@ -140,6 +166,18 @@ const CreateLink: React.FC = () => {
     return !customDomains.some((d) => d.domain === cleanedDomain);
   };
 
+  const checkDomain = async (domain: string) => {
+    try {
+      const response = await axios.get("http://localhost:5000/check-domain", {
+        params: { domain },
+      });
+      console.log("Domain check response:", response.data); // Log response data for debugging
+      setIsAvailable(response.data.available);
+    } catch (error) {
+      console.error("Error checking domain:", error);
+      setIsAvailable(false);
+    }
+  };
   useEffect(() => {
     if (validCustomLink) {
       const domainToCheck = removeProtocol(customLink);
@@ -150,53 +188,48 @@ const CreateLink: React.FC = () => {
     }
   }, [customLink]);
 
-  const fetchLinksFromLocalStorage = () => {
-    const storedLinks: Link[] = JSON.parse(
-      localStorage.getItem("links") || "[]"
-    );
-    setLinks(storedLinks);
-    setLoading(false);
-  };
+  // const handleUpdate = (updatedLink: Object) => {
+  //   setLink(updatedLink);
+  //   setIsOpen(false);
+  //   handleSubmit();
+  // };
+  const userId = user?.id;
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      const userData = JSON.parse(user);
-      fetchUserData(userData.token);
-    } else {
-      setLoading(false);
-      fetchLinksFromLocalStorage();
-    }
-  }, []);
+    const fetchLinkData = async () => {
+      if (isLoggedIn) {
+        if (!userId) return;
+        setLoading(true);
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/users/${userId}/links/${id}`
+          );
+          const data = response.data;
+          setLink(data);
+          setLongUrl(data.mainLink || "");
+          setCustomLink(data.customLink || "");
+          setColor(data.qrcodeColor || "#000000");
+          setLogo(data.qrcodeLogo || null);
+        } catch (error) {
+          console.error("Error fetching link data:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        const links: Link[] = JSON.parse(localStorage.getItem("links") || "[]");
+        // Find the link with the matching ID
+        const foundLink = links.find((link) => link.id === id);
+        setLink(foundLink || null);
+        setLongUrl(foundLink?.mainLink || "");
+        setCustomLink(foundLink?.customLink || "");
+        setInitialLink(foundLink?.customLink || "");
+        setColor(foundLink?.qrcodeColor || "#000000");
+        setLogo(foundLink?.qrcodeLogo || null);
+      }
+    };
 
-  useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
-    if (message) {
-      const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
-
-      // Clear timeout if component unmounts or message changes
-      return () => {
-        clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
-      };
-    }
-  }, [message]);
-
-  const [link, setLink] = useState<Partial<Link>>({
-    title: "",
-    id: uniqueId,
-    mainLink: "",
-    shortenedLink: "",
-    qrcode: "",
-    customLink: "",
-    clicks: 0,
-    visits: [],
-    createdAt: new Date().toISOString(),
-  });
+    fetchLinkData();
+  }, [userId, id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -204,7 +237,6 @@ const CreateLink: React.FC = () => {
 
     if (!validLongUrl) {
       console.error("Invalid URL.");
-      setIsSubmitted(true);
       return;
     }
     if (customLink.length > 0) {
@@ -217,6 +249,9 @@ const CreateLink: React.FC = () => {
       const domain = removeProtocol(customLink);
       const available = checkDomainAvailability(domain);
       if (available) {
+        setIsAvailable(true);
+      }
+      if (initialLink) {
         setIsAvailable(true);
       } else {
         setIsAvailable(false);
@@ -235,49 +270,37 @@ const CreateLink: React.FC = () => {
         return;
       }
     }
-    let generatedQrCode = link.qrcode;
-    if (isPreviewVisible) {
-      // Ensure the QR code is generated before form submission
-      if (qrRef.current) {
-        try {
-          setLoading(true);
-          generatedQrCode = await toPng(qrRef.current);
-          setLink((prevLink) => ({ ...prevLink, qrcode: generatedQrCode }));
-        } catch (err) {
-          console.error("Failed to generate QR code image", err);
-          setIsSubmitted(false);
-          setLoading(false);
-          return;
-        } finally {
-          setLoading(false);
-        }
+
+    setIsOpen(true);
+  };
+  const handleConfirmUpdate = async () => {
+    let generatedQrCode = link?.qrcode || "";
+    if (isPreviewVisible && qrRef.current) {
+      try {
+        setLoading(true);
+        generatedQrCode = await toPng(qrRef.current);
+        setLink((prevLink) => ({ ...prevLink, qrcode: generatedQrCode }));
+      } catch (err) {
+        console.error("Failed to generate QR code image", err);
+        setLoading(false);
+        return;
+      } finally {
+        setLoading(false);
       }
     }
-
-    const generateRandomString = (length: number): string => {
-      const characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      let result = "";
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        result += characters[randomIndex];
-      }
-      return result;
-    };
-    const randomString = generateRandomString(7);
-    const shortenedLink = `https://scissors.${randomString}.com`;
-
-    const newLink = {
-      title: link.title || longUrl,
-      id: uniqueId,
+    const updatedLink = {
+      ...link,
+      title: link?.title || longUrl,
       mainLink: longUrl,
-      shortenedLink: shortenedLink,
+      shortenedLink: link?.shortenedLink || "",
       qrcode: generatedQrCode,
       customLink: customLink,
-      clicks: 0,
-      visits: [],
-      createdAt: new Date().toISOString(),
+      qrcodeColor: color,
+      qrcodeLogo: logo,
+      updatedAt: new Date().toISOString(),
     };
+
+    const userId = user?.id;
 
     if (!isLoggedIn) {
       try {
@@ -286,21 +309,22 @@ const CreateLink: React.FC = () => {
 
         const savedLinks = localStorage.getItem("links");
         const links = savedLinks ? JSON.parse(savedLinks) : [];
-        const storedLinks = JSON.parse(localStorage.getItem("links") || "[]");
 
-        if (storedLinks.length >= 3) {
-          console.log("sorry");
-          setMessage(
-            "Oops, you've reached the limit for non-registered users. To continue using Scissors services, please create an account."
-          );
-          return;
+        const existingLinkIndex = links.findIndex(
+          (l) => l.id === updatedLink.id
+        );
+        if (existingLinkIndex !== -1) {
+          // Update the existing link
+          links[existingLinkIndex] = updatedLink;
         } else {
-          links.push(newLink);
-          localStorage.setItem("links", JSON.stringify(links));
-          setMessage("Your link has been created succesfully");
-          navigate("/links");
+          // Add the new link
+          return;
         }
 
+        localStorage.setItem("links", JSON.stringify(links));
+
+        navigate("/links");
+        return;
         // alert("Link saved locally. Please log in to save it to the server.");
       } catch (error) {
         console.error("Error saving link:", error);
@@ -312,22 +336,16 @@ const CreateLink: React.FC = () => {
 
       return;
     }
-
     try {
       setLoading(true);
-      const userId = user?.id;
-      const response = await axios.post(
-        `http://localhost:5000/users/${userId}/links`,
-        newLink
+      await axios.put(
+        `http://localhost:5000/users/${userId}/links/${id}`,
+        updatedLink
       );
-      setMessage("Your link has been created succesfully");
-      console.log("Link saved successfully:", response.data);
-
+      console.log("Link updated successfully");
       navigate("/links");
     } catch (error) {
-      setMessage("Oops, an error occured while creating the link");
-      console.error("Error saving link:", error);
-      setLoading(false);
+      console.error("Error updating link:", error);
     } finally {
       setIsSubmitted(false);
       setLoading(false);
@@ -355,25 +373,6 @@ const CreateLink: React.FC = () => {
       setLoading(false);
     }
   }, []);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        // Parse the user data from local storage and use it
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -611,279 +610,257 @@ const CreateLink: React.FC = () => {
             </div>{" "}
           </div>
         )}
-        {!isLoggedIn && (
-          <div
-            className="fixed rounded-full shadow-2xl outline outline-1  bg-gray-100 font-bold"
-            style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-          >
-            {links.length < 3 ? (
-              <div className="rounded-full  inline text-2xl px-3">
-                <div className="inline font-comic">Used:</div>
-                <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                  {links.length}/3
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-full  inline text-2xl px-3">
-                <div className="inline font-comic">Used:</div>
-                <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                  {links.length}/3
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <main className="px-100 main">
-            <div className="pt-20">
-              <p className="text-3xl font-bold tracking-tight p-0 pb-6 text-gray-900">
-                Create New Link
-              </p>
-              <p className="text-xl font-semibold pb-3">Long Link</p>
-              <div className="grid grid-flow-col">
-                <label className="text-md flex font-bold" htmlFor="longUrl">
-                  Destination
-                </label>
-                {longUrl && (
-                  <div className="text-sm flex justify-end font-semibold hidden-block">
-                    <p className="inline ">
-                      Hit{" "}
-                      <p className="inline  bg-gray-300 font-bold px-2 py-1 rounded-md text-sm">
-                        Enter
-                      </p>{" "}
-                      to quick create
-                    </p>
-                  </div>
-                )}
-              </div>
-              <input
-                type="text"
-                id="longUrl"
-                placeholder="https://your-long-url.com"
-                required
-                value={longUrl}
-                onChange={(e) => setLongUrl(e.target.value)}
-                className={`peer h-12 mt-1 block w-full px-3 py-2 bg-white border ${
-                  !validLongUrl && longUrl && isSubmitted
-                    ? "border-pink-500 text-pink-600"
-                    : "border-slate-300"
-                } rounded-sm text-m shadow-sm placeholder-slate-400
-                  focus:outline-none  focus:ring-gray-400 focus:ring-1 
-                  disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                  ${
-                    !validLongUrl && longUrl && isSubmitted
-                      ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                      : ""
-                  }
-                `}
-              />
-              {!validLongUrl && longUrl && isSubmitted && (
-                <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we'll need a valid URL, like
-                  "https://yourlonglink.com".
+        {link ? (
+          <form onSubmit={handleSubmit}>
+            <main className="px-100 main">
+              <div className="pt-20">
+                <p className="text-3xl font-bold tracking-tight p-0 pb-6 text-gray-900">
+                  Edit Link
                 </p>
-              )}
-              <label htmlFor="title">
-                <div className="grid grid-flow-col pt-8 w-28">
-                  <p className="text-md font-bold">Title</p>{" "}
-                  <p className="text-md font-light">(optional)</p>
-                </div>
-              </label>
-              <input
-                id="title"
-                type="text"
-                value={link.title || ""}
-                onChange={(e) => setLink({ ...link, title: e.target.value })}
-                placeholder="Enter your link title"
-                className=" h-12 mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-sm text-m shadow-sm placeholder-slate-400
-              focus:outline-none  focus:ring-gray-400 focus:ring-1
-            "
-              />
-              <hr
-                className="my-12 mx-0"
-                style={{
-                  height: "1px",
-                  backgroundColor: "rgb(83, 83, 83, 0.5)",
-                  border: "none",
-                }}
-              />
-              <p className="text-2xl font-bold tracking-tight p-0 pb-2 text-gray-900">
-                Ways to share
-              </p>
-              <p className="text-xl font-semibold">Short Link</p>
-              <div className="grid grid-flow-col pt-3 w-56">
-                <p className="text-md font-bold">Custom Domain</p>{" "}
-                <p className="text-md font-light">(optional)</p>{" "}
-                <Tooltip info="A short link will be automatically generated for you if the custom domain field is left blank." />
-              </div>
-              <input
-                type="text"
-                value={customLink}
-                onChange={(e) => setCustomLink(e.target.value)}
-                placeholder="https://your-custom-link.com"
-                className={`peer h-12 mt-1 block w-full px-3 pt-2 bg-white border ${
-                  !validCustomLink && customLink && isSubmitted
-                    ? "border-pink-500 text-pink-600"
-                    : "border-slate-300"
-                } rounded-sm text-m shadow-sm placeholder-slate-400
-                  focus:outline-none  focus:ring-gray-400 focus:ring-1 
-                  disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                  ${
-                    !validCustomLink && customLink && isSubmitted
-                      ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                      : ""
-                  }
-                `}
-              />
-              {!validCustomLink && customLink && isSubmitted && (
-                <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we'll need a valid URL, like
-                  "https://yourcustomshortlink.com".
-                </p>
-              )}
-              {isAvailable !== null && validCustomLink && (
-                <p
-                  className={`mt-1 text-sm ${
-                    isAvailable ? "text-green-600" : "text-pink-600"
-                  }`}
-                >
-                  {isAvailable ? "Domain is available!" : "Domain is occupied."}
-                </p>
-              )}
-              <div className="pt-12">
-                <button
-                  type="submit"
-                  className="mt-5 shadow-2xl h-12 w-full text-center hidden  font-bold  bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-                >
-                  Create
-                </button>{" "}
-              </div>
-            </div>
-            <div className="grid grid-flow-col pt-0 w-44">
-              <p className="text-xl font-semibold">QR Code</p>{" "}
-              <p className="text-lg font-light">(optional)</p>
-            </div>
-            <div className="grid w-120 grid-flow-col pt-3">
-              <ToggleButton
-                toggleState={isPreviewVisible}
-                onToggle={() => setIsPreviewVisible(!isPreviewVisible)}
-              />
-              <p className="text-md mb-4 pl-2 font-light">
-                Generate a QR Code that is faster and easier to use.
-              </p>
-            </div>
-            {isPreviewVisible && (
-              <div className="shadow flex-qr p-5 max-w-4xl grid-qrcode bg-gray-300 ">
-                <Container>
-                  <div className="pt-120">
-                    <div className="pl-120 sm:p-3">
-                      <p className="text-md font-semibold">Code Color</p>
-                      <input
-                        type="color"
-                        id="color"
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
-                        placeholder="Choose Color"
-                      />
-                    </div>
-                    <div className="sm:p-3 sm:pt-0">
-                      <p className="text-md pt-3 pb-0 mb-0 font-semibold">
-                        QR Code Logo
-                      </p>
-                      <LogoContainer>
-                        <Label htmlFor="file-input">
-                          {logo ? (
-                            <LogoPreview src={logo} alt="Logo Preview" />
-                          ) : (
-                            <Placeholder>
-                              <CameraIcon
-                                src="https://img.icons8.com/ios-filled/50/000000/camera.png"
-                                alt="Camera Icon"
-                              />
-                              <Text>Add Logo</Text>
-                            </Placeholder>
-                          )}
-                        </Label>
-                        <FileInput
-                          id="file-input"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoChange}
-                        />
-                      </LogoContainer>
-                    </div>
-                  </div>
-                </Container>
-                <div className="align-div">
-                  <div className="bg-white qr-width p-7 shadow mt-6 sm:m-3">
-                    <p className="text-md font-bold text-center">Preview</p>
 
-                    <div className="pp bg-white  w-auto justify-center items-center justify-self-center shadow outline m-3 outline-1">
-                      <div ref={qrRef}>
-                        <QRCode
-                          value={longUrl || "scissors.netlify.app"}
-                          size={150}
-                          fgColor={color}
-                          level={"H"}
-                          includeMargin={true}
-                          imageSettings={
-                            logo
-                              ? {
-                                  src: logo,
-                                  x: null,
-                                  y: null,
-                                  height: 40,
-                                  width: 40,
-                                  excavate: true,
-                                }
-                              : undefined
-                          }
+                <p className="text-xl font-semibold pb-3">Long Link</p>
+                <div className="grid grid-flow-col">
+                  <label className="text-md flex font-bold" htmlFor="longUrl">
+                    Destination
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  id="longUrl"
+                  placeholder="https://your-long-url.com"
+                  required
+                  value={longUrl}
+                  onChange={(e) => setLongUrl(e.target.value)}
+                  className={`peer h-12 mt-1 block w-full px-3 py-2 bg-white border ${
+                    !validLongUrl && longUrl && isSubmitted
+                      ? "border-pink-500 text-pink-600"
+                      : "border-slate-300"
+                  } rounded-sm text-m shadow-sm placeholder-slate-400 focus:outline-none  focus:ring-gray-400 focus:ring-1`}
+                />
+                {!validLongUrl && longUrl && isSubmitted && (
+                  <p className="mt-1 peer-invalid:visible text-pink-600 text-sm">
+                    Invalid link. Please, we'll need a valid URL, like
+                    "https://yourlonglink.com".
+                  </p>
+                )}
+                <label htmlFor="title">
+                  <div className="grid grid-flow-col pt-8 w-28">
+                    <p className="text-md font-bold">Title</p>{" "}
+                    <p className="text-md font-light">(optional)</p>
+                  </div>
+                </label>
+                <input
+                  id="title"
+                  type="text"
+                  value={link.title || ""}
+                  onChange={(e) => setLink({ ...link, title: e.target.value })}
+                  placeholder="Enter your link title"
+                  className="h-12 mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-sm text-m shadow-sm placeholder-slate-400 focus:outline-none focus:ring-gray-400 focus:ring-1"
+                />
+                <hr
+                  className="my-12 mx-0"
+                  style={{
+                    height: "1px",
+                    backgroundColor: "rgb(83, 83, 83, 0.5)",
+                    border: "none",
+                  }}
+                />
+                <p className="text-2xl font-bold tracking-tight p-0 pb-2 text-gray-900">
+                  Ways to share
+                </p>
+                <p className="text-xl font-semibold">Short Link</p>
+                <div className="grid grid-flow-col pt-3 w-52">
+                  <p className="text-md font-bold">Custom Domain</p>{" "}
+                  <p className="text-md font-light">(optional)</p>{" "}
+                </div>
+                <input
+                  type="text"
+                  value={customLink}
+                  onChange={(e) => setCustomLink(e.target.value)}
+                  placeholder="https://your-custom-link.com"
+                  className={`peer h-12 mt-1 block w-full px-3 pt-2 bg-white border ${
+                    !validCustomLink && customLink && isSubmitted
+                      ? "border-pink-500 text-pink-600"
+                      : "border-slate-300"
+                  } rounded-sm text-m shadow-sm placeholder-slate-400 focus:outline-none  focus:ring-gray-400 focus:ring-1`}
+                />
+                {!validCustomLink && customLink && isSubmitted && (
+                  <p className="mt-1 peer-invalid:visible text-pink-600 text-sm">
+                    Invalid link. Please, we'll need a valid URL, like
+                    "https://yourcustomshortlink.com".
+                  </p>
+                )}
+                {isAvailable !== null && validCustomLink && (
+                  <p
+                    className={`mt-1 text-sm m-0 ${
+                      isAvailable ? "text-green-600" : "text-pink-600"
+                    }`}
+                  >
+                    {isAvailable
+                      ? "Domain is available!"
+                      : "Domain is occupied."}
+                  </p>
+                )}
+                <div className="pt-10">
+                  <button
+                    type="submit"
+                    className="mt-5 shadow-2xl h-12 w-full text-center hidden font-bold bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-flow-col pt-0 w-44">
+                <p className="text-xl font-semibold">QR Code</p>{" "}
+                <p className="text-lg font-light">(optional)</p>
+              </div>
+              <div className="grid w-120 grid-flow-col pt-3">
+                <ToggleButton
+                  toggleState={isPreviewVisible}
+                  onToggle={() => setIsPreviewVisible(!isPreviewVisible)}
+                />
+                <p className="text-md mb-4 pl-2 font-light">
+                  Generate a QR Code that is faster and easier to use.
+                </p>
+              </div>
+              {isPreviewVisible && (
+                <div className="shadow flex-qr p-5 max-w-4xl grid-qrcode bg-gray-300">
+                  <Container>
+                    <div className="pt-120">
+                      <div className="pl-120 sm:p-3">
+                        <p className="text-md font-semibold">Code Color</p>
+                        <input
+                          type="color"
+                          id="color"
+                          value={color}
+                          onChange={(e) => setColor(e.target.value)}
+                          placeholder="Choose Color"
                         />
+                      </div>
+                      <div className="sm:p-3 sm:pt-0">
+                        <p className="text-md pt-3 pb-0 mb-0 font-semibold">
+                          QR Code Logo
+                        </p>
+                        <LogoContainer>
+                          <Label htmlFor="file-input">
+                            {logo ? (
+                              <LogoPreview src={logo} alt="Logo Preview" />
+                            ) : (
+                              <Placeholder>
+                                <CameraIcon
+                                  src="https://img.icons8.com/ios-filled/50/000000/camera.png"
+                                  alt="Camera Icon"
+                                />
+                                <Text>Add Logo</Text>
+                              </Placeholder>
+                            )}
+                          </Label>
+                          <FileInput
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoChange}
+                          />
+                        </LogoContainer>
+                      </div>
+                    </div>
+                  </Container>
+                  <div className="align-div">
+                    <div className="bg-white qr-width p-7 shadow mt-6 sm:m-3">
+                      <p className="text-md font-bold text-center">Preview</p>
+                      <div className="pp bg-white  w-auto justify-center items-center justify-self-center shadow outline m-3 outline-1">
+                        <div ref={qrRef}>
+                          <QRCode
+                            value={longUrl || "scissors.netlify.app"}
+                            size={150}
+                            fgColor={color}
+                            level={"H"}
+                            includeMargin={true}
+                            imageSettings={
+                              logo
+                                ? {
+                                    src: logo,
+                                    x: null,
+                                    y: null,
+                                    height: 40,
+                                    width: 40,
+                                    excavate: true,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              )}
+              <div className="md:p-14"></div>
+
+              <div className="pt-12">
+                <button
+                  type="submit"
+                  className="mt-5 shadow-2xl h-12 w-full text-center md:hidden font-bold bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
+                >
+                  Update
+                </button>
+                <Link to="/links">
+                  <button className="mt-5 mb-14 h-12 w-full md:hidden outline-green-800 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
+                    Cancel
+                  </button>
+                </Link>
+              </div>
+            </main>
+            {isOpen ? (
+              <UpdateModal
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                onUpdate={handleConfirmUpdate}
+              />
+            ) : (
+              <div
+                className="md:bg-white md:fixed header-grid md:w-full md:top-auto md:shadow lg:-mr-6 md:min-w-full hidden md:block"
+                style={{ zIndex: 1000, top: "91%" }}
+              >
+                <div className="max-w-9xl flex justify-end mx-auto p-4">
+                  <Link to="/links">
+                    <button className="outline-green-800 mx-3 hover:text-green-100 hover:bg-red-600 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
+                      Cancel
+                    </button>
+                  </Link>
+                  <button
+                    type="submit"
+                    className="font-bold bg-green-700 mx-3 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
+                  >
+                    Update
+                  </button>
+                </div>
               </div>
             )}
-            <div className="md:p-14"></div>
-            <div className="pt-12">
-              <button
-                type="submit"
-                className="mt-5 shadow-2xl h-12 w-full text-center md:hidden  font-bold  bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-              >
-                Create
-              </button>{" "}
-              <Link to="/dashboard">
-                <button className="mt-5 mb-14 h-12 w-full md:hidden outline-green-800 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
-                  Cancel
-                </button>
-              </Link>
-            </div>
-          </main>
-          <div
-            className=" md:bg-white md:fixed header-grid md:w-full
-         md:top-auto md:shadow lg:-mr-6 md:min-w-full hidden md:block"
-            style={{ zIndex: 1000, top: "91%" }}
-          >
-            <div className="max-w-9xl flex justify-end mx-auto p-4">
-              <Link to="/dashboard">
-                <button className="outline-green-800 mx-3 hover:text-green-100 hover:bg-red-600 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
-                  Cancel
-                </button>
-              </Link>
-              <button
-                type="submit"
-                className="font-bold  bg-green-700 mx-3 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-              >
-                Create
-              </button>
+          </form>
+        ) : (
+          <div className="px-110 main">
+            <Link to="/links">
+              <div className="pt-10 flex gap-1 text-black text-sm">
+                <i className="text-sm material-icons">arrow_back</i> Back to
+                List
+              </div>{" "}
+            </Link>
+            <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+              <div>
+                <p className="font-bold ">
+                  Oops!!! There’s no link associated with this ID. The link may
+                  have been deleted or may not exist.
+                </p>
+              </div>
             </div>
           </div>
-        </form>
+        )}
       </div>
     </>
   );
 };
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -943,4 +920,5 @@ const Text = styled.span`
   font-size: 12px;
   color: #888;
 `;
-export default CreateLink;
+
+export default EditLink;
