@@ -66,9 +66,9 @@ const Signup: React.FC = () => {
 
   const handleEmailSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
+    setLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/users`);
+      const response = await fetch(`https://users-api-scissors.onrender.com/users`);
       const data = await response.json();
       const userExists = data.some((user: any) => user.email === email);
 
@@ -88,7 +88,7 @@ const Signup: React.FC = () => {
 
   const handleDetailsSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
+    setLoading(true)
     if (!validatePassword(password)) {
       setMessage(
         "Password must be greater than six characters, and contain a symbol, one number, one lowercase, and one uppercase letter."
@@ -104,7 +104,7 @@ const Signup: React.FC = () => {
 
     // Submit the form or send data to your server here
 
-    const response = await fetch("http://localhost:5000/users", {
+    const response = await fetch("https://users-api-scissors.onrender.com/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -116,8 +116,10 @@ const Signup: React.FC = () => {
       console.log("Sign Up successful:", data);
       localStorage.setItem("user", JSON.stringify(data));
       setMessage("You have successfully created an account!");
+      setLoading(false)
       navigate("/dashboard");
     } else {
+      setLoading(false)
       alert("User not found or invalid credentials");
     }
   };
@@ -139,7 +141,7 @@ const Signup: React.FC = () => {
       console.log("ID Token: " + id_token);
 
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", "http://localhost:5000/users");
+      xhr.open("POST", "https://users-api-scissors.onrender.com/users");
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onload = function () {
         console.log("Signed up as: " + xhr.responseText);

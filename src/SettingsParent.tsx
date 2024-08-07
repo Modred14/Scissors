@@ -56,7 +56,7 @@ const SettingsParent: React.FC = () => {
   const handleUpdate = async (updatedUser: User) => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/users");
+      const response = await fetch("https://users-api-scissors.onrender.com/users");
       const data = await response.json();
       console.log("Fetched users:", data); // Debug log
       const userExists = data.some((user: any) => user.email === updatedUser.email && user.email !== email);
@@ -69,7 +69,7 @@ const SettingsParent: React.FC = () => {
         setMessage("");
         try {
           const response = await fetch(
-            `http://localhost:5000/users/${updatedUser.id}`,
+            `https://users-api-scissors.onrender.com/users/${updatedUser.id}`,
             {
               method: "PUT",
               headers: {

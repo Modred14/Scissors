@@ -73,6 +73,7 @@ const EditLink: React.FC = () => {
   const [longUrl, setLongUrl] = useState("");
   const [customLink, setCustomLink] = useState("");
   const [initialLink, setInitialLink] = useState("");
+  const [smallLoading, setSmallLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [color, setColor] = useState("#000000");
@@ -131,10 +132,13 @@ const EditLink: React.FC = () => {
   const addDomain = async (domain: string) => {
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
-      const response = await axios.post("http://localhost:5000/add-domain", {
-        id,
-        domain,
-      });
+      const response = await axios.post(
+        "https://users-api-scissors.onrender.com/add-domain",
+        {
+          id,
+          domain,
+        }
+      );
       if (response.data.success) {
         setCustomDomains([...customDomains, { id, domain }]);
       }
@@ -142,10 +146,36 @@ const EditLink: React.FC = () => {
       console.error("Error adding domain:", error);
     }
   };
+  const removeDomain = async (domain: string) => {
+    setSmallLoading(true);
+    try {
+      const response = await axios.delete(
+        "https://users-api-scissors.onrender.com/remove-domain",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: { domain },
+        }
+      );
+
+      if (response.data.success) {
+        setCustomDomains(response.data.domains);
+      }
+    } catch (error) {
+      console.error("Error removing domain:", error);
+      setMessage("An error occurred while removing the domain.");
+    } finally {
+      setSmallLoading(false);
+    }
+  };
 
   const getDomain = async () => {
+    setSmallLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/get-domains");
+      const response = await axios.get(
+        "https://users-api-scissors.onrender.com/get-domains"
+      );
       if (response.status === 200) {
         // Assuming the response contains an array of domains
         // Example response structure: { domains: [{ id: '1', domain: 'example.com' }, ...] }
@@ -154,6 +184,8 @@ const EditLink: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching domains:", error);
+    } finally {
+      setSmallLoading(false);
     }
   };
 
@@ -167,15 +199,21 @@ const EditLink: React.FC = () => {
   };
 
   const checkDomain = async (domain: string) => {
+    setSmallLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/check-domain", {
-        params: { domain },
-      });
+      const response = await axios.get(
+        "https://users-api-scissors.onrender.com/check-domain",
+        {
+          params: { domain },
+        }
+      );
       console.log("Domain check response:", response.data); // Log response data for debugging
       setIsAvailable(response.data.available);
     } catch (error) {
       console.error("Error checking domain:", error);
       setIsAvailable(false);
+    } finally {
+      setSmallLoading(false);
     }
   };
   useEffect(() => {
@@ -202,7 +240,7 @@ const EditLink: React.FC = () => {
         setLoading(true);
         try {
           const response = await axios.get(
-            `http://localhost:5000/users/${userId}/links/${id}`
+            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`
           );
           const data = response.data;
           setLink(data);
@@ -239,6 +277,10 @@ const EditLink: React.FC = () => {
       console.error("Invalid URL.");
       return;
     }
+    if (smallLoading) {
+      setMessage("Kindly wait for the custom domain to be validated.");
+      return;
+    }
     if (customLink.length > 0) {
       if (!isAvailable) {
         setMessage(
@@ -260,10 +302,7 @@ const EditLink: React.FC = () => {
         );
         return;
       }
-      if (isAvailable) {
-        const domain = removeProtocol(customLink);
-        addDomain(domain);
-      }
+
       if (!validCustomLink) {
         console.error("Invalid URL.");
         setIsSubmitted(true);
@@ -287,6 +326,12 @@ const EditLink: React.FC = () => {
       } finally {
         setLoading(false);
       }
+    }
+
+    if (isAvailable) {
+      const domain = removeProtocol(customLink);
+      removeDomain(domain);
+      addDomain(domain);
     }
     const updatedLink = {
       ...link,
@@ -339,7 +384,7 @@ const EditLink: React.FC = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://localhost:5000/users/${userId}/links/${id}`,
+        `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
         updatedLink
       );
       console.log("Link updated successfully");
@@ -690,16 +735,21 @@ const EditLink: React.FC = () => {
                     "https://yourcustomshortlink.com".
                   </p>
                 )}
-                {isAvailable !== null && validCustomLink && (
-                  <p
-                    className={`mt-1 text-sm m-0 ${
-                      isAvailable ? "text-green-600" : "text-pink-600"
-                    }`}
-                  >
-                    {isAvailable
-                      ? "Domain is available!"
-                      : "Domain is occupied."}
-                  </p>
+                {smallLoading ? (
+                  <div className="mt-1 text-sm">Please wait ...</div>
+                ) : (
+                  isAvailable !== null &&
+                  validCustomLink && (
+                    <p
+                      className={`mt-1 text-sm m-0 ${
+                        isAvailable ? "text-green-600" : "text-pink-600"
+                      }`}
+                    >
+                      {isAvailable
+                        ? "Domain is available!"
+                        : "Domain is occupied."}
+                    </p>
+                  )
                 )}
                 <div className="pt-10">
                   <button

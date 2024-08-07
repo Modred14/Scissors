@@ -60,7 +60,7 @@ const Login: React.FC = () => {
       console.log("ID Token: " + id_token);
 
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", "http://localhost:5000/users");
+      xhr.open("POST", "https://users-api-scissors.onrender.com/users");
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onload = function () {
         console.log("Signed in as: " + xhr.responseText);
@@ -78,8 +78,9 @@ const Login: React.FC = () => {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+setLoading(true)
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("https://users-api-scissors.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

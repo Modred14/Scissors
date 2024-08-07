@@ -94,7 +94,7 @@ const CreateLink: React.FC = () => {
 
   const checkDomain = async (domain: string) => {
     try {
-      const response = await axios.get("http://localhost:5000/check-domain", {
+      const response = await axios.get("https://users-api-scissors.onrender.com/check-domain", {
         params: { domain },
       });
       console.log("Domain check response:", response.data); // Log response data for debugging
@@ -108,7 +108,7 @@ const CreateLink: React.FC = () => {
   const addDomain = async (domain: string) => {
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
-      const response = await axios.post("http://localhost:5000/add-domain", {
+      const response = await axios.post("https://users-api-scissors.onrender.com/add-domain", {
         id,
         domain,
       });
@@ -122,7 +122,7 @@ const CreateLink: React.FC = () => {
 
   const getDomain = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get-domains");
+      const response = await axios.get("https://users-api-scissors.onrender.com/get-domains");
       if (response.status === 200) {
         setCustomDomains(response.data.domains);
       }
@@ -317,7 +317,7 @@ const CreateLink: React.FC = () => {
       setLoading(true);
       const userId = user?.id;
       const response = await axios.post(
-        `http://localhost:5000/users/${userId}/links`,
+        `https://users-api-scissors.onrender.com/users/${userId}/links`,
         newLink
       );
       setMessage("Your link has been created succesfully");

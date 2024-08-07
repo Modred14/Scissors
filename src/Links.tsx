@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import TruncatedWord from "./TruncatedWord";
 import useWindowWidth from "./useWindowWidth";
 import LinkOptions from "./LinkOptions";
+import SmallLoading from "./SmallLoading";
 
 interface User {
   id: string;
@@ -57,6 +58,7 @@ const Links: React.FC = () => {
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [smallLoading, setSmallLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
 
   const handleCopyClick = async (index: number) => {
@@ -151,10 +153,11 @@ const Links: React.FC = () => {
   }, [isLoggedIn]);
 
   const fetchLinks = async () => {
+    setSmallLoading(true);
     try {
       const userId = user?.id;
       const response = await fetch(
-        `http://localhost:5000/users/${userId}/links`,
+        `https://users-api-scissors.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -167,7 +170,7 @@ const Links: React.FC = () => {
     } catch (error) {
       console.error("Error fetching links:", error);
     } finally {
-      setLoading(false);
+      setSmallLoading(false);
     }
   };
 
@@ -177,6 +180,7 @@ const Links: React.FC = () => {
     );
     setLinks(storedLinks);
     setLoading(false);
+    setSmallLoading(false);
   };
 
   const handleSignOut = () => {
@@ -451,7 +455,14 @@ const Links: React.FC = () => {
               </p>
             </div>
             <div>
-              {links.length > 0 ? (
+              {smallLoading ? (
+                <div
+                className="bg-white shadow flex flex-col items-center justify-center"
+                style={{ height: "500px" }}
+              >
+                <SmallLoading />
+                </div>
+              ) : links.length > 0 ? (
                 <ul
                   className="bg-white shadow p-7 pt-1"
                   style={{ minHeight: "500px" }}
@@ -584,7 +595,7 @@ const Links: React.FC = () => {
                   style={{ height: "500px" }}
                 >
                   <p className="text-xl font-bold text-center mb-4">
-                    No link is available
+                    No link is available 
                   </p>
                   <div>
                     <a href="/create-link">

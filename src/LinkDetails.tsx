@@ -15,6 +15,7 @@ import { Link, useParams } from "react-router-dom";
 import useWindowWidth from "./useWindowWidth";
 import TruncatedWord from "./TruncatedWord";
 import Confirm from "./Confirm";
+import SmallLoading from  "./SmallLoading";
 
 interface User {
   firstName: string;
@@ -57,6 +58,7 @@ const LinkDetails: React.FC = () => {
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [smallLoading, setSmallLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
@@ -114,7 +116,7 @@ const LinkDetails: React.FC = () => {
       if (enteredPassword === user?.password) {
         try {
           const response = await fetch(
-            `http://localhost:5000/users/${userId}/links/${id}`,
+            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -162,11 +164,12 @@ const LinkDetails: React.FC = () => {
   const userId = user?.id;
   useEffect(() => {
     const fetchLinkDetails = async () => {
+      setSmallLoading(true)
       if (isLoggedIn) {
         try {
           const userId = user?.id;
           const response = await fetch(
-            `http://localhost:5000/users/${userId}/links/${id}`,
+            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
             {
               method: "GET",
               headers: {
@@ -188,6 +191,7 @@ const LinkDetails: React.FC = () => {
         setLink(foundLink || null);
       }
       setLoading(false);
+      setSmallLoading(false)
     };
 
     fetchLinkDetails();
@@ -264,10 +268,11 @@ const LinkDetails: React.FC = () => {
   }, [isLoggedIn]);
 
   const fetchLinks = async () => {
+    setSmallLoading(true)
     try {
       const userId = user?.id;
       const response = await fetch(
-        `http://localhost:5000/users/${userId}/links`,
+        `https://users-api-scissors.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -281,15 +286,18 @@ const LinkDetails: React.FC = () => {
       console.error("Error fetching links:", error);
     } finally {
       setLoading(false);
+      setSmallLoading(false)
     }
   };
 
   const fetchLinksFromLocalStorage = () => {
+    setSmallLoading(true)
     const storedLinks: Link[] = JSON.parse(
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
     setLoading(false);
+    setSmallLoading(false)
   };
 
   const handleSignOut = () => {
@@ -542,7 +550,14 @@ const LinkDetails: React.FC = () => {
               id={Link?.id}
             />
             <div></div>{" "}
-            {link ? (
+            {smallLoading ? (
+              <div
+                className="mt-7 bg-white shadow flex flex-col items-center justify-center"
+                style={{ height: "500px" }}
+              >
+                <SmallLoading />
+              </div>
+            ) : link ? (
               <div>
                 <div className="bg-white shadow-sm p-7 rounded-md mt-7">
                   <p className="text-3xl font-extrabold">

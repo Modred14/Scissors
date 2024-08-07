@@ -14,6 +14,7 @@ import Loading from "./Loading.tsx";
 import CreateLink from "./CreateLink.tsx";
 import EditLink from "./EditLink"
 import LinkDetails from "./LinkDetails"
+import SmallLoading from "./SmallLoading"
 
 const AppRouter: React.FC = () => {
   return (
@@ -33,6 +34,7 @@ const AppRouter: React.FC = () => {
         <Route path="*" element={<NotFound />} />
         <Route path="/link/:id" element={<LinkDetails />} />
         <Route path="/edit-link/:id" element={<EditLink />} />
+        <Route path="/link" element={<SmallLoading/>} />
       </Routes>
     </Router>
   );

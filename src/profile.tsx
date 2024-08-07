@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import Loading from "./Loading";
 import TruncatedWord from "./TruncatedWord";
 import useWindowWidth from "./useWindowWidth";
+import SmallLoading from "./SmallLoading"
 
 interface User {
   id: string;
@@ -57,6 +58,7 @@ const Profile: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [links, setLinks] = useState<Link[]>([]);
+  const [smallLoading, setSmallLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,10 +85,11 @@ const Profile: React.FC = () => {
   const maxLength = getMaxLength(windowWidth);
 
   const fetchLinks = async () => {
+    setSmallLoading(true)
     try {
       const userId = user?.id;
       const response = await fetch(
-        `http://localhost:5000/users/${userId}/links`,
+        `https://users-api-scissors.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -100,6 +103,7 @@ const Profile: React.FC = () => {
       console.error("Error fetching links:", error);
     } finally {
       setLoading(false);
+      setSmallLoading(false)
     }
   };
 
@@ -372,7 +376,7 @@ const Profile: React.FC = () => {
                       <img
                         src={user?.profileImg}
                         alt={user?.firstName}
-                        className="rounded-full h-40 w-44 outline-green-700 outline"
+                        className="rounded-full max-h-44 w-44 outline-green-700 outline"
                       />
                     </div>
                     <div className="hidden2 sm:block">
@@ -523,7 +527,14 @@ const Profile: React.FC = () => {
                   <div className="flex mt-9 mb-2 justify-start text-xl font-extrabold">
                     Links({links.length})
                   </div>
-                  {links.length > 0 ? (
+                  {smallLoading ? (
+              <div
+                className="mt-7 bg-gray-200 shadow flex flex-col items-center justify-center"
+                style={{ height: "300px" }}
+              >
+                <SmallLoading />
+              </div>
+            ) : links.length > 0 ? (
                     <ul
                       className="bg-gray-200"
                       style={{ minHeight: "300px" }}

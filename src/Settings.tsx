@@ -166,7 +166,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
     if (enteredPassword === user?.password) {
       try {
         const response = await fetch(
-          `http://localhost:5000/users/${user?.id}`,
+          `https://users-api-scissors.onrender.com/users/${user?.id}`,
           {
             method: "DELETE",
             headers: {

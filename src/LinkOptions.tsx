@@ -31,7 +31,7 @@ const LinkOptions: React.FC<Link> = ({
       if (enteredPassword === userPassword) {
         try {
           const response = await fetch(
-            `http://localhost:5000/users/${userId}/links/${id}`,
+            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
             {
               method: "DELETE",
               headers: {
