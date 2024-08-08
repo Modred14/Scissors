@@ -19,9 +19,9 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   profileImg: string;
-  links: string[];
+  links: Link[];
 }
 type Link = {
   title: string;
@@ -31,11 +31,12 @@ type Link = {
   qrcode: string;
   customLink: string;
   clicks: number;
-  visits: number;
+  visits: string[];
   createdAt: string;
 };
 
 interface SettingsProps {
+  user: User | null;
   onUpdate: (user: User) => void;
 }
 
@@ -459,6 +460,8 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                       lastName,
                       password,
                       profileImg,
+                      id: user?.id || "",
+                      links: user?.links || [],
                     };
                     console.log("Update Settings clicked:", updatedUser);
                     onUpdate(updatedUser);
@@ -469,6 +472,9 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                       firstName,
                       lastName,
                       profileImg,
+                      password: user?.password || "",
+                      id: user?.id || "",
+                      links: user?.links || [],
                     };
                     console.log(
                       "Update Settings clicked without password:",
@@ -511,7 +517,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                                 alt="Camera Icon"
                                 className="w-10 h-10"
                               />
-                              </div>
+                            </div>
                           )}
                           <img
                             src={profileImg}
@@ -702,7 +708,9 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xl font-bold sm:pt-3 all">Current Password</p>
+                    <p className="text-xl font-bold sm:pt-3 all">
+                      Current Password
+                    </p>
                     <input
                       type="text"
                       placeholder=" "

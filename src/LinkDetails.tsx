@@ -74,7 +74,8 @@ const LinkDetails: React.FC = () => {
     if (user) {
       setIsLoggedIn(true);
       const userData = JSON.parse(user);
-      fetchUserData(userData.token);
+      console.log(userData);
+      fetchUserData();
     } else {
       setLoading(false);
       fetchLinksFromLocalStorage();
@@ -96,7 +97,7 @@ const LinkDetails: React.FC = () => {
       // alert("Text copied to clipboard!");
     } catch (err) {
       console.error("Failed to copy: ", err);
-      setMessage("Oops!! Couldn't copy the link.");
+      setMessage("Oops!! Could not copy the link.");
     }
   };
 
@@ -147,7 +148,7 @@ const LinkDetails: React.FC = () => {
         } catch (error) {
           setIsModalOpen(false);
           console.error("Error deleting link:", error);
-          setMessage("Oops!! Couldn't delete the link.");
+          setMessage("Oops!! Could not delete the link.");
         }
       } else {
         setIsModalOpen(false);
@@ -157,7 +158,7 @@ const LinkDetails: React.FC = () => {
       const links = localStorage.getItem("links");
       if (links) {
         const linksArray = JSON.parse(links);
-        const updatedLinks = linksArray.filter((link: any) => link.id !== id);
+        const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
         setIsModalOpen(false);
         window.location.reload();
         localStorage.setItem("links", JSON.stringify(updatedLinks));
@@ -165,7 +166,7 @@ const LinkDetails: React.FC = () => {
         console.log(`Removed link with ID ${id}`);
       } else {
         // console.log("No links found in localStorage");
-        setMessage("Oops!! Couldn't delete the link.");
+        setMessage("Oops!! Could not delete the link.");
       }
     }
   };

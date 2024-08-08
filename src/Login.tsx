@@ -71,22 +71,25 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleFailure = (error: any) => {
+  const handleFailure = (error: boolean) => {
     console.error("Google Login failed:", error);
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch("https://users-api-scissors.onrender.com/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://users-api-scissors.onrender.com/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -139,11 +142,11 @@ setLoading(true)
             onFailure={handleFailure}
             cookiePolicy={"single_host_origin"}
             render={(renderProps) => (
-              <div
-                onClick={renderProps.onClick}
-                disabled={renderProps.disabled}
-              >
-                <button className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl">
+              <div onClick={renderProps.onClick}>
+                <button
+                  className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
+                  disabled={renderProps.disabled}
+                >
                   Continue with Google
                 </button>
               </div>
@@ -234,7 +237,7 @@ setLoading(true)
           <div className="center">
             <div className="mt-5 justify-center items-center text-center place-content-center">
               <p className="place-content-center">
-                Don't have an account?{" "}
+                Don&apos;t have an account?
                 <Link to="/signup">
                   <a>Sign up</a>
                 </Link>

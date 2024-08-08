@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Confirm from "./Confirm";
-import axios from "axios"
+import axios from "axios";
 
 type Link = {
   id: string;
@@ -37,7 +37,6 @@ const LinkOptions: React.FC<Link> = ({
     return url.replace(/^https?:\/\//, "");
   };
   const removeDomain = async (domain: string) => {
-    
     try {
       const response = await axios.delete(
         "https://users-api-scissors.onrender.com/remove-domain",
@@ -76,7 +75,7 @@ const LinkOptions: React.FC<Link> = ({
           if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`);
           }
-        
+
           console.log(`Removed link with ID ${id} from the server`);
           const domain = removeProtocol(customLink);
           removeDomain(domain);
@@ -94,14 +93,13 @@ const LinkOptions: React.FC<Link> = ({
     } else {
       const links = localStorage.getItem("links");
       if (links) {
-        
-          const linksArray = JSON.parse(links);
-          const updatedLinks = linksArray.filter((link: any) => link.id !== id);
-          localStorage.setItem("links", JSON.stringify(updatedLinks));
-          setIsModalOpen(false);
-          console.log(`Removed link with ID ${id} from localStorage`);
-          window.location.reload();
-          setMessage(`You have successfully deleted the link with ID ${id}`);
+        const linksArray = JSON.parse(links);
+        const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
+        localStorage.setItem("links", JSON.stringify(updatedLinks));
+        setIsModalOpen(false);
+        console.log(`Removed link with ID ${id} from localStorage`);
+        window.location.reload();
+        setMessage(`You have successfully deleted the link with ID ${id}`);
       } else {
         console.log("No links found in localStorage");
       }
@@ -126,6 +124,7 @@ const LinkOptions: React.FC<Link> = ({
       document.removeEventListener("click", handleClickOutside);
     };
   }, [handleClickOutside]);
+ 
 
   return (
     <div>
@@ -134,7 +133,7 @@ const LinkOptions: React.FC<Link> = ({
         onClose={() => setIsModalOpen(false)}
         onDelete={handleDelete}
         isLoggedIn={isLoggedIn}
-        id={Link?.id}
+        id={id}
       />
       <button
         className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
@@ -148,20 +147,19 @@ const LinkOptions: React.FC<Link> = ({
           ref={optionsRef}
           className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-10"
         >
-            <button
-              className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100"
-              onClick={() => {
-                setIsModalOpen(true); // Open modal to confirm deletion
-                setShowOptions(false); // Close options
-              }}
-            >
-              <div className="flex gap-3">
-                <span className="material-icons ">delete</span>{" "}
-                <p className="pt-1">Delete</p>
-              </div>
-            </button>
-          
-        
+          <button
+            className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100"
+            onClick={() => {
+              setIsModalOpen(true); // Open modal to confirm deletion
+              setShowOptions(false); // Close options
+            }}
+          >
+            <div className="flex gap-3">
+              <span className="material-icons ">delete</span>{" "}
+              <p className="pt-1">Delete</p>
+            </div>
+          </button>
+
           <Link to={`/link/${id}`}>
             <button className="w-full text-left px-2 text-black hover:text-black py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
               {" "}

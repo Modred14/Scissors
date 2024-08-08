@@ -175,7 +175,7 @@ const EditLink: React.FC = () => {
       );
       if (response.status === 200) {
         // Assuming the response contains an array of domains
-        // Example response structure: { domains: [{ id: '1', domain: 'example.com' }, ...] }
+        // Example response structure: { doma}, ...] }
         const domains: Domain[] = response.data.domains; // Extract domains with id and domain
         setCustomDomains(domains);
       }
@@ -353,7 +353,7 @@ const EditLink: React.FC = () => {
         const links = savedLinks ? JSON.parse(savedLinks) : [];
 
         const existingLinkIndex = links.findIndex(
-          (l) => l.id === updatedLink.id
+          (l: Link) => l.id === updatedLink.id
         );
         if (existingLinkIndex !== -1) {
           // Update the existing link
@@ -681,8 +681,8 @@ const EditLink: React.FC = () => {
                 />
                 {!validLongUrl && longUrl && isSubmitted && (
                   <p className="mt-1 peer-invalid:visible text-pink-600 text-sm">
-                    Invalid link. Please, we'll need a valid URL, like
-                    "https://yourlonglink.com".
+                    Invalid link. Please, we&apos;ll need a valid URL, like
+                    &quot;https://yourlonglink.com&quot;.
                   </p>
                 )}
                 <label htmlFor="title">
@@ -728,8 +728,8 @@ const EditLink: React.FC = () => {
                 />
                 {!validCustomLink && customLink && isSubmitted && (
                   <p className="mt-1 peer-invalid:visible text-pink-600 text-sm">
-                    Invalid link. Please, we'll need a valid URL, like
-                    "https://yourcustomshortlink.com".
+                    Invalid link. Please, we&apos;ll need a valid URL, like
+                    &quot;https://yourcustomshortlink.com&quot;.
                   </p>
                 )}
                 {smallLoading ? (
@@ -828,8 +828,8 @@ const EditLink: React.FC = () => {
                               logo
                                 ? {
                                     src: logo,
-                                    x: null,
-                                    y: null,
+                                    x: undefined,
+                                    y: undefined,
                                     height: 40,
                                     width: 40,
                                     excavate: true,

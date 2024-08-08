@@ -11,6 +11,7 @@ module.exports = {
     "plugin:import/typescript",
     "google",
     "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -24,10 +25,19 @@ module.exports = {
   plugins: [
     "@typescript-eslint",
     "import",
+    "react",
   ],
+  settings: {
+    react: {
+      version: "detect", 
+    },
+  },
   rules: {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
     "indent": ["error", 2],
+    "react/no-unescaped-entities": "error", // Add this to enforce escaping entities in React
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }], // Add this to ignore unused variables prefixed with an underscore
+    "no-undef": "off",
   },
 };

@@ -9,6 +9,16 @@ import "./login.css";
 import "./style.css";
 import Loading from "./Loading";
 
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  profileImg: string;
+  links: string[];
+}
+
 const Signup: React.FC = () => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -72,7 +82,7 @@ const Signup: React.FC = () => {
         `https://users-api-scissors.onrender.com/users`
       );
       const data = await response.json();
-      const userExists = data.some((user: any) => user.email === email);
+      const userExists = data.some((user: User) => user.email === email);
 
       if (userExists) {
         setMessage("Email already exists, Please log in.");
@@ -164,7 +174,7 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleFailure = (error: any) => {
+  const handleFailure = (error: boolean) => {
     console.error("Google Sign Up failed:", error);
     setMessage("Failed to sign up. Please try again.");
   };
@@ -197,11 +207,11 @@ const Signup: React.FC = () => {
               onFailure={handleFailure}
               cookiePolicy={"single_host_origin"}
               render={(renderProps) => (
-                <div
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                >
-                  <button className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl">
+                <div onClick={renderProps.onClick}>
+                  <button
+                    className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
+                    disabled={renderProps.disabled}
+                  >
                     Continue with Google
                   </button>
                 </div>
@@ -263,7 +273,7 @@ const Signup: React.FC = () => {
                   )}
                   <p className="mt-3 text-center" style={{ maxWidth: "570px" }}>
                     By signing up for Scissors you acknowledge that you agree to
-                    Scissors'{" "}
+                    Scissors&apos;
                     <a
                       href="/terms-of-service"
                       target="_blank"

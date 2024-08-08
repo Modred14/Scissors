@@ -115,7 +115,7 @@
   max-width: 27.5rem /* 384px */;
 }
 .background-notfound {
-  background-image: url("src/notfound.png");
+  background-image: url("../public/notfound.png");
   background-position: fixed;
   background-size: cover;
 }

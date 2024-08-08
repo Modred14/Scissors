@@ -66,7 +66,7 @@ const Confirm: React.FC<ConfirmProps> = ({
                     Cancel
                   </button>
                   <button
-                    onClick={() => onDelete(id)}
+                     onClick={() => id && onDelete(id)} 
                     className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800"
                   >
                     Delete

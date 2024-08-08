@@ -308,7 +308,7 @@ const NotFound: React.FC = () => {
                 We looked everywhere
               </p>
               <p className="justify-center notfound-body text-white font-bold text-5xl max-w-5xl text-center">
-                Oops, it seems like you've bumped into a route that doesn't
+                Oops, it seems like you&apos;ve bumped into a route that doesn&apos;t
                 exist.
               </p>
               <div className="flex flex-col items-center justify-center ">

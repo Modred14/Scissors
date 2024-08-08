@@ -545,7 +545,7 @@ const Profile: React.FC = () => {
                             new Date(b.createdAt).getTime() -
                             new Date(a.createdAt).getTime()
                         )
-                        .map((link: any) => (
+                        .map((link: Link) => (
                           <li
                             key={link.id}
                             className="border m-2 p-4 h-auto bg-gray-100"

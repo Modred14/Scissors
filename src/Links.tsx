@@ -95,7 +95,8 @@ const Links: React.FC = () => {
     if (user) {
       setIsLoggedIn(true);
       const userData = JSON.parse(user);
-      fetchUserData(userData.token);
+      console.log(userData)
+      fetchUserData();
     } else {
       setLoading(false);
       fetchLinksFromLocalStorage();
@@ -473,7 +474,7 @@ const Links: React.FC = () => {
                         new Date(b.createdAt).getTime() -
                         new Date(a.createdAt).getTime()
                     )
-                    .map((link: any, index: number) => (
+                    .map((link: Link, index: number) => (
                       <li
                         key={link.id}
                         className="border sm:m-4 mt-6 sm:mt-10 pl-0  sm:pl-4 p-4 h-auto bg-gray-100"
@@ -577,11 +578,11 @@ const Links: React.FC = () => {
                                 </Link>
                                 <LinkOptions
                                   id={link.id}
-                                  userId={user?.id}
+                                  userId={user?.id ?? ""}
                                   isLoggedIn={isLoggedIn}
                                   setMessage={setMessage}
                                   customLink={link.customLink}
-                                  userPassword={user?.password}
+                                  userPassword={user?.password ?? ""}
                                 />
                               </div>
                             </div>

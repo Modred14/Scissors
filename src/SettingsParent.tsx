@@ -7,19 +7,20 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   profileImg: string;
-  links: {
-    id: string;
-    title: string;
-    mainLink: string;
-    shortenedLink: string;
-    qrcode: string;
-    customLink: string;
-    clicks: number;
-    visits: string[];
-    createdAt: string;
-  }[];
+  links: Link[];
+}
+interface Link {
+  id: string;
+  title: string;
+  mainLink: string;
+  shortenedLink: string;
+  qrcode: string;
+  customLink: string;
+  clicks: number;
+  visits: string[];
+  createdAt: string;
 }
 
 const SettingsParent: React.FC = () => {
@@ -53,13 +54,13 @@ const SettingsParent: React.FC = () => {
     fetchUserData();
   }, []);
 
-  const handleUpdate = async (updatedUser: User) => {
+  const handleUpdate = async (updatedUser: User): Promise<void> => {
     setLoading(true);
     try {
       const response = await fetch("https://users-api-scissors.onrender.com/users");
       const data = await response.json();
       console.log("Fetched users:", data); // Debug log
-      const userExists = data.some((user: any) => user.email === updatedUser.email && user.email !== email);
+      const userExists = data.some((user: User) => user.email === updatedUser.email && user.email !== email);
       
       if (userExists) {
         setMessage("Email already exists, kindly input another email.");

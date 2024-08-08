@@ -30,9 +30,9 @@ const Terms: React.FC = () => {
         className="text-xl text-gray-600  font-comic"
         style={{ padding: "10%", paddingTop: "25px", paddingBottom: "10px" }}
       >
-        Welcome to Scissors! These Terms of Service ("Terms") govern your use of
-        the Scissors website ("Site") and the services provided by Scissors
-        ("Services"). By accessing or using the Site or Services, you agree to
+        Welcome to Scissors! These Terms of Service (&quot;Terms&quot;) govern your use of
+        the Scissors website (&quot;Site&quot;) and the services provided by Scissors
+        (&quot;Services&quot;). By accessing or using the Site or Services, you agree to
         be bound by these Terms. If you do not agree to these Terms, please do
         not use the Site or Services.
       </p>

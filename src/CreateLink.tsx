@@ -47,6 +47,7 @@ interface Domain {
   domain: string;
 }
 
+
 const navigation = (isLoggedIn: boolean) => [
   { name: "Home", href: "/", current: false },
   { name: "Dashboard", href: "/dashboard", current: false },
@@ -175,7 +176,8 @@ const CreateLink: React.FC = () => {
     if (user) {
       setIsLoggedIn(true);
       const userData = JSON.parse(user);
-      fetchUserData(userData.token);
+      console.log(userData);
+      fetchUserData();
     } else {
       setLoading(false);
       fetchLinksFromLocalStorage();
@@ -303,7 +305,7 @@ const CreateLink: React.FC = () => {
         if (storedLinks.length >= 3) {
           console.log("sorry");
           setMessage(
-            "Oops, you've reached the limit for non-registered users. To continue using Scissors services, please create an account."
+            "Oops, you have reached the limit for non-registered users. To continue using Scissors services, please create an account."
           );
           return;
         } else {
@@ -691,8 +693,8 @@ const CreateLink: React.FC = () => {
               />
               {!validLongUrl && longUrl && isSubmitted && (
                 <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we'll need a valid URL, like
-                  "https://yourlonglink.com".
+                  Invalid link. Please, we&apos;ll need a valid URL, like
+                  &quot;https://yourlonglink.com&quot;.
                 </p>
               )}
               <label htmlFor="title">
@@ -749,8 +751,8 @@ const CreateLink: React.FC = () => {
               />
               {!validCustomLink && customLink && isSubmitted && (
                 <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we'll need a valid URL, like
-                  "https://yourcustomshortlink.com".
+                  Invalid link. Please, we&apos;ll need a valid URL, like
+                  &quot;https://yourcustomshortlink.com&quot;.
                 </p>
               )}
               {smallLoading ? (
@@ -850,8 +852,8 @@ const CreateLink: React.FC = () => {
                             logo
                               ? {
                                   src: logo,
-                                  x: null,
-                                  y: null,
+                                  x: undefined,
+                                  y: undefined,
                                   height: 40,
                                   width: 40,
                                   excavate: true,

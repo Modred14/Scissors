@@ -35,8 +35,8 @@ const Policy: React.FC = () => {
         >
           At Scissors, we are committed to protecting your privacy. This Privacy
           Policy explains how we collect, use, disclose, and safeguard your
-          information when you visit our website ("Site") and use our services
-          ("Services"). By accessing or using the Site or Services, you agree to
+          information when you visit our website (&quot;Site&quot;) and use our services
+          (&quot;Services&quot;). By accessing or using the Site or Services, you agree to
           the terms of this Privacy Policy. If you do not agree with the terms
           of this Privacy Policy, please do not use the Site or Services.
         </p>
@@ -62,7 +62,7 @@ const Policy: React.FC = () => {
             generate, and the analytics related to link usage.
           </li>
           <li>
-            Log Data: Our servers automatically record information ("Log Data")
+            Log Data: Our servers automatically record information (&quot;Log Data&quot;)
             when you use the Site. This Log Data may include your IP address,
             browser type, the pages you visit, and the time spent on those
             pages.
@@ -142,7 +142,7 @@ const Policy: React.FC = () => {
             effectively. We will notify affected users and take necessary steps
             to mitigate the impact and prevent future occurrences.
           </li>
-        </p>{" "}
+        </p>
         <p
           className="text-2xl font-bold text-gray-800"
           style={{ padding: "10%", paddingTop: "25px", paddingBottom: 0 }}
@@ -158,7 +158,7 @@ const Policy: React.FC = () => {
           services, and we are not responsible for their privacy practices. We
           encourage you to review the privacy policies of any third-party
           services you interact with.
-        </p>{" "}
+        </p>
         <p
           className="text-2xl font-bold text-gray-800"
           style={{ padding: "10%", paddingTop: "25px", paddingBottom: 0 }}
@@ -174,7 +174,7 @@ const Policy: React.FC = () => {
           retention period is required or permitted by law. When your
           information is no longer needed, we will securely delete or anonymize
           it.
-        </p>{" "}
+        </p>
         <p
           className="text-2xl font-bold text-gray-800"
           style={{ padding: "10%", paddingTop: "25px", paddingBottom: 0 }}
@@ -212,7 +212,7 @@ const Policy: React.FC = () => {
             communications or limiting the use of your data for certain
             purposes.
           </li>
-        </p>{" "}
+        </p>
         <p
           className="text-2xl font-bold text-gray-800"
           style={{ padding: "10%", paddingTop: "25px", paddingBottom: 0 }}
@@ -229,7 +229,7 @@ const Policy: React.FC = () => {
           indicating the effective date of the revisions. Your continued use of
           the Site and Services after the effective date constitutes your
           acceptance of the updated Privacy Policy.
-        </p>{" "}
+        </p>
         <p
           className="text-2xl font-bold text-gray-800"
           style={{ padding: "10%", paddingTop: "25px", paddingBottom: 0 }}
@@ -242,7 +242,7 @@ const Policy: React.FC = () => {
         >
           If you have any questions, concerns, or requests regarding this
           Privacy Policy or our privacy practices, please contact us at:
-          Scissors Email:{" "}
+          Scissors Email:
           <a href="mailto:favourdomirin@gmail.com">favourdomirin@gmail.com</a>
         </p>
       </div>
