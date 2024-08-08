@@ -104,6 +104,7 @@ const Dashboard: React.FC = () => {
                   <div className="hidden md:ml-6 md:block">
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
+                        <Link to={item.href}>
                         <a
                           key={item.name}
                           href={item.href}
@@ -116,7 +117,7 @@ const Dashboard: React.FC = () => {
                           )}
                         >
                           {item.name}
-                        </a>
+                        </a></Link>
                       ))}
                     </div>
                   </div>
@@ -156,22 +157,27 @@ const Dashboard: React.FC = () => {
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
+                            <Link to= "/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
+                              </Link>
                             </MenuItem>
                             <MenuItem>
+                            <Link to="/settings">
                               <a
                                 href="/settings"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Settings
                               </a>
+                              </Link>
                             </MenuItem>
                             <MenuItem>
+                            <Link to="#">
                               <a
                                 href="#"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
@@ -179,6 +185,7 @@ const Dashboard: React.FC = () => {
                               >
                                 Sign out
                               </a>
+                              </Link>
                             </MenuItem>
                           </MenuItems>
                         </Menu>
@@ -229,22 +236,26 @@ const Dashboard: React.FC = () => {
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                          <MenuItem>
-                            <a
-                              href="/profile"
-                              className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                            >
-                              Your Profile
-                            </a>
-                          </MenuItem>
-                          <MenuItem>
-                            <a
-                              href="/settings"
-                              className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                            >
-                              Settings
-                            </a>
-                          </MenuItem>
+                           <MenuItem>
+                            <Link to= "/profile">
+                              <a
+                                href="/profile"
+                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                              >
+                                Your Profile
+                              </a>
+                              </Link>
+                            </MenuItem>
+                            <MenuItem>
+                            <Link to="/settings">
+                              <a
+                                href="/settings"
+                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                              >
+                                Settings
+                              </a>
+                              </Link>
+                            </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}

@@ -163,20 +163,14 @@ const Signup: React.FC = () => {
         if (xhr.status === 200) {
           localStorage.setItem("user", JSON.stringify(xhr.responseText));
           navigate("/dashboard");
-        } else {
-          setMessage("Failed to sign up. Please try again.");
         }
       };
       xhr.send("idtoken=" + id_token);
-    } else {
-      console.error("Sign up failed: ", response);
-      setMessage("Failed to sign up. Please try again.");
     }
   };
 
   const handleFailure = (error: boolean) => {
     console.error("Google Sign Up failed:", error);
-    setMessage("Failed to sign up. Please try again.");
   };
   if (loading) {
     return <Loading />;
