@@ -5,7 +5,7 @@ type ConfirmProps = {
   onClose: () => void;
   onDelete: (password: string) => void;
   isLoggedIn: boolean;
-  id: string;
+  id?: string;
 };
 
 const Confirm: React.FC<ConfirmProps> = ({

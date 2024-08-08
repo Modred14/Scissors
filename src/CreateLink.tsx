@@ -72,6 +72,7 @@ const CreateLink: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [customDomains, setCustomDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
+  const [smallLoading, setSmallLoading] = useState(true);
   const [links, setLinks] = useState<Link[]>([]);
   const [longUrl, setLongUrl] = useState("");
   const [customLink, setCustomLink] = useState("");
@@ -94,9 +95,12 @@ const CreateLink: React.FC = () => {
 
   const checkDomain = async (domain: string) => {
     try {
-      const response = await axios.get("https://users-api-scissors.onrender.com/check-domain", {
-        params: { domain },
-      });
+      const response = await axios.get(
+        "https://users-api-scissors.onrender.com/check-domain",
+        {
+          params: { domain },
+        }
+      );
       console.log("Domain check response:", response.data); // Log response data for debugging
       setIsAvailable(response.data.available);
     } catch (error) {
@@ -108,10 +112,13 @@ const CreateLink: React.FC = () => {
   const addDomain = async (domain: string) => {
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
-      const response = await axios.post("https://users-api-scissors.onrender.com/add-domain", {
-        id,
-        domain,
-      });
+      const response = await axios.post(
+        "https://users-api-scissors.onrender.com/add-domain",
+        {
+          id,
+          domain,
+        }
+      );
       if (response.data.success) {
         setCustomDomains([...customDomains, { id, domain }]);
       }
@@ -121,13 +128,18 @@ const CreateLink: React.FC = () => {
   };
 
   const getDomain = async () => {
+    setSmallLoading(true);
     try {
-      const response = await axios.get("https://users-api-scissors.onrender.com/get-domains");
+      const response = await axios.get(
+        "https://users-api-scissors.onrender.com/get-domains"
+      );
       if (response.status === 200) {
         setCustomDomains(response.data.domains);
       }
     } catch (error) {
       console.error("Error fetching domains:", error);
+    } finally {
+      setSmallLoading(false);
     }
   };
 
@@ -741,14 +753,22 @@ const CreateLink: React.FC = () => {
                   "https://yourcustomshortlink.com".
                 </p>
               )}
-              {isAvailable !== null && validCustomLink && (
-                <p
-                  className={`mt-1 text-sm ${
-                    isAvailable ? "text-green-600" : "text-pink-600"
-                  }`}
-                >
-                  {isAvailable ? "Domain is available!" : "Domain is occupied."}
-                </p>
+              {smallLoading ? (
+                <div className="mt-1 text-sm">Please wait ...</div>
+              ) : (
+                !smallLoading &&
+                isAvailable !== null &&
+                validCustomLink && (
+                  <p
+                    className={`mt-1 text-sm m-0 ${
+                      isAvailable ? "text-green-600" : "text-pink-600"
+                    }`}
+                  >
+                    {isAvailable
+                      ? "Domain is available!"
+                      : "Domain is occupied."}
+                  </p>
+                )
               )}
               <div className="pt-12">
                 <button

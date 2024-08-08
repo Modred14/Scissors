@@ -66,9 +66,11 @@ const Signup: React.FC = () => {
 
   const handleEmailSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(`https://users-api-scissors.onrender.com/users`);
+      const response = await fetch(
+        `https://users-api-scissors.onrender.com/users`
+      );
       const data = await response.json();
       const userExists = data.some((user: any) => user.email === email);
 
@@ -88,7 +90,7 @@ const Signup: React.FC = () => {
 
   const handleDetailsSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true)
+    setLoading(true);
     if (!validatePassword(password)) {
       setMessage(
         "Password must be greater than six characters, and contain a symbol, one number, one lowercase, and one uppercase letter."
@@ -104,22 +106,25 @@ const Signup: React.FC = () => {
 
     // Submit the form or send data to your server here
 
-    const response = await fetch("https://users-api-scissors.onrender.com/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ firstName, lastName, email, password }),
-    });
+    const response = await fetch(
+      "https://users-api-scissors.onrender.com/users",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+      }
+    );
     const data = await response.json();
     if (response.ok) {
       console.log("Sign Up successful:", data);
       localStorage.setItem("user", JSON.stringify(data));
       setMessage("You have successfully created an account!");
-      setLoading(false)
+      setLoading(false);
       navigate("/dashboard");
     } else {
-      setLoading(false)
+      setLoading(false);
       alert("User not found or invalid credentials");
     }
   };
@@ -145,15 +150,23 @@ const Signup: React.FC = () => {
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.onload = function () {
         console.log("Signed up as: " + xhr.responseText);
+        if (xhr.status === 200) {
+          localStorage.setItem("user", JSON.stringify(xhr.responseText));
+          navigate("/dashboard");
+        } else {
+          setMessage("Failed to sign up. Please try again.");
+        }
       };
       xhr.send("idtoken=" + id_token);
     } else {
       console.error("Sign up failed: ", response);
+      setMessage("Failed to sign up. Please try again.");
     }
   };
 
   const handleFailure = (error: any) => {
-    console.error("Google Login failed:", error);
+    console.error("Google Sign Up failed:", error);
+    setMessage("Failed to sign up. Please try again.");
   };
   if (loading) {
     return <Loading />;

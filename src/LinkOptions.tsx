@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Confirm from "./Confirm";
+import axios from "axios"
 
 type Link = {
   id: string;
@@ -8,7 +9,12 @@ type Link = {
   isLoggedIn: boolean;
   setMessage: (message: string) => void;
   userPassword: string;
+  customLink: string;
 };
+interface Domain {
+  id: string;
+  domain: string;
+}
 
 const LinkOptions: React.FC<Link> = ({
   id,
@@ -16,16 +22,43 @@ const LinkOptions: React.FC<Link> = ({
   isLoggedIn,
   setMessage,
   userPassword,
+  customLink,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customDomains, setCustomDomains] = useState<Domain[]>([]);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
+  const removeProtocol = (url: string) => {
+    return url.replace(/^https?:\/\//, "");
+  };
+  const removeDomain = async (domain: string) => {
+    
+    try {
+      const response = await axios.delete(
+        "https://users-api-scissors.onrender.com/remove-domain",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: { domain },
+        }
+      );
 
+      if (response.data.success) {
+        setCustomDomains(response.data.domains);
+        const cleanedDomain = removeProtocol(domain);
+        return !customDomains.some((d) => d.domain === cleanedDomain);
+      }
+    } catch (error) {
+      console.error("Error removing domain:", error);
+      setMessage("An error occurred while removing the domain.");
+    }
+  };
   const handleDelete = async (enteredPassword: string) => {
     if (isLoggedIn) {
       if (enteredPassword === userPassword) {
@@ -43,8 +76,10 @@ const LinkOptions: React.FC<Link> = ({
           if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`);
           }
-
+        
           console.log(`Removed link with ID ${id} from the server`);
+          const domain = removeProtocol(customLink);
+          removeDomain(domain);
           setIsModalOpen(false);
           window.location.reload();
           setMessage(`You have successfully deleted the link with ID ${id}`);

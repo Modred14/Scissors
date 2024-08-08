@@ -147,7 +147,6 @@ const EditLink: React.FC = () => {
     }
   };
   const removeDomain = async (domain: string) => {
-    setSmallLoading(true);
     try {
       const response = await axios.delete(
         "https://users-api-scissors.onrender.com/remove-domain",
@@ -165,8 +164,6 @@ const EditLink: React.FC = () => {
     } catch (error) {
       console.error("Error removing domain:", error);
       setMessage("An error occurred while removing the domain.");
-    } finally {
-      setSmallLoading(false);
     }
   };
 
@@ -738,6 +735,7 @@ const EditLink: React.FC = () => {
                 {smallLoading ? (
                   <div className="mt-1 text-sm">Please wait ...</div>
                 ) : (
+                  !smallLoading &&
                   isAvailable !== null &&
                   validCustomLink && (
                     <p

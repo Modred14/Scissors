@@ -580,6 +580,7 @@ const Links: React.FC = () => {
                                   userId={user?.id}
                                   isLoggedIn={isLoggedIn}
                                   setMessage={setMessage}
+                                  customLink={link.customLink}
                                   userPassword={user?.password}
                                 />
                               </div>

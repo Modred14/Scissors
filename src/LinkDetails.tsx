@@ -15,7 +15,8 @@ import { Link, useParams } from "react-router-dom";
 import useWindowWidth from "./useWindowWidth";
 import TruncatedWord from "./TruncatedWord";
 import Confirm from "./Confirm";
-import SmallLoading from  "./SmallLoading";
+import SmallLoading from "./SmallLoading";
+import axios from "axios";
 
 interface User {
   firstName: string;
@@ -35,7 +36,10 @@ type Link = {
   visits: number;
   createdAt: string;
 };
-
+interface Domain {
+  id: string;
+  domain: string;
+}
 const navigation = (isLoggedIn: boolean) => [
   { name: "Home", href: "/", current: false },
   { name: "Dashboard", href: "/dashboard", current: false },
@@ -63,6 +67,7 @@ const LinkDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [link, setLink] = useState<Link | null>(null);
+  const [customDomains, setCustomDomains] = useState<Domain[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -132,6 +137,10 @@ const LinkDetails: React.FC = () => {
           // Handle successful deletion (e.g., update state, show a message, redirect)
 
           setLink(null);
+          const link = links.find((link) => link.id === id);
+          const customLink = link?.customLink || "";
+          const domain = removeProtocol(customLink);
+          removeDomain(domain);
           setIsModalOpen(false);
           setMessage(`You have successfully deleted the link with ID ${id}.`);
           console.log("Link deleted successfully");
@@ -164,7 +173,7 @@ const LinkDetails: React.FC = () => {
   const userId = user?.id;
   useEffect(() => {
     const fetchLinkDetails = async () => {
-      setSmallLoading(true)
+      setSmallLoading(true);
       if (isLoggedIn) {
         try {
           const userId = user?.id;
@@ -191,7 +200,7 @@ const LinkDetails: React.FC = () => {
         setLink(foundLink || null);
       }
       setLoading(false);
-      setSmallLoading(false)
+      setSmallLoading(false);
     };
 
     fetchLinkDetails();
@@ -242,6 +251,32 @@ const LinkDetails: React.FC = () => {
     }
   }, []);
 
+  const removeProtocol = (url: string) => {
+    return url.replace(/^https?:\/\//, "");
+  };
+  const removeDomain = async (domain: string) => {
+    try {
+      const response = await axios.delete(
+        "https://users-api-scissors.onrender.com/remove-domain",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: { domain },
+        }
+      );
+
+      if (response.data.success) {
+        setCustomDomains(response.data.domains);
+        const cleanedDomain = removeProtocol(domain);
+        return !customDomains.some((d) => d.domain === cleanedDomain);
+      }
+    } catch (error) {
+      console.error("Error removing domain:", error);
+      setMessage("An error occurred while removing the domain.");
+    }
+  };
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -268,7 +303,7 @@ const LinkDetails: React.FC = () => {
   }, [isLoggedIn]);
 
   const fetchLinks = async () => {
-    setSmallLoading(true)
+    setSmallLoading(true);
     try {
       const userId = user?.id;
       const response = await fetch(
@@ -286,18 +321,18 @@ const LinkDetails: React.FC = () => {
       console.error("Error fetching links:", error);
     } finally {
       setLoading(false);
-      setSmallLoading(false)
+      setSmallLoading(false);
     }
   };
 
   const fetchLinksFromLocalStorage = () => {
-    setSmallLoading(true)
+    setSmallLoading(true);
     const storedLinks: Link[] = JSON.parse(
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
     setLoading(false);
-    setSmallLoading(false)
+    setSmallLoading(false);
   };
 
   const handleSignOut = () => {
@@ -547,7 +582,7 @@ const LinkDetails: React.FC = () => {
               onClose={() => setIsModalOpen(false)}
               onDelete={handleDelete}
               isLoggedIn={isLoggedIn}
-              id={Link?.id}
+              id={link?.id}
             />
             <div></div>{" "}
             {smallLoading ? (
