@@ -588,11 +588,13 @@ const Profile: React.FC = () => {
                         No link is available
                       </p>
                       <div>
+                        <Link to="/create-link">
                         <a href="/create-link">
                           <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
                             Create New
                           </button>
                         </a>
+                        </Link>
                       </div>
                     </div>
                   )}

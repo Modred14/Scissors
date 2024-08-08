@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Confirm from "./Confirm";
 import axios from "axios";
+import SmallLoading from "./SmallLoading";
 
 type Link = {
   id: string;
@@ -10,6 +11,8 @@ type Link = {
   setMessage: (message: string) => void;
   userPassword: string;
   customLink: string;
+  smallLoading: boolean;
+  setSmallLoading: (loading: boolean) => void;
 };
 interface Domain {
   id: string;
@@ -23,6 +26,8 @@ const LinkOptions: React.FC<Link> = ({
   setMessage,
   userPassword,
   customLink,
+  smallLoading,
+  setSmallLoading,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -33,6 +38,7 @@ const LinkOptions: React.FC<Link> = ({
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
+  setSmallLoading(false);
   const removeProtocol = (url: string) => {
     return url.replace(/^https?:\/\//, "");
   };
@@ -59,6 +65,7 @@ const LinkOptions: React.FC<Link> = ({
     }
   };
   const handleDelete = async (enteredPassword: string) => {
+    setSmallLoading(true);
     if (isLoggedIn) {
       if (enteredPassword === userPassword) {
         try {
@@ -80,15 +87,19 @@ const LinkOptions: React.FC<Link> = ({
           const domain = removeProtocol(customLink);
           removeDomain(domain);
           setIsModalOpen(false);
+
           window.location.reload();
+          setSmallLoading(false);
           setMessage(`You have successfully deleted the link with ID ${id}`);
         } catch (error) {
           console.error("Error deleting link from the server:", error);
           setIsModalOpen(false);
+          setSmallLoading(false);
         }
       } else {
         setIsModalOpen(false);
         setMessage("Incorrect password. Please try again.");
+        setSmallLoading(false);
       }
     } else {
       const links = localStorage.getItem("links");
@@ -96,15 +107,20 @@ const LinkOptions: React.FC<Link> = ({
         const linksArray = JSON.parse(links);
         const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
         localStorage.setItem("links", JSON.stringify(updatedLinks));
+
         setIsModalOpen(false);
         console.log(`Removed link with ID ${id} from localStorage`);
         window.location.reload();
+
         setMessage(`You have successfully deleted the link with ID ${id}`);
+        setSmallLoading(false);
       } else {
         console.log("No links found in localStorage");
+        setSmallLoading(false);
       }
     }
     setShowOptions(false); // Close options after deletion
+    setSmallLoading(false);
   };
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -124,7 +140,9 @@ const LinkOptions: React.FC<Link> = ({
       document.removeEventListener("click", handleClickOutside);
     };
   }, [handleClickOutside]);
- 
+  if (smallLoading) {
+    return <SmallLoading />;
+  }
 
   return (
     <div>
