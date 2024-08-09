@@ -191,6 +191,10 @@ const Links: React.FC = () => {
     setIsLoggedIn(false);
     setUser(null);
   };
+  if (typeof links.length === "undefined" ) {
+    setSmallLoading(true);
+    handleSignOut();
+  } 
 
   if (loading) {
     return <Loading />;

@@ -130,6 +130,7 @@ const EditLink: React.FC = () => {
   };
 
   const addDomain = async (domain: string) => {
+    setSmallLoading(true)
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
       const response = await axios.post(
@@ -144,9 +145,12 @@ const EditLink: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding domain:", error);
+    }finally{
+      setSmallLoading(false)
     }
   };
   const removeDomain = async (domain: string) => {
+    setSmallLoading(true)
     try {
       const response = await axios.delete(
         "https://users-api-scissors.onrender.com/remove-domain",
@@ -164,6 +168,8 @@ const EditLink: React.FC = () => {
     } catch (error) {
       console.error("Error removing domain:", error);
       setMessage("An error occurred while removing the domain.");
+    }finally{
+      setSmallLoading(false)
     }
   };
 
@@ -191,8 +197,11 @@ const EditLink: React.FC = () => {
   }, []);
 
   const checkDomainAvailability = (domain: string) => {
+    setSmallLoading(true);
     const cleanedDomain = removeProtocol(domain);
+    setSmallLoading(false);
     return !customDomains.some((d) => d.domain === cleanedDomain);
+    
   };
 
   const checkDomain = async (domain: string) => {
@@ -214,12 +223,16 @@ const EditLink: React.FC = () => {
     }
   };
   useEffect(() => {
+    setSmallLoading(true);
     if (validCustomLink) {
+      
       const domainToCheck = removeProtocol(customLink);
       console.log("Valid custom link without protocol:", domainToCheck);
       checkDomain(domainToCheck);
+      setSmallLoading(false);
     } else {
       setIsAvailable(null);
+      setSmallLoading(false);
     }
   }, [customLink]);
 

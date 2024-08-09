@@ -95,6 +95,7 @@ const CreateLink: React.FC = () => {
   };
 
   const checkDomain = async (domain: string) => {
+    setSmallLoading(true);
     try {
       const response = await axios.get(
         "https://users-api-scissors.onrender.com/check-domain",
@@ -107,10 +108,13 @@ const CreateLink: React.FC = () => {
     } catch (error) {
       console.error("Error checking domain:", error);
       setIsAvailable(false);
+    }finally {
+      setSmallLoading(false);
     }
   };
 
   const addDomain = async (domain: string) => {
+    setSmallLoading(true)
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
       const response = await axios.post(
@@ -125,6 +129,8 @@ const CreateLink: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding domain:", error);
+    }finally {
+      setSmallLoading(false);
     }
   };
 
@@ -149,17 +155,22 @@ const CreateLink: React.FC = () => {
   }, []);
 
   const checkDomainAvailability = (domain: string) => {
+    setSmallLoading(true);
     const cleanedDomain = removeProtocol(domain);
+    setSmallLoading(false);
     return !customDomains.some((d) => d.domain === cleanedDomain);
   };
 
   useEffect(() => {
+    setSmallLoading(true);
     if (validCustomLink) {
       const domainToCheck = removeProtocol(customLink);
       console.log("Valid custom link without protocol:", domainToCheck);
       checkDomain(domainToCheck);
+      setSmallLoading(false);
     } else {
       setIsAvailable(null);
+      setSmallLoading(false);
     }
   }, [customLink]);
 

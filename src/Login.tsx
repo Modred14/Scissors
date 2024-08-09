@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  GoogleLogin,
-  GoogleLoginResponse,
-  GoogleLoginResponseOffline,
-} from "react-google-login";
+
 import "./login.css";
 import "./style.css";
 import Loading from "./Loading";
@@ -16,7 +12,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const navigate = useNavigate();
-  const clientId = "YOUR_GOOGLE_CLIENT_ID";
+
 
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
@@ -29,6 +25,28 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   }, [navigate]);
+
+  const handleGoogleMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const storedUserData = localStorage.getItem("user");
+
+      if (storedUserData) {
+        setMessage(
+          "Opps, google sign in is not yet available for this website. Try again later"
+        );
+      } else {
+        setMessage(
+          "Opps, google sign in is not yet available for this website. Try again later"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setMessage(
+        "Opps, google sign in is not yet available for this website. Try again later"
+      );
+    }
+  };
 
   useEffect(() => {
     // Clear the message after 5 seconds with a fade-out effect
@@ -46,34 +64,7 @@ const Login: React.FC = () => {
     }
   }, [message]);
 
-  const handleLogin = (
-    response: GoogleLoginResponse | GoogleLoginResponseOffline
-  ) => {
-    if ("profileObj" in response) {
-      const profile = response.profileObj;
-      console.log("ID: " + profile.googleId);
-      console.log("Name: " + profile.name);
-      console.log("Image URL: " + profile.imageUrl);
-      console.log("Email: " + profile.email);
-
-      const id_token = response.tokenId;
-      console.log("ID Token: " + id_token);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "https://users-api-scissors.onrender.com/users");
-      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xhr.onload = function () {
-        console.log("Signed in as: " + xhr.responseText);
-      };
-      xhr.send("idtoken=" + id_token);
-    } else {
-      console.error("Login failed: ", response);
-    }
-  };
-
-  const handleFailure = (error: boolean) => {
-    console.error("Google Login failed:", error);
-  };
+  
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,22 +127,14 @@ const Login: React.FC = () => {
           <p className="text-4xl mb-5 font-extrabold text-green-700 text-center">
             Sign in
           </p>
-          <GoogleLogin
-            clientId={clientId}
-            onSuccess={handleLogin}
-            onFailure={handleFailure}
-            cookiePolicy={"single_host_origin"}
-            render={(renderProps) => (
-              <div onClick={renderProps.onClick}>
+          
                 <button
                   className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
-                  disabled={renderProps.disabled}
+                  onClick={handleGoogleMessage}
                 >
                   Continue with Google
                 </button>
-              </div>
-            )}
-          />
+            
           <div className="m-space">
             <div className="inline">
               <div className="line"></div>
@@ -237,7 +220,7 @@ const Login: React.FC = () => {
           <div className="center">
             <div className="mt-5 justify-center items-center text-center place-content-center">
               <p className="place-content-center">
-                Don&apos;t have an account?
+                Don&apos;t have an account?{" "}
                 <Link to="/signup">
                   <a>Sign up</a>
                 </Link>

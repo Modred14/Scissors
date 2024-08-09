@@ -143,6 +143,11 @@ const Profile: React.FC = () => {
     setUser(null);
     window.location.reload();
   };
+  if (typeof links.length === "undefined" ) {
+    setSmallLoading(true);
+    handleSignOut();
+    
+  } 
   if (loading) {
     return <Loading />;
   }
@@ -540,7 +545,7 @@ const Profile: React.FC = () => {
                   </div>
                   {smallLoading ? (
               <div
-                className="mt-7 bg-gray-200 shadow flex flex-col items-center justify-center"
+                className="mt-1 bg-gray-200 shadow flex flex-col items-center justify-center"
                 style={{ height: "300px" }}
               >
                 <SmallLoading />
@@ -581,7 +586,7 @@ const Profile: React.FC = () => {
                     </ul>
                   ) : (
                     <div
-                      className="bg-gray-200 flex flex-col items-center justify-center"
+                      className="mt-1 bg-gray-200 flex flex-col items-center justify-center"
                       style={{ height: "300px" }}
                     >
                       <p className="text-xl font-bold text-center mb-4">
