@@ -601,6 +601,7 @@ const Links: React.FC = () => {
                                   userPassword={user?.password ?? ""}
                                   smallLoading={smallLoading}
                                   setSmallLoading={setSmallLoading}
+                                  setLinks={setLinks}
                                 />
                               </div>
                             </div>

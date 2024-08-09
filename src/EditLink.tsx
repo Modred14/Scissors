@@ -16,7 +16,7 @@ import Loading from "./Loading";
 import QRCode from "qrcode.react";
 import ToggleButton from "./ToggleButton";
 import styled from "styled-components";
-import { toPng } from "html-to-image";
+import html2canvas from 'html2canvas';
 import UpdateModal from "./UpdateModal";
 
 interface User {
@@ -130,7 +130,7 @@ const EditLink: React.FC = () => {
   };
 
   const addDomain = async (domain: string) => {
-    setSmallLoading(true)
+    setSmallLoading(true);
     try {
       const id = Date.now().toString(); // Simple unique string ID generation
       const response = await axios.post(
@@ -145,12 +145,12 @@ const EditLink: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding domain:", error);
-    }finally{
-      setSmallLoading(false)
+    } finally {
+      setSmallLoading(false);
     }
   };
   const removeDomain = async (domain: string) => {
-    setSmallLoading(true)
+    setSmallLoading(true);
     try {
       const response = await axios.delete(
         "https://users-api-scissors.onrender.com/remove-domain",
@@ -168,8 +168,8 @@ const EditLink: React.FC = () => {
     } catch (error) {
       console.error("Error removing domain:", error);
       setMessage("An error occurred while removing the domain.");
-    }finally{
-      setSmallLoading(false)
+    } finally {
+      setSmallLoading(false);
     }
   };
 
@@ -201,7 +201,6 @@ const EditLink: React.FC = () => {
     const cleanedDomain = removeProtocol(domain);
     setSmallLoading(false);
     return !customDomains.some((d) => d.domain === cleanedDomain);
-    
   };
 
   const checkDomain = async (domain: string) => {
@@ -225,7 +224,6 @@ const EditLink: React.FC = () => {
   useEffect(() => {
     setSmallLoading(true);
     if (validCustomLink) {
-      
       const domainToCheck = removeProtocol(customLink);
       console.log("Valid custom link without protocol:", domainToCheck);
       checkDomain(domainToCheck);
@@ -256,6 +254,7 @@ const EditLink: React.FC = () => {
           setLink(data);
           setLongUrl(data.mainLink || "");
           setCustomLink(data.customLink || "");
+          setInitialLink(data.customLink || "");
           setColor(data.qrcodeColor || "#000000");
           setLogo(data.qrcodeLogo || null);
         } catch (error) {
@@ -324,17 +323,23 @@ const EditLink: React.FC = () => {
   };
   const handleConfirmUpdate = async () => {
     let generatedQrCode = link?.qrcode || "";
-    if (isPreviewVisible && qrRef.current) {
-      try {
-        setLoading(true);
-        generatedQrCode = await toPng(qrRef.current);
-        setLink((prevLink) => ({ ...prevLink, qrcode: generatedQrCode }));
-      } catch (err) {
-        console.error("Failed to generate QR code image", err);
-        setLoading(false);
-        return;
-      } finally {
-        setLoading(false);
+    if (isPreviewVisible) {
+      
+      if (qrRef.current) {
+        try {
+          setLoading(true);
+          const canvas = await html2canvas(qrRef.current);
+          generatedQrCode = canvas.toDataURL('image/png');
+          setLink((prevLink) => ({ ...prevLink, qrcode: generatedQrCode }));
+        } catch (err) {
+          console.error("Failed to generate QR code image", err);
+          setIsSubmitted(false);
+          setLoading(false);
+          return;
+        } finally {
+          
+          setLoading(false);
+        }
       }
     }
 
@@ -445,7 +450,7 @@ const EditLink: React.FC = () => {
         className="fixed header-grid w-full min-w-fit "
         style={{ zIndex: 1000 }}
       >
-       <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto px-2 md:px-6 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
@@ -464,19 +469,20 @@ const EditLink: React.FC = () => {
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
                         <Link to={item.href}>
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          aria-current={item.current ? "page" : undefined}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
-                          )}
-                        >
-                          {item.name}
-                        </a></Link>
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            aria-current={item.current ? "page" : undefined}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            {item.name}
+                          </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -516,34 +522,34 @@ const EditLink: React.FC = () => {
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
-                            <Link to= "/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
+                              <Link to="/profile">
+                                <a
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Your Profile
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
+                              <Link to="/settings">
+                                <a
+                                  href="/settings"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Settings
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="#">
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                onClick={handleSignOut}
-                              >
-                                Sign out
-                              </a>
+                              <Link to="#">
+                                <a
+                                  href="#"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                  onClick={handleSignOut}
+                                >
+                                  Sign out
+                                </a>
                               </Link>
                             </MenuItem>
                           </MenuItems>
@@ -595,17 +601,17 @@ const EditLink: React.FC = () => {
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                           <MenuItem>
-                            <Link to= "/profile">
+                          <MenuItem>
+                            <Link to="/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </Link>
+                          </MenuItem>
+                          <MenuItem>
                             <Link to="/settings">
                               <a
                                 href="/settings"
@@ -613,8 +619,8 @@ const EditLink: React.FC = () => {
                               >
                                 Settings
                               </a>
-                              </Link>
-                            </MenuItem>
+                            </Link>
+                          </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}

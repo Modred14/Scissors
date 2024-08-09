@@ -90,7 +90,7 @@ const LandingPage: React.FC = () => {
         className="fixed header-grid w-full min-w-fit "
         style={{ zIndex: 1200 }}
       >
-       <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto px-2 md:px-6 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
@@ -109,19 +109,20 @@ const LandingPage: React.FC = () => {
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
                         <Link to={item.href}>
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          aria-current={item.current ? "page" : undefined}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
-                          )}
-                        >
-                          {item.name}
-                        </a></Link>
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            aria-current={item.current ? "page" : undefined}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            {item.name}
+                          </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -161,34 +162,34 @@ const LandingPage: React.FC = () => {
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
-                            <Link to= "/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
+                              <Link to="/profile">
+                                <a
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Your Profile
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
+                              <Link to="/settings">
+                                <a
+                                  href="/settings"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Settings
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="#">
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                onClick={handleSignOut}
-                              >
-                                Sign out
-                              </a>
+                              <Link to="#">
+                                <a
+                                  href="#"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                  onClick={handleSignOut}
+                                >
+                                  Sign out
+                                </a>
                               </Link>
                             </MenuItem>
                           </MenuItems>
@@ -240,17 +241,17 @@ const LandingPage: React.FC = () => {
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                           <MenuItem>
-                            <Link to= "/profile">
+                          <MenuItem>
+                            <Link to="/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </Link>
+                          </MenuItem>
+                          <MenuItem>
                             <Link to="/settings">
                               <a
                                 href="/settings"
@@ -258,8 +259,8 @@ const LandingPage: React.FC = () => {
                               >
                                 Settings
                               </a>
-                              </Link>
-                            </MenuItem>
+                            </Link>
+                          </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}
@@ -354,91 +355,98 @@ const LandingPage: React.FC = () => {
                 Get Started ➔
               </button>
             </Link>
-            <div className="px-12 grid md:max-w-6xl mt-12 md:grid-cols-3 gap-10 md:grid-flow-col md:px-6">
-              <div className=" outline outline-1 shadow-lg thecard">
-                <div className="thefront">
-                  <img src="/random.png" alt="Url shortner" />
-                  <div>
-                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
-                      <span className="material-icons pt-1">link</span> URL
-                      Shortner
+            <div className="px-12 grid lg:max-w-6xl mt-12  lg:grid-cols-3 gap-10 lg:grid-flow-col lg:px-6">
+             
+                {" "}
+                <div className=" outline outline-1 shadow-lg thecard">
+                  <div className="thefront">
+                    <img src="/random.png" alt="Url shortner" />
+                    <div>
+                      <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                        <span className="material-icons pt-1">link</span> URL
+                        Shortner
+                      </p>
+                      <p className="font-bold text-sm pb-3 px-3">
+                        A full-service approach to help strengthen each and
+                        every point of contact your audience has with your
+                        content.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="theback">
+                    <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
+                      We offer a comprehensive service to enhance every point of
+                      contact your audience has with your content, ensuring
+                      stronger engagement and connection. By addressing each
+                      touchpoint, we help create a cohesive and impactful brand
+                      presence that resonates with your audience.
                     </p>
+                    <Link to="/signup">
+                      <button className="w-full shadow-2xl transition-colors small-text-sm bg-green-700 text-base text-white rounded-none py-2 px-2 mt-10 sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                        Get Started ➔
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+                <div className="outline outline-1 shadow-lg thecard">
+                  <div className="thefront">
+                    <img src="/qrcode.png" alt="QR Code" />
+                    <div>
+                      <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                        <span className="material-icons pt-1">qr_code</span> QR
+                        Codes
+                      </p>
+                    </div>
                     <p className="font-bold text-sm pb-3 px-3">
-                      A full-service approach to help strengthen each and every
-                      point of contact your audience has with your content.
+                      QR Code solutions for every brand, business, and customer
+                      interaction.
                     </p>
                   </div>
-                </div>
-                <div className="theback">
-                  <p className="font-bold text-base pb-3 pt-10 px-4">
-                    We offer a comprehensive service to enhance every point of
-                    contact your audience has with your content, ensuring
-                    stronger engagement and connection. By addressing each
-                    touchpoint, we help create a cohesive and impactful brand
-                    presence that resonates with your audience.
-                  </p>
-                  <Link to="/signup">
-                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base text-white rounded-none py-2 px-2 mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                      Get Started ➔
-                    </button>
-                  </Link>
-                </div>
+                  <div className="theback">
+                    <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
+                      QR Code solutions for every brand, business, and customer
+                      interaction. Our service ensures seamless integration and
+                      enhanced engagement across all touchpoints, providing
+                      reliable and efficient ways to connect with your audience
+                      through customized QR codes.
+                    </p>
+                    <Link to="/signup">
+                      <button className="w-full shadow-2xl small-text-sm transition-colors bg-green-700 text-base text-white rounded-none py-2 px-2 small-space sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                        Get Started ➔
+                      </button>
+                    </Link>
+                  </div>
+                
               </div>
-              <div className="outline outline-1 shadow-lg thecard">
-                <div className="thefront">
-                  <img src="/qrcode.png" alt="QR Code" />
-                  <div>
-                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
-                      <span className="material-icons pt-1">qr_code</span> QR Codes
+              <div className="flex flex-col items-center justify-center">
+                <div className="outline outline-1  shadow-lg thecard">
+                  <div className="thefront">
+                    <img src="/url.png" alt="Url shortner" />
+                    <div>
+                      <p className="font-bold text-2xl py-3 px-3">
+                        🌐 Custom Links
+                      </p>
+                    </div>
+                    <p className="font-bold text-sm pb-3 px-3">
+                      Simply type the link you want, and if the domain is
+                      available, you will secure your personalized custom URL.
                     </p>
                   </div>
-                  <p className="font-bold text-sm pb-3 px-3">
-                    QR Code solutions for every brand, business, and customer
-                    interaction.
-                  </p>
-                </div>
-                <div className="theback">
-                  <p className="font-bold text-base pb-3 pt-10 px-4">
-                    QR Code solutions for every brand, business, and customer
-                    interaction. Our service ensures seamless integration and
-                    enhanced engagement across all touchpoints, providing
-                    reliable and efficient ways to connect with your audience
-                    through customized QR codes.
-                  </p>
-                  <Link to="/signup">
-                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base text-white rounded-none py-2 px-2 mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                      Get Started ➔
-                    </button>
-                  </Link>
-                </div>
-              </div>
-              <div className="outline outline-1 shadow-lg thecard">
-                <div className="thefront">
-                  <img src="/url.png" alt="Url shortner" />
-                  <div>
-                    <p className="font-bold text-2xl py-3 px-3">
-                      🌐 Custom Links
+                  <div className="theback">
+                    {" "}
+                    <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
+                      Type the link you want, and if the domain is available,
+                      you will secure your personalized custom URL. This ensures
+                      you get a unique and memorable link tailored to your
+                      needs, enhancing your brand’s online presence and making
+                      it easier for customers to find and engage with you.
                     </p>
+                    <Link to="/signup">
+                      <button className="w-full small-text-sm shadow-2xl bg-green-700 transition-colors text-base text-white rounded-none py-2 px-2 mt-10 sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                        Get Started ➔
+                      </button>
+                    </Link>
                   </div>
-                  <p className="font-bold text-sm pb-3 px-3">
-                    Simply type the link you want, and if the domain is
-                    available, you will secure your personalized custom URL.
-                  </p>
-                </div>
-                <div className="theback">
-                  {" "}
-                  <p className="font-bold text-base pb-3 pt-10 px-4">
-                    Type the link you want, and if the domain is available, you
-                    will secure your personalized custom URL. This ensures you
-                    get a unique and memorable link tailored to your needs,
-                    enhancing your brand’s online presence and making it easier
-                    for customers to find and engage with you.
-                  </p>
-                  <Link to="/signup">
-                    <button className="w-full shadow-2xl bg-green-700 transition-colors text-base text-white rounded-none py-2 px-2 mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                      Get Started ➔
-                    </button>
-                  </Link>
                 </div>
               </div>
             </div>
@@ -449,7 +457,7 @@ const LandingPage: React.FC = () => {
                 Adopted and cherished by millions of users for more than a
                 decade
               </p>
-              <div className="max-w-7xl px-5 grid mt-12 shadow-xl lg:grid-cols-4 gap-2 lg:grid-flow-col md:px-6 correct-grid">
+              <div className="change-layout max-w-7xl px-5 grid mt-12 shadow-xl lg:grid-cols-4 gap-2 lg:grid-flow-col md:px-6 correct-grid">
                 <div className="bg-gray-300 p-5 md:p-10 font-bold text-xl rounded-xl">
                   <p className="text-6xl">
                     🌍 <br />

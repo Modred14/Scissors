@@ -119,6 +119,11 @@
   background-position: fixed;
   background-size: cover;
 }
+.scissors-background{
+  background-image: url("../public/scissors-background.png");
+  background-position: fixed;
+  background-size: cover;
+}
 .notfound {
   background-color: rgb(0, 0, 0, 0.5);
 }
@@ -129,6 +134,7 @@
 .theback {
   position: absolute;
   z-index: 1;
+ 
   top: 0;
   left: 0;
   right: 0;
@@ -279,6 +285,12 @@
     left: 90%;
   }
 }
+@media screen and (max-width: 500px) {
+  .change-layout{
+    display: grid;
+    grid-template-columns: auto;
+  }
+}
 @media screen and (max-width: 475px) {
   .bar {
     display: block;
@@ -317,6 +329,13 @@
     display: block;
     position: fixed;
     left: 85%;
+  }
+  .small-text-sm{
+    font-size: 0.875rem /* 14px */;
+    line-height: 1.25rem /* 20px */;
+  }
+  .small-space{
+    margin-top: 1rem;
   }
 }
 @media screen and (max-width: 350px) {

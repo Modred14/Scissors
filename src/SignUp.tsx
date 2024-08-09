@@ -35,17 +35,17 @@ const Signup: React.FC = () => {
 
       if (storedUserData) {
         setMessage(
-          "Opps, google sign up is not yet available for this website. Try again later"
+          "Oops, google sign up is not yet available for this website. Try again later"
         );
       } else {
         setMessage(
-          "Opps, google sign up is not yet available for this website. Try again later"
+          "Oops, google sign up is not yet available for this website. Try again later"
         );
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
       setMessage(
-        "Opps, google sign up is not yet available for this website. Try again later"
+        "Oops, google sign up is not yet available for this website. Try again later"
       );
     }
   };
@@ -377,7 +377,7 @@ const Signup: React.FC = () => {
         </div>
         <p className="mb-10 text-center">© 2024 Scissors</p>
       </div>
-      <div></div>
+      <div className="scissors-background"></div>
     </div>
   );
 };

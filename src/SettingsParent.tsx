@@ -87,11 +87,11 @@ const SettingsParent: React.FC = () => {
             setMessage("Your data has been sucessfully updated in the database.");
           } else {
             console.error("Failed to update user data");
-            setMessage("Opps, an error occured. Please try again later. If the error persist, try inputting another data.");
+            setMessage("Oops, an error occured. Please try again later. If the error persist, try inputting another data.");
           }
         } catch (error) {
           console.error("Error updating user data:", error);
-          setMessage("Opps, an error occured. Please try again later. If the error persist, check if you have access to internet connection.");
+          setMessage("Oops, an error occured. Please try again later. If the error persist, check if you have access to internet connection.");
         } finally {
           setLoading(false);
         }

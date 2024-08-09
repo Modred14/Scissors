@@ -4,7 +4,7 @@ import Confirm from "./Confirm";
 import axios from "axios";
 import SmallLoading from "./SmallLoading";
 
-type Link = {
+type LinkOptionsProps = {
   id: string;
   userId: string;
   isLoggedIn: boolean;
@@ -13,13 +13,25 @@ type Link = {
   customLink: string;
   smallLoading: boolean;
   setSmallLoading: (loading: boolean) => void;
+  setLinks: React.Dispatch<React.SetStateAction<Link[]>>;
+};
+type Link = {
+  title: string;
+  id: string;
+  mainLink: string;
+  shortenedLink: string;
+  qrcode: string;
+  customLink: string;
+  clicks: number;
+  visits: number;
+  createdAt: string;
 };
 interface Domain {
   id: string;
   domain: string;
 }
 
-const LinkOptions: React.FC<Link> = ({
+const LinkOptions: React.FC<LinkOptionsProps> = ({
   id,
   userId,
   isLoggedIn,
@@ -28,6 +40,7 @@ const LinkOptions: React.FC<Link> = ({
   customLink,
   smallLoading,
   setSmallLoading,
+  setLinks,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -68,6 +81,7 @@ const LinkOptions: React.FC<Link> = ({
     setSmallLoading(true);
     if (isLoggedIn) {
       if (enteredPassword === userPassword) {
+        setSmallLoading(true);
         try {
           const response = await fetch(
             `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
@@ -88,7 +102,17 @@ const LinkOptions: React.FC<Link> = ({
           removeDomain(domain);
           setIsModalOpen(false);
 
-          window.location.reload();
+          const allLinkString = localStorage.getItem("links") || "";
+          let allLinks: Link[] = [];
+  
+          if (allLinkString) {
+            try {
+              allLinks = JSON.parse(allLinkString);
+            } catch (error) {
+              console.error("Error parsing links from localStorage", error);
+            }
+          }
+          setLinks(allLinks);
           setSmallLoading(false);
           setMessage(`You have successfully deleted the link with ID ${id}`);
         } catch (error) {
@@ -104,14 +128,24 @@ const LinkOptions: React.FC<Link> = ({
     } else {
       const links = localStorage.getItem("links");
       if (links) {
+        setSmallLoading(true);
         const linksArray = JSON.parse(links);
         const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
         localStorage.setItem("links", JSON.stringify(updatedLinks));
 
         setIsModalOpen(false);
         console.log(`Removed link with ID ${id} from localStorage`);
-        window.location.reload();
+        const allLinkString = localStorage.getItem("links") || "";
+        let allLinks: Link[] = [];
 
+        if (allLinkString) {
+          try {
+            allLinks = JSON.parse(allLinkString);
+          } catch (error) {
+            console.error("Error parsing links from localStorage", error);
+          }
+        }
+        setLinks(allLinks);
         setMessage(`You have successfully deleted the link with ID ${id}`);
         setSmallLoading(false);
       } else {

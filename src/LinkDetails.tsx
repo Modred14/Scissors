@@ -336,6 +336,22 @@ const LinkDetails: React.FC = () => {
     setSmallLoading(false);
   };
 
+  const handleDownload = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault(); // Prevent the default anchor behavior
+  
+    const link = document.createElement('a');
+    link.href = (event.currentTarget as HTMLAnchorElement).href;
+    link.download = `${link.title}_qrcode.png`; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+if(link){
+  setMessage("Your download has started succesfully.");
+  }else{
+    setMessage("Oops, An error occurred while downloading the qrcode.");
+  }
+  };
+
   const handleSignOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
@@ -782,11 +798,12 @@ const LinkDetails: React.FC = () => {
                           <img src={link.qrcode} alt="QR Code" />
                         </div>
                         <div className="mt-3 flex text-center items-center  justify-center ">
-                          <button className="flex font-bold ml-5 px-2 py-1 gap-1 text-white bg-green-700">
+                          <button className="flex font-bold ml-0 px-2 py-1 gap-1 text-white bg-green-700">
                             <a
                               className="flex font-bold px-2 py-1 gap-1 hover:text-white text-white bg-green-700"
                               href={link.qrcode}
-                              download={`${link.title} qrcode`}
+                              download={`${link.title}_qrcode.png`}
+                              onClick={handleDownload}
                             >
                               <i className="material-icons">download</i>Download
                             </a>
