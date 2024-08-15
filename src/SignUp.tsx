@@ -92,6 +92,7 @@ const Signup: React.FC = () => {
       }
     } catch (error) {
       console.error("Error during Google Sign-Up:", error);
+      setLoading(false);
     }
   };
 
