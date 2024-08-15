@@ -78,63 +78,58 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
   };
   const handleDelete = async (enteredPassword: string) => {
     setSmallLoading(true);
+    
     if (isLoggedIn) {
       if (enteredPassword === userPassword) {
-        setSmallLoading(true);
         try {
-          const response = await fetch(
-            `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`,
-            {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
+          const deleteUrl = `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`;
+          console.log("Attempting to delete link:", deleteUrl);
+          
+          const response = await fetch(deleteUrl, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+  
           if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
+            throw new Error(`Failed to delete link: ${response.status} ${response.statusText}`);
           }
-
+  
           console.log(`Removed link with ID ${id} from the server`);
+          if(customLink){
           const domain = removeProtocol(customLink);
           removeDomain(domain);
           setIsModalOpen(false);
-
-          const responseData = await fetch(
-            `https://app-scissors-api.onrender.com/users/${userId}/links`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          let allLinks: Link[] = [];
-
-          try {
-            const data = await responseData.json();
-            if (data) {
-              allLinks = data;
-            }
-          } catch (error) {
-            console.error("Error parsing links from the API response", error);
+        }
+          const fetchUrl = `https://app-scissors-api.onrender.com/users/${userId}/links`;
+          console.log("Fetching updated links from:", fetchUrl);
+  
+          const responseData = await fetch(fetchUrl, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+  
+          if (!responseData.ok) {
+            throw new Error(`Failed to fetch updated links: ${responseData.status} ${responseData.statusText}`);
           }
-
-          setLinks(allLinks);
-          setSmallLoading(false);
+  
+          const data = await responseData.json();
+          setLinks(data || []);
           setMessage(`You have successfully deleted the link with ID ${id}`);
-        } catch (error) {
-          console.error("Error deleting link from the server:", error);
-          setIsModalOpen(false);
+        } catch (error: any) {
+          console.error("Error deleting link from the server:", error.message, error);
+          setMessage("An error occurred while deleting the link. Please try again later.");
+        } finally {
           setSmallLoading(false);
         }
       } else {
         setIsModalOpen(false);
         setMessage("Incorrect password. Please try again.");
         setSmallLoading(false);
-      }
+      } 
     } else {
       const links = localStorage.getItem("links");
       if (links) {

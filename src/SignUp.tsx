@@ -202,7 +202,7 @@ const Signup: React.FC = () => {
 
         localStorage.setItem("user", JSON.stringify(combinedUser));
 
-        await sendEmailVerification(user);
+        sendEmailVerification(user);
         setMessage("Verification email sent. Please check your inbox.");
 
         setTimeout(() => {
