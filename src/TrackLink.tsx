@@ -33,7 +33,7 @@ const TrackLink: React.FC<TrackLinkProps> = ({ link }) => {
           console.warn(
             "User is not authenticated. Skipping Firestore logging."
           );
-          return;
+          
         }
 
         if (!link) {
