@@ -76,6 +76,7 @@ const Signup: React.FC = () => {
         );
         const data = await response.json();
         if (response.ok) {
+          setLoading(true)
           console.log("Sign Up successful:", data);
           localStorage.setItem("user", JSON.stringify(data));
           setMessage("You have successfully created an account!");

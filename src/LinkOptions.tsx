@@ -136,18 +136,15 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         setSmallLoading(false);
       }
     } else {
-      console.log("hello");
       const links = localStorage.getItem("links");
-
       if (links) {
         setSmallLoading(true);
-
         const linksArray = JSON.parse(links);
         const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
         localStorage.setItem("links", JSON.stringify(updatedLinks));
 
+        setIsModalOpen(false);
         console.log(`Removed link with ID ${id} from localStorage`);
-
         const allLinkString = localStorage.getItem("links") || "";
         let allLinks: Link[] = [];
 
@@ -158,18 +155,16 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
             console.error("Error parsing links from localStorage", error);
           }
         }
-
         setLinks(allLinks);
         setMessage(`You have successfully deleted the link with ID ${id}`);
-        setIsModalOpen(false);
         setSmallLoading(false);
       } else {
         console.log("No links found in localStorage");
         setSmallLoading(false);
       }
-
-      setShowOptions(false);
     }
+    setShowOptions(false);
+    setSmallLoading(false);
   };
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
