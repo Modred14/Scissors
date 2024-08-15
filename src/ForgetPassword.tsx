@@ -48,7 +48,7 @@ const ForgetPassword: React.FC = () => {
         setMessage("The email exists, loading user credentials.");
         sendPasswordResetEmail(auth, email);
       } else {
-        setMessage("Email does not exist, please check the email again.");
+        setMessage("Email does not exist. Please check your email and try again, or enter another email.");
         return;
       }
     } catch (error) {
