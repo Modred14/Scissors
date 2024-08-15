@@ -48,7 +48,9 @@ const ForgetPassword: React.FC = () => {
         setMessage("The email exists, loading user credentials.");
         sendPasswordResetEmail(auth, email);
       } else {
-        setMessage("Email does not exist. Please check your email and try again, or enter another email.");
+        setMessage(
+          "Email does not exist. Please check your email and try again, or enter another email."
+        );
         return;
       }
     } catch (error) {
@@ -105,6 +107,9 @@ const ForgetPassword: React.FC = () => {
               Submit
             </button>
           </form>
+          <p className="mt-5">
+            Go back to <a href="/login">Sign in</a> page
+          </p>
         </div>
       </div>
     </div>
