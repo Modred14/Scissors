@@ -20,7 +20,7 @@ const Confirm: React.FC<ConfirmProps> = ({
   userPassword,
 }) => {
   const [password, setPassword] = React.useState("");
-  if (isOpen && userPassword === "" && isLoggedIn) {
+  if (isOpen && userPassword === "") {
     setMessage(
       `You will need to add a password to your account before deleting the link.`
     );

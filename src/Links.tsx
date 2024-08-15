@@ -100,6 +100,7 @@ const Links: React.FC = () => {
       fetchLinksFromLocalStorage();
     }
   }, []);
+  
   const windowWidth = useWindowWidth();
 
   const getMaxLength = (width: number): number => {
@@ -598,7 +599,7 @@ const Links: React.FC = () => {
                                   isLoggedIn={isLoggedIn}
                                   setMessage={setMessage}
                                   customLink={link.customLink}
-                                  userPassword={user?.password ?? ""}
+                                  userPassword={user?.password ?? " "}
                                   smallLoading={smallLoading}
                                   setSmallLoading={setSmallLoading}
                                   setLinks={setLinks}
