@@ -230,7 +230,7 @@ const NotFound: React.FC = () => {
                             <span className="sr-only">Open user menu</span>
                             <img
                               alt="Default profile"
-                              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
                               className="h-8 w-8 rounded-full"
                             />
                           </MenuButton>
@@ -322,7 +322,7 @@ const NotFound: React.FC = () => {
                 Oops, it seems like you&apos;ve bumped into a route that
                 doesn&apos;t exist.
               </p>
-              <div className="flex flex-col items-center justify-center ">
+              <div className="rounded-lg flex flex-col items-center justify-center ">
                 <Link to="/">
                   <button className=" justify-self-center animate-bounce justify-center outline outline-black bg-gray-100 shadow-xl text-lg text-green-600 rounded-lg transition-colors py-2  px-2 mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
                     Go back to homepage
