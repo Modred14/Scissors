@@ -18,7 +18,7 @@ const Confirm: React.FC<ConfirmProps> = ({
   onDelete,
 }) => {
   const [password, setPassword] = React.useState("");
-  if (!isLoggedIn &&isOpen && userPassword === "") {
+  if (isLoggedIn &&isOpen && userPassword === "") {
     setMessage(
       `You will need to add a password to your account before deleting the account.`
     );
