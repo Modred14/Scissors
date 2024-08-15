@@ -442,25 +442,27 @@ const Links: React.FC = () => {
             </div>
           )}
           {!isLoggedIn && (
-            <div
-              className="fixed rounded-full shadow-2xl outline outline-1  bg-gray-100 font-bold"
-              style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-            >
-              {links.length < 3 ? (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                    {links.length}/3
+            <div className="rounded-full">
+              <div
+                className="fixed  shadow-2xl outline outline-1  bg-gray-100 font-bold"
+                style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
+              >
+                {links.length < 3 ? (
+                  <div className="rounded-full  inline text-2xl px-3">
+                    <div className="inline font-comic">Used:</div>
+                    <div className="rounded-full inline pl-1 text-2xl text-green-500">
+                      {links.length}/3
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                    {links.length}/3
+                ) : (
+                  <div className="rounded-full  inline text-2xl px-3">
+                    <div className="inline font-comic">Used:</div>
+                    <div className="rounded-full inline pl-1 text-2xl text-red-500">
+                      {links.length}/3
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
           <div className="mx-auto py-6 max-w-8xl px-4 sm:px-6 lg:px-8">

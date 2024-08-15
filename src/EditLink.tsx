@@ -269,7 +269,7 @@ const EditLink: React.FC = () => {
         return;
       }
       if (invalidDomainLink) {
-        setMessage('Oops, your custom domain can\'t contain a slash ("/").');
+        setMessage(`Oops, your custom domain can't contain any slashes ("/") except for the ones in ("https://").`);
         return;
       }
       if (initialLink) {

@@ -241,7 +241,9 @@ const CreateLink: React.FC = () => {
       }
 
       if (invalidDomainLink) {
-        setMessage('Oops, your custom domain can\'t contain a slash ("/").');
+        setMessage(
+          `Oops, your custom domain can't contain any slashes ("/") except for the ones in ("https://").`
+        );
         return;
       }
 
@@ -698,25 +700,27 @@ const CreateLink: React.FC = () => {
           </div>
         )}
         {!isLoggedIn && (
-          <div
-            className="fixed rounded-full shadow-2xl outline outline-1  bg-gray-100 font-bold"
-            style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-          >
-            {links.length < 3 ? (
-              <div className="rounded-full  inline text-2xl px-3">
-                <div className="inline font-comic">Used:</div>
-                <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                  {links.length}/3
+          <div className="rounded-full">
+            <div
+              className="fixed  shadow-2xl outline outline-1  bg-gray-100 font-bold"
+              style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
+            >
+              {links.length < 3 ? (
+                <div className="rounded-full  inline text-2xl px-3">
+                  <div className="inline font-comic">Used:</div>
+                  <div className="rounded-full inline pl-1 text-2xl text-green-500">
+                    {links.length}/3
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-full  inline text-2xl px-3">
-                <div className="inline font-comic">Used:</div>
-                <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                  {links.length}/3
+              ) : (
+                <div className="rounded-full  inline text-2xl px-3">
+                  <div className="inline font-comic">Used:</div>
+                  <div className="rounded-full inline pl-1 text-2xl text-red-500">
+                    {links.length}/3
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
         <form onSubmit={handleSubmit}>
