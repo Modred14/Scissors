@@ -1,0 +1,10 @@
+[build]
+  # Directory where the built files are located (usually "build" or "dist")
+  publish = "dist"
+  # Command to build your project
+  command = "npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
