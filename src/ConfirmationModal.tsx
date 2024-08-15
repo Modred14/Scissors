@@ -5,18 +5,20 @@ type ConfirmProps = {
   onClose: () => void;
   setMessage: (message: string) => void;
   userPassword?: string;
+  isLoggedIn: boolean;
   onDelete: (password: string) => void;
 };
 
 const Confirm: React.FC<ConfirmProps> = ({
   isOpen,
   setMessage,
+  isLoggedIn,
   userPassword,
   onClose,
   onDelete,
 }) => {
   const [password, setPassword] = React.useState("");
-  if (isOpen && userPassword === "") {
+  if (!isLoggedIn &&isOpen && userPassword === "") {
     setMessage(
       `You will need to add a password to your account before deleting the account.`
     );

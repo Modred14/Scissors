@@ -786,6 +786,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                 onDelete={handleDelete}
                 userPassword={user?.password}
                 setMessage={setMessage}
+                isLoggedIn={isLoggedIn}
               />
             </div>
           ) : (
