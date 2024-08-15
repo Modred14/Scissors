@@ -15,6 +15,7 @@ import CreateLink from "./CreateLink.tsx";
 import EditLink from "./EditLink";
 import LinkDetails from "./LinkDetails";
 import SmallLoading from "./SmallLoading";
+import ForgetPassword from "./ForgetPassword"
 
 const AppRouter: React.FC = () => {
   return (
@@ -35,6 +36,7 @@ const AppRouter: React.FC = () => {
         <Route path="/link/:id" element={<LinkDetails />} />
         <Route path="/edit-link/:id" element={<EditLink />} />
         <Route path="/link" element={<SmallLoading />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
       </Routes>
     </Router>
   );

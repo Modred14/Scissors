@@ -221,7 +221,7 @@ const Login: React.FC = () => {
           </label>
           <a
             className="block mt-2 text-right text-sky-500 hover:underline"
-            href="#"
+            href="/forget-password"
           >
             Forgot password?
           </a>
