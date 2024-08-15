@@ -1,6 +1,7 @@
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loading from "./Loading";
 import "./control-width.css";
+import Footer from "./Footer";
 
 const Terms: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -23,18 +24,21 @@ const Terms: React.FC = () => {
       <p className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold">
         Version 1.0
       </p>
-      <p className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold" style={{ paddingLeft: "10%", paddingRight: "10%"}}>
+      <p
+        className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold"
+        style={{ paddingLeft: "10%", paddingRight: "10%" }}
+      >
         Last Updated: July 9,2024
       </p>
       <p
         className="text-xl text-gray-600  font-comic"
         style={{ padding: "10%", paddingTop: "25px", paddingBottom: "10px" }}
       >
-        Welcome to Scissors! These Terms of Service (&quot;Terms&quot;) govern your use of
-        the Scissors website (&quot;Site&quot;) and the services provided by Scissors
-        (&quot;Services&quot;). By accessing or using the Site or Services, you agree to
-        be bound by these Terms. If you do not agree to these Terms, please do
-        not use the Site or Services.
+        Welcome to Scissors! These Terms of Service (&quot;Terms&quot;) govern
+        your use of the Scissors website (&quot;Site&quot;) and the services
+        provided by Scissors (&quot;Services&quot;). By accessing or using the
+        Site or Services, you agree to be bound by these Terms. If you do not
+        agree to these Terms, please do not use the Site or Services.
       </p>
       <p
         className="text-2xl font-bold text-gray-600  font-comic"
@@ -193,22 +197,29 @@ const Terms: React.FC = () => {
       </p>
       <p
         className="text-xl text-gray-600 pb-0  font-comic"
-        style={{ padding: "10%", paddingTop: 0, paddingBottom:0 }}
+        style={{ padding: "10%", paddingTop: 0, paddingBottom: 0 }}
       >
         If you have any questions about these Terms, please contact us at
         <a href="mailto:favourdomirin@gmail.com"> favourdomirin@gmail.com</a>
-        <br /> 
+        <br />
         By using the Site or Services, you acknowledge that you have read,
         understood, and agree to be bound by these Terms of Service.
       </p>
       <div className="flex items-center justify-center">
-        <img src="/Scissors_logo.png" alt="Scissors" className="w-48 my-24 animate-bounce duration-1000 ease-linear" style={{animationDuration:"3s"}}/>
-        
+        <img
+          src="/Scissors_logo.png"
+          alt="Scissors"
+          className="w-48 my-24 animate-bounce duration-1000 ease-linear"
+          style={{ animationDuration: "3s" }}
+        />
       </div>
       <div className="flex items-center justify-center mb-16">
         <img src="/Scissors_logo.png" alt="Scissors" className="sm:w-32 w-20" />
         <p className="font-extrabold text-adjust">Scissors</p>
-        </div>
+      </div>
+      <div className="mt-20">
+        <Footer />
+      </div>
     </div>
   );
 };

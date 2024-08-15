@@ -14,7 +14,8 @@ import { Link } from "react-router-dom";
 import Loading from "./Loading";
 import TruncatedWord from "./TruncatedWord";
 import useWindowWidth from "./useWindowWidth";
-import SmallLoading from "./SmallLoading"
+import SmallLoading from "./SmallLoading";
+import Footer from "./Footer";
 
 interface User {
   id: string;
@@ -73,8 +74,7 @@ const Profile: React.FC = () => {
     if (width >= 1300) return 70;
 
     if (width >= 1150) return 65;
-    if(width >= 850) return 55;
-    // if (width >= 790) return 60;
+    if (width >= 850) return 55;
     if (width >= 720) return 50;
     if (width >= 460) return 30;
     if (width >= 365) return 22;
@@ -85,11 +85,11 @@ const Profile: React.FC = () => {
   const maxLength = getMaxLength(windowWidth);
 
   const fetchLinks = async () => {
-    setSmallLoading(true)
+    setSmallLoading(true);
     try {
       const userId = user?.id;
       const response = await fetch(
-        `https://users-api-scissors.onrender.com/users/${userId}/links`,
+        `https://app-scissors-api.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -103,7 +103,7 @@ const Profile: React.FC = () => {
       console.error("Error fetching links:", error);
     } finally {
       setLoading(false);
-      setSmallLoading(false)
+      setSmallLoading(false);
     }
   };
 
@@ -123,7 +123,6 @@ const Profile: React.FC = () => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const user = JSON.parse(storedUserData);
         setUser(user);
       } else {
@@ -136,18 +135,16 @@ const Profile: React.FC = () => {
     }
   };
 
-  // console.log(user?.profileImg);
   const handleSignOut = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUser(null);
     window.location.reload();
   };
-  if (typeof links.length === "undefined" ) {
+  if (typeof links.length === "undefined") {
     setSmallLoading(true);
     handleSignOut();
-    
-  } 
+  }
   if (loading) {
     return <Loading />;
   }
@@ -177,19 +174,20 @@ const Profile: React.FC = () => {
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
                         <Link to={item.href}>
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          aria-current={item.current ? "page" : undefined}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
-                          )}
-                        >
-                          {item.name}
-                        </a></Link>
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            aria-current={item.current ? "page" : undefined}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            {item.name}
+                          </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -229,34 +227,34 @@ const Profile: React.FC = () => {
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
-                            <Link to= "/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
+                              <Link to="/profile">
+                                <a
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Your Profile
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
+                              <Link to="/settings">
+                                <a
+                                  href="/settings"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Settings
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="#">
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                onClick={handleSignOut}
-                              >
-                                Sign out
-                              </a>
+                              <Link to="#">
+                                <a
+                                  href="#"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                  onClick={handleSignOut}
+                                >
+                                  Sign out
+                                </a>
                               </Link>
                             </MenuItem>
                           </MenuItems>
@@ -308,17 +306,17 @@ const Profile: React.FC = () => {
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                           <MenuItem>
-                            <Link to= "/profile">
+                          <MenuItem>
+                            <Link to="/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </Link>
+                          </MenuItem>
+                          <MenuItem>
                             <Link to="/settings">
                               <a
                                 href="/settings"
@@ -326,8 +324,8 @@ const Profile: React.FC = () => {
                               >
                                 Settings
                               </a>
-                              </Link>
-                            </MenuItem>
+                            </Link>
+                          </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}
@@ -544,17 +542,14 @@ const Profile: React.FC = () => {
                     Links({links.length})
                   </div>
                   {smallLoading ? (
-              <div
-                className="mt-1 bg-gray-200 shadow flex flex-col items-center justify-center"
-                style={{ height: "300px" }}
-              >
-                <SmallLoading />
-              </div>
-            ) : links.length > 0 ? (
-                    <ul
-                      className="bg-gray-200"
-                      style={{ minHeight: "300px" }}
+                    <div
+                      className="mt-1 bg-gray-200 shadow flex flex-col items-center justify-center"
+                      style={{ height: "300px" }}
                     >
+                      <SmallLoading />
+                    </div>
+                  ) : links.length > 0 ? (
+                    <ul className="bg-gray-200" style={{ minHeight: "300px" }}>
                       {links
                         .sort(
                           (a, b) =>
@@ -594,11 +589,11 @@ const Profile: React.FC = () => {
                       </p>
                       <div>
                         <Link to="/create-link">
-                        <a href="/create-link">
-                          <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
-                            Create New
-                          </button>
-                        </a>
+                          <a href="/create-link">
+                            <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
+                              Create New
+                            </button>
+                          </a>
                         </Link>
                       </div>
                     </div>
@@ -631,6 +626,9 @@ const Profile: React.FC = () => {
             </div>
           )}
         </main>
+      </div>
+      <div className="mt-20">
+        <Footer />
       </div>
     </>
   );

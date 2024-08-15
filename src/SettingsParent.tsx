@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Settings from "./Settings";
-import Loading from "./Loading"; // Assuming you have a Loading component
+import Loading from "./Loading";
+import {
+  getAuth,
+  updateEmail,
+  sendEmailVerification,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
+import Footer from "./Footer";
 
 interface User {
   id: string;
@@ -24,11 +32,61 @@ interface Link {
 }
 
 const SettingsParent: React.FC = () => {
-  const [email, setEmail] = useState(""); // Assume email state can be set somewhere
+  const [email, setEmail] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [message, setMessage] = useState("");
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+
+  const auth = getAuth();
+  const userPassword = user?.password || "";
+  const handleEmailChange = async (newEmail: string) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.log("No user is signed in.");
+      return;
+    }
+
+    if (userPassword === "") {
+      setMessage("Password is required to update your email.");
+      return;
+    }
+
+    try {
+      console.log(
+        `Re-authenticating user: ${user.email} with provided password. ${userPassword}`
+      );
+
+      const credential = EmailAuthProvider.credential(
+        user.email!,
+        userPassword
+      );
+      await reauthenticateWithCredential(user, credential);
+
+      await updateEmail(user, newEmail);
+      await sendEmailVerification(user);
+      console.log("Email updated and verification email sent.");
+      setMessage("Verification email sent. Please verify your new email.");
+      return true;
+    } catch (error: any) {
+      console.error("Error updating email:", error);
+
+      if (error.code === "auth/wrong-password") {
+        setMessage("The password provided is incorrect. Please try again.");
+      } else if (error.code === "auth/invalid-credential") {
+        setMessage(
+          "The credentials are invalid. Please check your email and password."
+        );
+      } else {
+        setMessage(
+          "Failed to update email. Kindly verify your old email before changing it."
+        );
+      }
+
+      return false; // Return false to indicate failure
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,10 +95,9 @@ const SettingsParent: React.FC = () => {
         const storedUserData = localStorage.getItem("user");
 
         if (storedUserData) {
-          // Parse the user data from local storage and use it
           const user = JSON.parse(storedUserData);
           setUser(user);
-          setEmail(user.email); // Set email state with the user's email
+          setEmail(user.email);
         } else {
           console.error("Failed to fetch user data or no user data found");
         }
@@ -57,11 +114,15 @@ const SettingsParent: React.FC = () => {
   const handleUpdate = async (updatedUser: User): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch("https://users-api-scissors.onrender.com/users");
+      const response = await fetch(
+        "https://app-scissors-api.onrender.com/users"
+      );
       const data = await response.json();
-      console.log("Fetched users:", data); // Debug log
-      const userExists = data.some((user: User) => user.email === updatedUser.email && user.email !== email);
-      
+      console.log("Fetched users:", data);
+      const userExists = data.some(
+        (user: User) => user.email === updatedUser.email && user.email !== email
+      );
+
       if (userExists) {
         setMessage("Email already exists, kindly input another email.");
         setLoading(false);
@@ -69,8 +130,15 @@ const SettingsParent: React.FC = () => {
       } else {
         setMessage("");
         try {
+          if (updatedUser.email !== email) {
+            const emailUpdated = await handleEmailChange(updatedUser.email);
+            if (!emailUpdated) {
+              setLoading(false);
+              return;
+            }
+          }
           const response = await fetch(
-            `https://users-api-scissors.onrender.com/users/${updatedUser.id}`,
+            `https://app-scissors-api.onrender.com/users/${updatedUser.id}`,
             {
               method: "PUT",
               headers: {
@@ -79,19 +147,26 @@ const SettingsParent: React.FC = () => {
               body: JSON.stringify(updatedUser),
             }
           );
+
           if (response.ok) {
             const data = await response.json();
-            console.log("Updated user:", data); // Debug log
-            setUser(data); // Update local state with the updated user data from the server
+            console.log("Updated user:", data);
+            setUser(data);
             localStorage.setItem("user", JSON.stringify(data));
-            setMessage("Your data has been sucessfully updated in the database.");
+            setMessage(
+              "Your data has been sucessfully updated in the database."
+            );
           } else {
             console.error("Failed to update user data");
-            setMessage("Oops, an error occured. Please try again later. If the error persist, try inputting another data.");
+            setMessage(
+              "Oops, an error occured. Please try again later. If the error persist, try inputting another data."
+            );
           }
         } catch (error) {
           console.error("Error updating user data:", error);
-          setMessage("Oops, an error occured. Please try again later. If the error persist, check if you have access to internet connection.");
+          setMessage(
+            "Oops, an error occured. Please try again later. If the error persist, check if you have access to internet connection."
+          );
         } finally {
           setLoading(false);
         }
@@ -103,34 +178,42 @@ const SettingsParent: React.FC = () => {
     }
   };
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
-
-      // Clear timeout if component unmounts or message changes
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
 
   if (loading) {
-    return <Loading />; // Render a loading indicator while fetching data
+    return <Loading />;
   }
 
   return (
     <div>
-       {message && (
-        <div className={`flex justify-center transition-opacity duration-500 ${isFadingOut ? "opacity-0" : "opacity-100"}`}>
-            <div className="fixed animate-message bg-black p-4 mx-4 rounded" style={{ top:"10%"}}>
-                <p className=" text-red-100">{message}</p>
-                </div> </div>)}
+      {message && (
+        <div
+          className={`flex justify-center transition-opacity duration-500 ${
+            isFadingOut ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <div
+            className="fixed animate-message bg-black p-4 mx-4 rounded"
+            style={{ top: "10%" }}
+          >
+            <p className=" text-red-100">{message}</p>
+          </div>{" "}
+        </div>
+      )}
       <Settings user={user} onUpdate={handleUpdate} />
-     
+      <div className="mt-20">
+        <Footer />
+      </div>
     </div>
   );
 };

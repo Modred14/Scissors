@@ -71,6 +71,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasAt = email.includes("@");
+  const [hasPassword, setHasPassword] = useState(false);
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
   const [profileImg, setProfileImg] = useState("");
   const [isHovered, setIsHovered] = useState(false);
@@ -103,17 +104,15 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
   };
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
@@ -134,7 +133,6 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const userData = JSON.parse(storedUserData);
         setUser(userData);
         setEmail(userData.email);
@@ -142,6 +140,11 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
         setProfileImg(userData.profileImg);
         setLastName(userData.lastName);
         setUserPassword(userData.password);
+        if (userData.password === "") {
+          setHasPassword(false);
+        } else {
+          setHasPassword(true);
+        }
       } else {
         console.error("Failed to fetch user data or no user data found");
       }
@@ -152,7 +155,6 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
     }
   };
 
-  // console.log(user?.profileImg);
   const handleSignOut = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
@@ -167,7 +169,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
     if (enteredPassword === user?.password) {
       try {
         const response = await fetch(
-          `https://users-api-scissors.onrender.com/users/${user?.id}`,
+          `https://app-scissors-api.onrender.com/users/${user?.id}`,
           {
             method: "DELETE",
             headers: {
@@ -203,7 +205,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
         className="fixed header-grid w-full min-w-fit "
         style={{ zIndex: 1000 }}
       >
-       <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto px-2 md:px-6 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
@@ -222,19 +224,20 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
                         <Link to={item.href}>
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          aria-current={item.current ? "page" : undefined}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
-                          )}
-                        >
-                          {item.name}
-                        </a></Link>
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            aria-current={item.current ? "page" : undefined}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            {item.name}
+                          </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -274,34 +277,34 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
-                            <Link to= "/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
+                              <Link to="/profile">
+                                <a
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Your Profile
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
+                              <Link to="/settings">
+                                <a
+                                  href="/settings"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Settings
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="#">
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                onClick={handleSignOut}
-                              >
-                                Sign out
-                              </a>
+                              <Link to="#">
+                                <a
+                                  href="#"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                  onClick={handleSignOut}
+                                >
+                                  Sign out
+                                </a>
                               </Link>
                             </MenuItem>
                           </MenuItems>
@@ -353,17 +356,17 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                           <MenuItem>
-                            <Link to= "/profile">
+                          <MenuItem>
+                            <Link to="/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </Link>
+                          </MenuItem>
+                          <MenuItem>
                             <Link to="/settings">
                               <a
                                 href="/settings"
@@ -371,8 +374,8 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                               >
                                 Settings
                               </a>
-                              </Link>
-                            </MenuItem>
+                            </Link>
+                          </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}
@@ -445,7 +448,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                 onSubmit={(e) => {
                   e.preventDefault();
 
-                  if (currentPassword && password && confirmPassword) {
+                  if (password && confirmPassword) {
                     if (currentPassword != userPassword) {
                       setMessage(
                         "The current password you have entered does not match the data in our database"
@@ -522,7 +525,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                             onChange={handleImageUpload}
                           />
                           {isHovered && (
-                            <div className="absolute inset-0  transition-all duration-1000 bg-gray-200 bg-opacity-50 flex items-center justify-center rounded-full">
+                            <div className="absolute inset-0  transition-all duration-1000 bg-gray-600 bg-opacity-50 flex items-center justify-center rounded-full">
                               <img
                                 src="https://img.icons8.com/ios-filled/50/000000/camera.png"
                                 alt="Camera Icon"
@@ -718,21 +721,23 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-xl font-bold sm:pt-3 all">
-                      Current Password
-                    </p>
-                    <input
-                      type="text"
-                      placeholder=" "
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
+                  {hasPassword && (
+                    <div>
+                      <p className="text-xl font-bold sm:pt-3 all">
+                        Current Password
+                      </p>
+                      <input
+                        type="text"
+                        placeholder=" "
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
                 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
               "
-                    />
-                  </div>
+                      />
+                    </div>
+                  )}
                   <div>
                     <p className="text-xl font-bold  all">New Password</p>
                     <input
@@ -779,6 +784,8 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onDelete={handleDelete}
+                userPassword={user?.password}
+                setMessage={setMessage}
               />
             </div>
           ) : (

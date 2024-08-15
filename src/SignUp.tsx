@@ -3,6 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 import "./style.css";
 import Loading from "./Loading";
+import { auth } from "./firebaseConfig";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendEmailVerification,
+} from "firebase/auth";
 
 interface User {
   id: string;
@@ -29,24 +35,63 @@ const Signup: React.FC = () => {
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
 
-  const handleGoogleMessage = async () => {
+  const googleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      const storedUserData = localStorage.getItem("user");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      if (storedUserData) {
-        setMessage(
-          "Oops, google sign up is not yet available for this website. Try again later"
+      if (user) {
+        const displayName = user.displayName || "";
+        const [firstName, lastName] = displayName.split(" ");
+
+        const emailCheckResponse = await fetch(
+          `https://app-scissors-api.onrender.com/users?email=${user.email}`
         );
-      } else {
-        setMessage(
-          "Oops, google sign up is not yet available for this website. Try again later"
+        const emailCheckData = await emailCheckResponse.json();
+
+        if (emailCheckData.exists) {
+          setMessage("Email already exists. Please log in.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          "https://app-scissors-api.onrender.com/users",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: user.uid,
+              firstName,
+              lastName,
+              email: user.email,
+              profileImg: user.photoURL,
+            }),
+          }
         );
+        const data = await response.json();
+        if (response.ok) {
+          console.log("Sign Up successful:", data);
+          localStorage.setItem("user", JSON.stringify(data));
+          setMessage("You have successfully created an account!");
+          await sendEmailVerification(user);
+          setMessage("Verification email sent. Please check your inbox.");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 2000);
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setMessage("Error during Google Sign-Up");
+        }
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      setMessage(
-        "Oops, google sign up is not yet available for this website. Try again later"
-      );
+      console.error("Error during Google Sign-Up:", error);
     }
   };
 
@@ -60,17 +105,15 @@ const Signup: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
@@ -96,7 +139,7 @@ const Signup: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://users-api-scissors.onrender.com/users`
+        `https://app-scissors-api.onrender.com/users`
       );
       const data = await response.json();
       const userExists = data.some((user: User) => user.email === email);
@@ -131,10 +174,8 @@ const Signup: React.FC = () => {
       return;
     }
 
-    // Submit the form or send data to your server here
-
     const response = await fetch(
-      "https://users-api-scissors.onrender.com/users",
+      "https://app-scissors-api.onrender.com/users",
       {
         method: "POST",
         headers: {
@@ -144,15 +185,32 @@ const Signup: React.FC = () => {
       }
     );
     const data = await response.json();
+
     if (response.ok) {
       console.log("Sign Up successful:", data);
       localStorage.setItem("user", JSON.stringify(data));
-      setMessage("You have successfully created an account!");
       setLoading(false);
-      navigate("/dashboard");
+      const user = auth.currentUser;
+      setMessage("You have successfully created an account!");
+      if (user) {
+        const combinedUser = {
+          ...data,
+          firebaseUser: user,
+        };
+
+        localStorage.setItem("user", JSON.stringify(combinedUser));
+
+        await sendEmailVerification(user);
+        setMessage("Verification email sent. Please check your inbox.");
+
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+        setLoading(false);
+      }
     } else {
       setLoading(false);
-      alert("User not found or invalid credentials");
+      setMessage("Oops, an error occur during signup. Couldn't sign up.");
     }
   };
 
@@ -182,7 +240,7 @@ const Signup: React.FC = () => {
             <div>
               <button
                 className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
-                onClick={handleGoogleMessage}
+                onClick={googleSignUp}
               >
                 Continue with Google
               </button>
@@ -243,7 +301,7 @@ const Signup: React.FC = () => {
                   )}
                   <p className="mt-3 text-center" style={{ maxWidth: "570px" }}>
                     By signing up for Scissors you acknowledge that you agree to
-                    Scissors&apos;
+                    Scissors&apos;{" "}
                     <a
                       href="/terms-of-service"
                       target="_blank"

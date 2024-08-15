@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { auth } from "./firebaseConfig";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import "./login.css";
 import "./style.css";
 import Loading from "./Loading";
@@ -12,7 +13,6 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const navigate = useNavigate();
-
 
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
@@ -26,45 +26,59 @@ const Login: React.FC = () => {
     }
   }, [navigate]);
 
-  const handleGoogleMessage = async (e: React.FormEvent) => {
+  const googleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const storedUserData = localStorage.getItem("user");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      if (storedUserData) {
-        setMessage(
-          "Oops, google sign in is not yet available for this website. Try again later"
+      if (user) {
+        const response = await fetch(
+          "https://app-scissors-api.onrender.com/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: user.email,
+            }),
+          }
         );
-      } else {
-        setMessage(
-          "Oops, google sign in is not yet available for this website. Try again later"
-        );
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          console.log("Sign In successful:", data);
+          setMessage("You have successfully signed into your account!");
+          setLoading(false);
+          navigate("/dashboard");
+        } else {
+          setLoading(false);
+          setMessage(data.message);
+        }
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      setMessage(
-        "Oops, google sign in is not yet available for this website. Try again later"
-      );
+      console.error("Error during Google Sign-In:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
-
-  
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +86,7 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://users-api-scissors.onrender.com/login",
+        "https://app-scissors-api.onrender.com/login",
         {
           method: "POST",
           headers: {
@@ -127,14 +141,14 @@ const Login: React.FC = () => {
           <p className="text-4xl mb-5 font-extrabold text-green-700 text-center">
             Sign in
           </p>
-          
-                <button
-                  className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
-                  onClick={handleGoogleMessage}
-                >
-                  Continue with Google
-                </button>
-            
+
+          <button
+            className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
+            onClick={googleSignIn}
+          >
+            Continue with Google
+          </button>
+
           <div className="m-space">
             <div className="inline">
               <div className="line"></div>

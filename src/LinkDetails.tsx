@@ -17,6 +17,11 @@ import TruncatedWord from "./TruncatedWord";
 import Confirm from "./Confirm";
 import SmallLoading from "./SmallLoading";
 import axios from "axios";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "./firebaseConfig";
+import TrackLink from "./TrackLink";
+import AnalyticsDashboard from "./Analytics";
+import Footer from "./Footer";
 
 interface User {
   firstName: string;
@@ -25,7 +30,7 @@ interface User {
   profileImg: string;
   password: string;
 }
-type Link = {
+type LinkProps = {
   title: string;
   id: string;
   mainLink: string;
@@ -58,7 +63,7 @@ function classNames(...classes: string[]) {
 
 const LinkDetails: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [links, setLinks] = useState<Link[]>([]);
+  const [links, setLinks] = useState<LinkProps[]>([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +71,7 @@ const LinkDetails: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
-  const [link, setLink] = useState<Link | null>(null);
+  const [link, setLink] = useState<LinkProps | null>(null);
   const [customDomains, setCustomDomains] = useState<Domain[]>([]);
 
   useEffect(() => {
@@ -84,7 +89,6 @@ const LinkDetails: React.FC = () => {
 
   const handleCopyClick = async (id: string) => {
     try {
-      // Find the link with the given id
       const link = links.find((link) => link.id === id);
       if (!link) {
         throw new Error("Link not found");
@@ -102,27 +106,27 @@ const LinkDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
+
+  const userPassword = user?.password;
 
   const handleDelete = async (enteredPassword: string) => {
     if (isLoggedIn) {
       if (enteredPassword === user?.password) {
         try {
           const response = await fetch(
-            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
+            `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -135,9 +139,8 @@ const LinkDetails: React.FC = () => {
             throw new Error(`Error: ${response.statusText}`);
           }
 
-          // Handle successful deletion (e.g., update state, show a message, redirect)
-
           setLink(null);
+          setLinks([]);
           const link = links.find((link) => link.id === id);
           const customLink = link?.customLink || "";
           const domain = removeProtocol(customLink);
@@ -158,19 +161,21 @@ const LinkDetails: React.FC = () => {
       const links = localStorage.getItem("links");
       if (links) {
         const linksArray = JSON.parse(links);
-        const updatedLinks = linksArray.filter((link: Link) => link.id !== id);
+        const updatedLinks = linksArray.filter(
+          (link: LinkProps) => link.id !== id
+        );
         setIsModalOpen(false);
-        window.location.reload();
+        setLink(null);
+        setLinks([]);
         localStorage.setItem("links", JSON.stringify(updatedLinks));
         setMessage(`You have successfully deleted the link with ID ${id}.`);
         console.log(`Removed link with ID ${id}`);
       } else {
-        // console.log("No links found in localStorage");
         setMessage("Oops!! Could not delete the link.");
       }
     }
   };
-  // Use useParams to get link ID from URL
+
   const userId = user?.id;
   useEffect(() => {
     const fetchLinkDetails = async () => {
@@ -179,7 +184,7 @@ const LinkDetails: React.FC = () => {
         try {
           const userId = user?.id;
           const response = await fetch(
-            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
+            `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`,
             {
               method: "GET",
               headers: {
@@ -194,9 +199,9 @@ const LinkDetails: React.FC = () => {
           console.error("Error fetching link details from database:", error);
         }
       } else {
-        // Retrieve all links from local storage
-        const links: Link[] = JSON.parse(localStorage.getItem("links") || "[]");
-        // Find the link with the matching ID
+        const links: LinkProps[] = JSON.parse(
+          localStorage.getItem("links") || "[]"
+        );
         const foundLink = links.find((link) => link.id === id);
         setLink(foundLink || null);
       }
@@ -205,6 +210,10 @@ const LinkDetails: React.FC = () => {
     };
 
     fetchLinkDetails();
+
+    logEvent(analytics, "view_link_details", {
+      link_id: id,
+    });
   }, [id, isLoggedIn, userId]);
 
   const windowWidth = useWindowWidth();
@@ -258,7 +267,7 @@ const LinkDetails: React.FC = () => {
   const removeDomain = async (domain: string) => {
     try {
       const response = await axios.delete(
-        "https://users-api-scissors.onrender.com/remove-domain",
+        "https://app-scissors-api.onrender.com/remove-domain",
         {
           headers: {
             "Content-Type": "application/json",
@@ -274,7 +283,6 @@ const LinkDetails: React.FC = () => {
       }
     } catch (error) {
       console.error("Error removing domain:", error);
-      setMessage("An error occurred while removing the domain.");
     }
   };
 
@@ -284,7 +292,6 @@ const LinkDetails: React.FC = () => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const user = JSON.parse(storedUserData);
         setUser(user);
       } else {
@@ -308,7 +315,7 @@ const LinkDetails: React.FC = () => {
     try {
       const userId = user?.id;
       const response = await fetch(
-        `https://users-api-scissors.onrender.com/users/${userId}/links`,
+        `https://app-scissors-api.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -328,7 +335,7 @@ const LinkDetails: React.FC = () => {
 
   const fetchLinksFromLocalStorage = () => {
     setSmallLoading(true);
-    const storedLinks: Link[] = JSON.parse(
+    const storedLinks: LinkProps[] = JSON.parse(
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
@@ -337,19 +344,19 @@ const LinkDetails: React.FC = () => {
   };
 
   const handleDownload = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault(); // Prevent the default anchor behavior
-  
-    const link = document.createElement('a');
+    event.preventDefault();
+
+    const link = document.createElement("a");
     link.href = (event.currentTarget as HTMLAnchorElement).href;
-    link.download = `${link.title}_qrcode.png`; 
+    link.download = `${link.title}_qrcode.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-if(link){
-  setMessage("Your download has started succesfully.");
-  }else{
-    setMessage("Oops, An error occurred while downloading the qrcode.");
-  }
+    if (link) {
+      setMessage("Your download has started succesfully.");
+    } else {
+      setMessage("Oops, An error occurred while downloading the qrcode.");
+    }
   };
 
   const handleSignOut = () => {
@@ -367,7 +374,7 @@ if(link){
   return (
     <>
       <div className="fixed header-grid w-full" style={{ zIndex: 1000 }}>
-      <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto px-2 md:px-6 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
@@ -386,19 +393,20 @@ if(link){
                     <div className="flex space-x-4">
                       {navigation(isLoggedIn).map((item) => (
                         <Link to={item.href}>
-                        <a
-                          key={item.name}
-                          href={item.href}
-                          aria-current={item.current ? "page" : undefined}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
-                          )}
-                        >
-                          {item.name}
-                        </a></Link>
+                          <a
+                            key={item.name}
+                            href={item.href}
+                            aria-current={item.current ? "page" : undefined}
+                            className={classNames(
+                              item.current
+                                ? "bg-gray-900 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            {item.name}
+                          </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -438,34 +446,34 @@ if(link){
                             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                           >
                             <MenuItem>
-                            <Link to= "/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
+                              <Link to="/profile">
+                                <a
+                                  href="/profile"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Your Profile
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
+                              <Link to="/settings">
+                                <a
+                                  href="/settings"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                >
+                                  Settings
+                                </a>
                               </Link>
                             </MenuItem>
                             <MenuItem>
-                            <Link to="#">
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                onClick={handleSignOut}
-                              >
-                                Sign out
-                              </a>
+                              <Link to="#">
+                                <a
+                                  href="#"
+                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
+                                  onClick={handleSignOut}
+                                >
+                                  Sign out
+                                </a>
                               </Link>
                             </MenuItem>
                           </MenuItems>
@@ -517,17 +525,17 @@ if(link){
                           transition
                           className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                         >
-                           <MenuItem>
-                            <Link to= "/profile">
+                          <MenuItem>
+                            <Link to="/profile">
                               <a
                                 href="/profile"
                                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                               >
                                 Your Profile
                               </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </Link>
+                          </MenuItem>
+                          <MenuItem>
                             <Link to="/settings">
                               <a
                                 href="/settings"
@@ -535,8 +543,8 @@ if(link){
                               >
                                 Settings
                               </a>
-                              </Link>
-                            </MenuItem>
+                            </Link>
+                          </MenuItem>
                         </MenuItems>
                       </Menu>
                       {/* Mobile menu button*/}
@@ -611,6 +619,8 @@ if(link){
               onDelete={handleDelete}
               isLoggedIn={isLoggedIn}
               id={link?.id}
+              setMessage={setMessage}
+              userPassword={userPassword}
             />
             <div></div>{" "}
             {smallLoading ? (
@@ -817,37 +827,44 @@ if(link){
                     )}
                   </div>
                 </div>
-                <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+                <div className="bg-white shadow-sm p-7 pb-0 mb-16 grid md:grid-flow-col rounded-md mt-7">
+                  <div className="hidden">
+                    <TrackLink link={link} />
+                  </div>
                   <div>
-                    <p className=" text-center text-xl font-extrabold flex">
-                      Analystics
+                    <p className=" text-center text-3xl mb-2 font-extrabold flex">
+                      Analytics
                     </p>
-                    {isLoggedIn ? (
-                      <div>
-                        <div></div>
-                      </div>
-                    ) : (
-                      <div>
-                        <div></div>
-                      </div>
-                    )}
+                    <AnalyticsDashboard linkId={link.id} />
                   </div>
                 </div>
+              </div>
+            ) : smallLoading ? (
+              <div
+                className="mt-7 bg-white shadow flex flex-col items-center justify-center"
+                style={{ height: "500px" }}
+              >
+                <SmallLoading />
               </div>
             ) : (
-              <div>
-                <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
-                  <div>
-                    <p className="font-bold ">
-                      Oops!!! There’s no link associated with this ID. The link
-                      may have been deleted or may not exist.
-                    </p>
+              !link && (
+                <div>
+                  <div className="bg-white shadow-sm p-7 grid md:grid-flow-col rounded-md mt-7">
+                    <div>
+                      <p className="font-bold ">
+                        Oops!!! There is no link associated with this ID. The
+                        link may have been deleted or may not exist.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )
             )}
           </div>
         </main>
+      </div>
+      <div className="mt-20">
+        <Footer />
       </div>
     </>
   );

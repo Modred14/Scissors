@@ -58,7 +58,7 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
   const removeDomain = async (domain: string) => {
     try {
       const response = await axios.delete(
-        "https://users-api-scissors.onrender.com/remove-domain",
+        "https://app-scissors-api.onrender.com/remove-domain",
         {
           headers: {
             "Content-Type": "application/json",
@@ -74,7 +74,6 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
       }
     } catch (error) {
       console.error("Error removing domain:", error);
-      setMessage("An error occurred while removing the domain.");
     }
   };
   const handleDelete = async (enteredPassword: string) => {
@@ -84,7 +83,7 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         setSmallLoading(true);
         try {
           const response = await fetch(
-            `https://users-api-scissors.onrender.com/users/${userId}/links/${id}`,
+            `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`,
             {
               method: "DELETE",
               headers: {
@@ -102,16 +101,27 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
           removeDomain(domain);
           setIsModalOpen(false);
 
-          const allLinkString = localStorage.getItem("links") || "";
-          let allLinks: Link[] = [];
-  
-          if (allLinkString) {
-            try {
-              allLinks = JSON.parse(allLinkString);
-            } catch (error) {
-              console.error("Error parsing links from localStorage", error);
+          const responseData = await fetch(
+            `https://app-scissors-api.onrender.com/users/${userId}/links`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
             }
+          );
+
+          let allLinks: Link[] = [];
+
+          try {
+            const data = await responseData.json();
+            if (data) {
+              allLinks = data;
+            }
+          } catch (error) {
+            console.error("Error parsing links from the API response", error);
           }
+
           setLinks(allLinks);
           setSmallLoading(false);
           setMessage(`You have successfully deleted the link with ID ${id}`);
@@ -153,7 +163,7 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         setSmallLoading(false);
       }
     }
-    setShowOptions(false); // Close options after deletion
+    setShowOptions(false);
     setSmallLoading(false);
   };
 
@@ -186,6 +196,8 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         onDelete={handleDelete}
         isLoggedIn={isLoggedIn}
         id={id}
+        setMessage={setMessage}
+        userPassword={userPassword}
       />
       <button
         className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"

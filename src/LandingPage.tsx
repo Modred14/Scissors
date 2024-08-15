@@ -12,6 +12,7 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
+import Footer from "./Footer";
 
 interface User {
   id: string;
@@ -60,7 +61,6 @@ const LandingPage: React.FC = () => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const user = JSON.parse(storedUserData);
         setUser(user);
       } else {
@@ -72,7 +72,6 @@ const LandingPage: React.FC = () => {
       setLoading(false);
     }
   };
-  // console.log(user?.profileImg);
   const handleSignOut = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
@@ -356,67 +355,64 @@ const LandingPage: React.FC = () => {
               </button>
             </Link>
             <div className="px-12 grid lg:max-w-6xl mt-12  lg:grid-cols-3 gap-10 lg:grid-flow-col lg:px-6">
-             
-                {" "}
-                <div className=" outline outline-1 shadow-lg thecard">
-                  <div className="thefront">
-                    <img src="/random.png" alt="Url shortner" />
-                    <div>
-                      <p className="font-bold text-2xl flex gap-2 py-3 px-3">
-                        <span className="material-icons pt-1">link</span> URL
-                        Shortner
-                      </p>
-                      <p className="font-bold text-sm pb-3 px-3">
-                        A full-service approach to help strengthen each and
-                        every point of contact your audience has with your
-                        content.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="theback">
-                    <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
-                      We offer a comprehensive service to enhance every point of
-                      contact your audience has with your content, ensuring
-                      stronger engagement and connection. By addressing each
-                      touchpoint, we help create a cohesive and impactful brand
-                      presence that resonates with your audience.
+              {" "}
+              <div className=" outline outline-1 shadow-lg thecard">
+                <div className="thefront">
+                  <img src="/random.png" alt="Url shortner" />
+                  <div>
+                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                      <span className="material-icons pt-1">link</span> URL
+                      Shortner
                     </p>
-                    <Link to="/signup">
-                      <button className="w-full shadow-2xl transition-colors small-text-sm bg-green-700 text-base text-white rounded-none py-2 px-2 mt-10 sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                        Get Started ➔
-                      </button>
-                    </Link>
+                    <p className="font-bold text-sm pb-3 px-3">
+                      A full-service approach to help strengthen each and every
+                      point of contact your audience has with your content.
+                    </p>
                   </div>
                 </div>
-                <div className="outline outline-1 shadow-lg thecard">
-                  <div className="thefront">
-                    <img src="/qrcode.png" alt="QR Code" />
-                    <div>
-                      <p className="font-bold text-2xl flex gap-2 py-3 px-3">
-                        <span className="material-icons pt-1">qr_code</span> QR
-                        Codes
-                      </p>
-                    </div>
-                    <p className="font-bold text-sm pb-3 px-3">
-                      QR Code solutions for every brand, business, and customer
-                      interaction.
+                <div className="theback">
+                  <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
+                    We offer a comprehensive service to enhance every point of
+                    contact your audience has with your content, ensuring
+                    stronger engagement and connection. By addressing each
+                    touchpoint, we help create a cohesive and impactful brand
+                    presence that resonates with your audience.
+                  </p>
+                  <Link to="/signup">
+                    <button className="w-full shadow-2xl transition-colors small-text-sm bg-green-700 text-base text-white rounded-none py-2 px-2 mt-10 sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                      Get Started ➔
+                    </button>
+                  </Link>
+                </div>
+              </div>
+              <div className="outline outline-1 shadow-lg thecard">
+                <div className="thefront">
+                  <img src="/qrcode.png" alt="QR Code" />
+                  <div>
+                    <p className="font-bold text-2xl flex gap-2 py-3 px-3">
+                      <span className="material-icons pt-1">qr_code</span> QR
+                      Codes
                     </p>
                   </div>
-                  <div className="theback">
-                    <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
-                      QR Code solutions for every brand, business, and customer
-                      interaction. Our service ensures seamless integration and
-                      enhanced engagement across all touchpoints, providing
-                      reliable and efficient ways to connect with your audience
-                      through customized QR codes.
-                    </p>
-                    <Link to="/signup">
-                      <button className="w-full shadow-2xl small-text-sm transition-colors bg-green-700 text-base text-white rounded-none py-2 px-2 small-space sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                        Get Started ➔
-                      </button>
-                    </Link>
-                  </div>
-                
+                  <p className="font-bold text-sm pb-3 px-3">
+                    QR Code solutions for every brand, business, and customer
+                    interaction.
+                  </p>
+                </div>
+                <div className="theback">
+                  <p className="font-bold text-base pb-3 pt-10 px-4 small-text-sm">
+                    QR Code solutions for every brand, business, and customer
+                    interaction. Our service ensures seamless integration and
+                    enhanced engagement across all touchpoints, providing
+                    reliable and efficient ways to connect with your audience
+                    through customized QR codes.
+                  </p>
+                  <Link to="/signup">
+                    <button className="w-full shadow-2xl small-text-sm transition-colors bg-green-700 text-base text-white rounded-none py-2 px-2 small-space sm:mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
+                      Get Started ➔
+                    </button>
+                  </Link>
+                </div>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <div className="outline outline-1  shadow-lg thecard">
@@ -508,6 +504,9 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="h-28"></div>
         </main>
+      </div>
+      <div>
+        <Footer />
       </div>
     </>
   );

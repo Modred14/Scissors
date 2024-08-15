@@ -19,6 +19,8 @@ import Tooltip from "./Tooltip";
 import styled from "styled-components";
 import html2canvas from "html2canvas";
 import { v4 as uuidv4 } from "uuid";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "./firebaseConfig";
 
 interface User {
   id: string;
@@ -30,7 +32,7 @@ interface User {
   links: string[];
 }
 
-interface Link {
+interface LinkProps {
   title: string;
   id: string;
   mainLink: string;
@@ -73,7 +75,7 @@ const CreateLink: React.FC = () => {
   const [customDomains, setCustomDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
   const [smallLoading, setSmallLoading] = useState(true);
-  const [links, setLinks] = useState<Link[]>([]);
+  const [links, setLinks] = useState<LinkProps[]>([]);
   const [longUrl, setLongUrl] = useState("");
   const [customLink, setCustomLink] = useState("");
   const [message, setMessage] = useState("");
@@ -93,31 +95,15 @@ const CreateLink: React.FC = () => {
     return url.replace(/^https?:\/\//, "");
   };
 
-  const checkDomain = async (domain: string) => {
-    setSmallLoading(true);
-    try {
-      const response = await axios.get(
-        "https://users-api-scissors.onrender.com/check-domain",
-        {
-          params: { domain },
-        }
-      );
-      console.log("Domain check response:", response.data); // Log response data for debugging
-      setIsAvailable(response.data.available);
-    } catch (error) {
-      console.error("Error checking domain:", error);
-      setIsAvailable(false);
-    } finally {
-      setSmallLoading(false);
-    }
-  };
+  const checkDomain = removeProtocol(customLink);
+  const invalidDomainLink = checkDomain.includes("/");
 
   const addDomain = async (domain: string) => {
     setSmallLoading(true);
     try {
-      const id = Date.now().toString(); // Simple unique string ID generation
+      const id = Date.now().toString();
       const response = await axios.post(
-        "https://users-api-scissors.onrender.com/add-domain",
+        "https://app-scissors-api.onrender.com/add-domain",
         {
           id,
           domain,
@@ -125,6 +111,11 @@ const CreateLink: React.FC = () => {
       );
       if (response.data.success) {
         setCustomDomains([...customDomains, { id, domain }]);
+        logEvent(analytics, "domain_added", {
+          domain: domain,
+          userId: user?.id || "guest",
+          addedAt: new Date().toISOString(),
+        });
       }
     } catch (error) {
       console.error("Error adding domain:", error);
@@ -137,7 +128,7 @@ const CreateLink: React.FC = () => {
     setSmallLoading(true);
     try {
       const response = await axios.get(
-        "https://users-api-scissors.onrender.com/get-domains"
+        "https://app-scissors-api.onrender.com/get-domains"
       );
       if (response.status === 200) {
         setCustomDomains(response.data.domains);
@@ -156,8 +147,9 @@ const CreateLink: React.FC = () => {
   const checkDomainAvailability = (domain: string) => {
     setSmallLoading(true);
     const cleanedDomain = removeProtocol(domain);
+    const isAvailable = !customDomains.some((d) => d.domain === cleanedDomain);
     setSmallLoading(false);
-    return !customDomains.some((d) => d.domain === cleanedDomain);
+    return isAvailable;
   };
 
   useEffect(() => {
@@ -165,7 +157,6 @@ const CreateLink: React.FC = () => {
     if (validCustomLink) {
       const domainToCheck = removeProtocol(customLink);
       console.log("Valid custom link without protocol:", domainToCheck);
-      checkDomain(domainToCheck);
       setSmallLoading(false);
     } else {
       setIsAvailable(null);
@@ -174,7 +165,7 @@ const CreateLink: React.FC = () => {
   }, [customLink]);
 
   const fetchLinksFromLocalStorage = () => {
-    const storedLinks: Link[] = JSON.parse(
+    const storedLinks: LinkProps[] = JSON.parse(
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
@@ -195,22 +186,20 @@ const CreateLink: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
 
-  const [link, setLink] = useState<Partial<Link>>({
+  const [link, setLink] = useState<Partial<LinkProps>>({
     title: "",
     id: uniqueId,
     mainLink: "",
@@ -232,36 +221,49 @@ const CreateLink: React.FC = () => {
       return;
     }
     if (customLink.length > 0) {
-      if (!isAvailable) {
+      const checkDomain = removeProtocol(customLink);
+      const available = checkDomainAvailability(checkDomain);
+      if (available) {
+        setIsAvailable(true);
+      } else setIsAvailable(false);
+      if (isAvailable === null) {
+        setMessage("Please wait... Validating Domain");
+        return;
+      }
+      if (smallLoading) {
+        setMessage("Kindly wait for the custom domain to be validated.");
+        return;
+      } else if (!isAvailable) {
         setMessage(
           "Kindly enter another domain, the one you inputted is already occupied by another website."
         );
         return;
       }
-      const domain = removeProtocol(customLink);
-      const available = checkDomainAvailability(domain);
-      if (available) {
-        setIsAvailable(true);
-      } else {
+
+      if (invalidDomainLink) {
+        setMessage('Oops, your custom domain can\'t contain a slash ("/").');
+        return;
+      }
+
+      if (!isAvailable) {
         setIsAvailable(false);
         setMessage(
           "Kindly enter another domain, the one you inputted is already occupied by another website."
         );
         return;
       }
-      if (isAvailable) {
-        const domain = removeProtocol(customLink);
-        addDomain(domain);
-      }
+
       if (!validCustomLink) {
         console.error("Invalid URL.");
         setIsSubmitted(true);
+        setIsAvailable(false);
         return;
       }
+      const domain = removeProtocol(customLink);
+      await addDomain(domain);
     }
     let generatedQrCode = link.qrcode;
     if (isPreviewVisible) {
-      // Ensure the QR code is generated before form submission
       if (qrRef.current) {
         try {
           setLoading(true);
@@ -273,8 +275,6 @@ const CreateLink: React.FC = () => {
           setIsSubmitted(false);
           setLoading(false);
           return;
-        } finally {
-          setLoading(false);
         }
       }
     }
@@ -290,21 +290,57 @@ const CreateLink: React.FC = () => {
       return result;
     };
     const randomString = generateRandomString(7);
-    const shortenedLink = `https://scissors.${randomString}.com`;
+    const shortenedLink = ` https://app-scissors-api.onrender.com/s/${randomString}`;
 
-    const response = await fetch("http://localhost:5000/api/urls/shorten", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ longUrl, shortenedLink }),
-    });
-    if(response.ok){
-    const data = await response.json();
-    console.log(data.message);
-  }else{
-    const data = await response.json();
-    console.log(data.message);
-    return
-  }
+    const response = await fetch(
+      " https://app-scissors-api.onrender.com/api/urls/shorten",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ longUrl, shortUrl: randomString }),
+      }
+    );
+    let customLinkDomain = null;
+    if (customLink) {
+      const domain = removeProtocol(customLink);
+      const responseData = await fetch(
+        "https://app-scissors-api.onrender.com/api/urls/shortenCustom",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ longUrl, customLink: domain }),
+        }
+      );
+
+      if (responseData.ok) {
+        const data = await responseData.json();
+        console.log(data.message);
+        console.log("working");
+        customLinkDomain = `https://app-scissors-api.onrender.com/c/${domain}`;
+      } else {
+        const errorData = await responseData.json();
+        console.log(errorData.message);
+        console.log("Custom link error");
+      }
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data.message);
+
+      logEvent(analytics, "link_created", {
+        userId: user?.id || "guest",
+        longUrl: longUrl,
+        shortenedLink: shortenedLink,
+        customLink: customLinkDomain || "none",
+        createdAt: new Date().toISOString(),
+      });
+    } else {
+      const data = await response.json();
+      console.log(data.message);
+      console.log("error");
+      return;
+    }
 
     const newLink = {
       title: link.title || longUrl,
@@ -312,7 +348,7 @@ const CreateLink: React.FC = () => {
       mainLink: longUrl,
       shortenedLink: shortenedLink,
       qrcode: generatedQrCode,
-      customLink: customLink,
+      customLink: customLinkDomain,
       clicks: 0,
       visits: [],
       createdAt: new Date().toISOString(),
@@ -339,10 +375,10 @@ const CreateLink: React.FC = () => {
           setMessage("Your link has been created succesfully");
           navigate("/links");
         }
-
-        // alert("Link saved locally. Please log in to save it to the server.");
       } catch (error) {
         console.error("Error saving link:", error);
+        setMessage("An error occured while saving the link");
+        setIsSubmitted(false);
         setLoading(false);
       } finally {
         setIsSubmitted(false);
@@ -356,7 +392,7 @@ const CreateLink: React.FC = () => {
       setLoading(true);
       const userId = user?.id;
       const response = await axios.post(
-        `https://users-api-scissors.onrender.com/users/${userId}/links`,
+        `https://app-scissors-api.onrender.com/users/${userId}/links`,
         newLink
       );
       setMessage("Your link has been created succesfully");
@@ -401,7 +437,6 @@ const CreateLink: React.FC = () => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const user = JSON.parse(storedUserData);
         setUser(user);
       } else {
@@ -792,21 +827,23 @@ const CreateLink: React.FC = () => {
                   &quot;https://yourcustomshortlink.com&quot;.
                 </p>
               )}
-              {smallLoading ? (
+              {validCustomLink && smallLoading ? (
                 <div className="mt-1 text-sm">Please wait ...</div>
               ) : (
                 !smallLoading &&
-                isAvailable !== null &&
-                validCustomLink && (
-                  <p
-                    className={`mt-1 text-sm m-0 ${
-                      isAvailable ? "text-green-600" : "text-pink-600"
-                    }`}
-                  >
-                    {isAvailable
-                      ? "Domain is available!"
-                      : "Domain is occupied."}
-                  </p>
+                validCustomLink &&
+                isAvailable != null && (
+                  <div>
+                    <p
+                      className={`mt-1 text-sm m-0 ${
+                        isAvailable ? "text-green-600" : "text-pink-600"
+                      }`}
+                    >
+                      {isAvailable
+                        ? "Domain is available!"
+                        : "Domain is occupied."}
+                    </p>
+                  </div>
                 )
               )}
               <div className="pt-12">

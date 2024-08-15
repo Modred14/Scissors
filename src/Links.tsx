@@ -24,7 +24,7 @@ interface User {
   profileImg: string;
   password: string;
 }
-type Link = {
+type LinkProps = {
   title: string;
   id: string;
   mainLink: string;
@@ -54,7 +54,7 @@ function classNames(...classes: string[]) {
 
 const Links: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [links, setLinks] = useState<Link[]>([]);
+  const [links, setLinks] = useState<LinkProps[]>([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,17 +75,15 @@ const Links: React.FC = () => {
   };
 
   useEffect(() => {
-    // Clear the message after 5 seconds with a fade-out effect
     if (message) {
       const timer = setTimeout(() => {
-        setIsFadingOut(true); // Trigger the fade-out effect
-        setTimeout(() => setMessage(""), 500); // Match the duration with CSS transition
-      }, 4500); // Start fade-out before 5 seconds
+        setIsFadingOut(true);
+        setTimeout(() => setMessage(""), 500);
+      }, 4500);
 
-      // Clear timeout if component unmounts or message changes
       return () => {
         clearTimeout(timer);
-        setIsFadingOut(false); // Reset the fade-out state
+        setIsFadingOut(false);
       };
     }
   }, [message]);
@@ -134,7 +132,6 @@ const Links: React.FC = () => {
       const storedUserData = localStorage.getItem("user");
 
       if (storedUserData) {
-        // Parse the user data from local storage and use it
         const user = JSON.parse(storedUserData);
         setUser(user);
       } else {
@@ -158,7 +155,7 @@ const Links: React.FC = () => {
     try {
       const userId = user?.id;
       const response = await fetch(
-        `https://users-api-scissors.onrender.com/users/${userId}/links`,
+        `https://app-scissors-api.onrender.com/users/${userId}/links`,
         {
           method: "GET",
           headers: {
@@ -176,7 +173,8 @@ const Links: React.FC = () => {
   };
 
   const fetchLinksFromLocalStorage = () => {
-    const storedLinks: Link[] = JSON.parse(
+    setSmallLoading(true);
+    const storedLinks: LinkProps[] = JSON.parse(
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
@@ -191,10 +189,10 @@ const Links: React.FC = () => {
     setIsLoggedIn(false);
     setUser(null);
   };
-  if (typeof links.length === "undefined" ) {
+  if (typeof links.length === "undefined") {
     setSmallLoading(true);
     handleSignOut();
-  } 
+  }
 
   if (loading) {
     return <Loading />;
@@ -490,7 +488,7 @@ const Links: React.FC = () => {
                         new Date(b.createdAt).getTime() -
                         new Date(a.createdAt).getTime()
                     )
-                    .map((link: Link, index: number) => (
+                    .map((link: LinkProps, index: number) => (
                       <li
                         key={link.id}
                         className="border sm:m-4 mt-6 sm:mt-10 pl-0  sm:pl-4 p-4 h-auto bg-gray-100"
@@ -632,6 +630,9 @@ const Links: React.FC = () => {
             </div>
           </div>
         </main>
+        <div className="my-10 mt-8 pb-5 flex justify-center text-gray-500  text-xl">
+          -- You&apos;ve reached the end of your links --
+        </div>
       </div>
     </>
   );

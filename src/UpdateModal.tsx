@@ -15,11 +15,11 @@ const UpdateModal: React.FC<updateProps> = ({ isOpen, onClose, onUpdate }) => {
         <div className="bg-white p-5 rounded-md shadow-md">
           <h2 className="text-2xl font-bold mb-4">Confirm Link Update</h2>
           <p className="mb-4 text-base">
-            Updating this link means you are changing the original version of the link. Consequently, the former data associated with this link will no longer be valid, and only the new data will work.
+            Updating this link means you are changing the original version of
+            the link. Consequently, the former data associated with this link
+            will no longer be valid, and only the new data will work.
           </p>
-          <p className="mb-4 text-base">
-            Do you still want to continue?
-          </p>
+          <p className="mb-4 text-base">Do you still want to continue?</p>
           <div className="flex justify-end space-x-2">
             <button
               onClick={onClose}

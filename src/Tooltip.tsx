@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import './Tooltip.css'; // Make sure to create a CSS file for styling
+import React, { useState } from "react";
+import "./Tooltip.css";
 
 const Tooltip: React.FC<{ info: string }> = ({ info }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <span 
+    <span
       className="tooltip-container"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

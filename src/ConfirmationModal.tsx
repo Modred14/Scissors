@@ -3,11 +3,27 @@ import React from "react";
 type ConfirmProps = {
   isOpen: boolean;
   onClose: () => void;
+  setMessage: (message: string) => void;
+  userPassword?: string;
   onDelete: (password: string) => void;
 };
 
-const Confirm: React.FC<ConfirmProps> = ({ isOpen, onClose, onDelete }) => {
+const Confirm: React.FC<ConfirmProps> = ({
+  isOpen,
+  setMessage,
+  userPassword,
+  onClose,
+  onDelete,
+}) => {
   const [password, setPassword] = React.useState("");
+  if (isOpen && userPassword === "") {
+    setMessage(
+      `You will need to add a password to your account before deleting the account.`
+    );
+    onClose();
+  } else if (isOpen && userPassword === "") {
+    return;
+  }
 
   if (!isOpen) return null;
 

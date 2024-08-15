@@ -1,7 +1,6 @@
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loading from "./Loading";
-
-
+import Footer from "./Footer";
 
 const Policy: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -25,7 +24,10 @@ const Policy: React.FC = () => {
       <p className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold">
         Version 1.0
       </p>
-      <p className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold" style={{ paddingLeft: "10%", paddingRight: "10%"}}>
+      <p
+        className="pt-8 text-center text-4xl font-comic text-gray-600 font-bold"
+        style={{ paddingLeft: "10%", paddingRight: "10%" }}
+      >
         Last Updated: July 9,2024
       </p>
       <div className="font-comic">
@@ -35,10 +37,11 @@ const Policy: React.FC = () => {
         >
           At Scissors, we are committed to protecting your privacy. This Privacy
           Policy explains how we collect, use, disclose, and safeguard your
-          information when you visit our website (&quot;Site&quot;) and use our services
-          (&quot;Services&quot;). By accessing or using the Site or Services, you agree to
-          the terms of this Privacy Policy. If you do not agree with the terms
-          of this Privacy Policy, please do not use the Site or Services.
+          information when you visit our website (&quot;Site&quot;) and use our
+          services (&quot;Services&quot;). By accessing or using the Site or
+          Services, you agree to the terms of this Privacy Policy. If you do not
+          agree with the terms of this Privacy Policy, please do not use the
+          Site or Services.
         </p>
         <p
           className="text-2xl font-bold text-gray-800"
@@ -62,10 +65,10 @@ const Policy: React.FC = () => {
             generate, and the analytics related to link usage.
           </li>
           <li>
-            Log Data: Our servers automatically record information (&quot;Log Data&quot;)
-            when you use the Site. This Log Data may include your IP address,
-            browser type, the pages you visit, and the time spent on those
-            pages.
+            Log Data: Our servers automatically record information (&quot;Log
+            Data&quot;) when you use the Site. This Log Data may include your IP
+            address, browser type, the pages you visit, and the time spent on
+            those pages.
           </li>
           <li>
             Cookies and Tracking Technologies: We use cookies and similar
@@ -247,13 +250,20 @@ const Policy: React.FC = () => {
         </p>
       </div>
       <div className="flex items-center justify-center">
-        <img src="/Scissors_logo.png" alt="Scissors" className="w-48 my-24 animate-bounce duration-1000 ease-linear" style={{animationDuration:"3s"}}/>
-        
+        <img
+          src="/Scissors_logo.png"
+          alt="Scissors"
+          className="w-48 my-24 animate-bounce duration-1000 ease-linear"
+          style={{ animationDuration: "3s" }}
+        />
       </div>
       <div className="flex items-center justify-center mb-16">
         <img src="/Scissors_logo.png" alt="Scissors" className="sm:w-32 w-20" />
         <p className="font-extrabold text-adjust">Scissors</p>
-        </div>
+      </div>
+      <div className="mt-20">
+        <Footer />
+      </div>
     </div>
   );
 };
