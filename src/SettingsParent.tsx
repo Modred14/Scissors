@@ -8,7 +8,6 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
-import Footer from "./Footer";
 
 interface User {
   id: string;
@@ -211,9 +210,6 @@ const SettingsParent: React.FC = () => {
         </div>
       )}
       <Settings user={user} onUpdate={handleUpdate} />
-      <div className="mt-20">
-        <Footer />
-      </div>
     </div>
   );
 };

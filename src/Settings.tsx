@@ -13,6 +13,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
 import ConfirmationModal from "./ConfirmationModal";
+import Footer from "./Footer";
 
 interface User {
   id: string;
@@ -814,6 +815,15 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
             </div>
           )}
         </main>
+        {isLoggedIn ? (
+          <div className="mt-32">
+            <Footer />
+          </div>
+        ) : (
+          <div className="mt-64">
+            <Footer />
+          </div>
+        )}
       </div>
     </>
   );

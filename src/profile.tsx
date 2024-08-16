@@ -625,11 +625,19 @@ const Profile: React.FC = () => {
               <div></div>
             </div>
           )}
+          
         </main>
+        {isLoggedIn ? (
+          <div className="mt-32">
+            <Footer />
+          </div>
+        ) : (
+          <div className="mt-64">
+            <Footer />
+          </div>
+        )}
       </div>
-      <div className="mt-20">
-        <Footer />
-      </div>
+     
     </>
   );
 };
