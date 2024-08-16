@@ -18,7 +18,7 @@ Scissors is a URL-shortening platform that allows users to generate short, custo
 
 ## Tech Stack
 
-- **Frontend**: TypeScript React
+- **Frontend**: TypeScript React Tailwind
 - **Backend & Database**: Firebase
 - **Linting & Formatting**: ESLint, Prettier
 - **QR Code Generation**: Third-party QR code generator API
