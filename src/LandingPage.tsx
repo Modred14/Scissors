@@ -424,7 +424,7 @@ const LandingPage: React.FC = () => {
                       </p>
                     </div>
                     <p className="font-bold text-sm pb-3 px-3">
-                      Simply type the link you want, and if the domain is
+                      Input your link. if the domain is
                       available, you will secure your personalized custom URL.
                     </p>
                   </div>
