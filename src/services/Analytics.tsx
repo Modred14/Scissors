@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { db } from "./firebaseConfig";
+import { db } from "../firebaseConfig";
 import { doc, onSnapshot } from "firebase/firestore";
 import { Pie, Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";

@@ -24,7 +24,7 @@ const useCustomDomains = () => {
   }, []);
 
   const checkDomainAvailability = (domain: string) => {
-    if (loading) return false; // Optionally handle loading state
+    if (loading) return false;
     const sanitizedDomain = domain.replace(/^https?:\/\//, "");
     return !domains.some((d) => d.domain === sanitizedDomain);
   };

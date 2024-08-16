@@ -1,5 +1,4 @@
-import { shortenUrl, randomString} from "../src/ShortUrl";
-
+import { shortenUrl, randomString } from "../src/services/ShortUrl";
 
 (global as any).fetch = jest.fn();
 
@@ -18,12 +17,10 @@ describe("shortenUrl", () => {
       }),
     };
 
-    
     (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await shortenUrl(longUrl);
 
- 
     expect(global.fetch).toHaveBeenCalledWith(
       "https://app-scissors-api.onrender.com/api/urls/shorten",
       {
@@ -33,7 +30,6 @@ describe("shortenUrl", () => {
       }
     );
 
-    
     expect(result).toBe(
       `https://app-scissors-api.onrender.com/s/${mockRandomString}`
     );
@@ -42,13 +38,11 @@ describe("shortenUrl", () => {
   it("should throw an error if the API request fails", async () => {
     const longUrl = "https://example.com";
 
-   
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       json: async () => ({}),
     });
 
-    
     await expect(shortenUrl(longUrl)).rejects.toThrow("Failed to shorten URL");
   });
 });

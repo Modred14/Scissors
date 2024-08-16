@@ -20,7 +20,7 @@ import axios from "axios";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "./firebaseConfig";
 import TrackLink from "./TrackLink";
-import AnalyticsDashboard from "./Analytics";
+import AnalyticsDashboard from "./services/Analytics";
 import Footer from "./Footer";
 
 interface User {
