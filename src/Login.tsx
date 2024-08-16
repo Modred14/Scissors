@@ -157,7 +157,7 @@ const Login: React.FC = () => {
             </div>
           </div>
         </form>
-        <form onSubmit={handleEmailLogin}>
+        <form onSubmit={handleEmailLogin} className="mb-10">
           {message && (
             <div
               className={`flex justify-center transition-opacity duration-500 ${
@@ -248,7 +248,7 @@ const Login: React.FC = () => {
               className="h-32 my-8"
             />
           </div>
-          <p className="mb-10 text-center">© 2024 Scissors</p>
+          <p className="mb-10 pb-20 text-center">© 2024 Scissors</p>
         </form>
       </div>
       <div className="scissors-background"></div>

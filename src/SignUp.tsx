@@ -435,7 +435,7 @@ const Signup: React.FC = () => {
             className="h-32 my-8 animate-pulse"
           />
         </div>
-        <p className="mb-10 text-center">© 2024 Scissors</p>
+        <p className="mb-10  pb-20 text-center">© 2024 Scissors</p>
       </div>
       <div className="scissors-background"></div>
     </div>
