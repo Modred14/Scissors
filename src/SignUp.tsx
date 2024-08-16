@@ -9,6 +9,7 @@ import {
   signInWithPopup,
   sendEmailVerification,
 } from "firebase/auth";
+import { IoEyeOff, IoEye } from "react-icons/io5";
 
 interface User {
   id: string;
@@ -30,10 +31,15 @@ const Signup: React.FC = () => {
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
 
   const googleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +82,7 @@ const Signup: React.FC = () => {
         );
         const data = await response.json();
         if (response.ok) {
-          setLoading(true)
+          setLoading(true);
           console.log("Sign Up successful:", data);
           localStorage.setItem("user", JSON.stringify(data));
           setMessage("You have successfully created an account!");
@@ -255,7 +261,7 @@ const Signup: React.FC = () => {
                   <div className="inline">
                     <div className="line"></div>
                     <div className="line correct-line"></div>
-                    <div className="text-center">or</div>
+                    <div className="text-center">OR</div>
                   </div>
                 </div>
                 {message && (
@@ -380,12 +386,31 @@ const Signup: React.FC = () => {
                   />
                 </label>
                 <label className="block">
-                  <span className="block text-base font-bold text-slate-700">
-                    Password
-                  </span>
+                  <div className="grid grid-flow-col">
+                    <span className="block text-base font-bold text-slate-700">
+                      Password
+                    </span>
+                    <div
+                      className="cursor-pointer flex flex-end mt-1 mr-4 justify-end"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <div className="grid grid-flow-col gap-1">
+                          <IoEyeOff size={17} />{" "}
+                          <p className="font-bold -mt-1 text-green-700">hide</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-flow-col gap-1">
+                          <IoEye size={18} />{" "}
+                          <p className="font-bold -mt-1 text-green-700">show</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <input
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -401,7 +426,7 @@ const Signup: React.FC = () => {
                   </span>
                   <input
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Confirm Password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
