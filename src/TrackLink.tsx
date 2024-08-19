@@ -33,7 +33,6 @@ const TrackLink: React.FC<TrackLinkProps> = ({ link }) => {
           console.warn(
             "User is not authenticated. Skipping Firestore logging."
           );
-          
         }
 
         if (!link) {
@@ -95,11 +94,26 @@ const TrackLink: React.FC<TrackLinkProps> = ({ link }) => {
 
   return (
     <>
-      <a href={link.mainLink}>Main Link</a>
-      <a href={link.customLink}>Custom Link</a>
-      <a href={link.shortenedLink}>Shortened Link</a>
+      <a href={link.mainLink} onClick={() => handleClick(link.id)}>
+        Main Link
+      </a>
+      <a href={link.customLink} onClick={() => handleClick(link.id)}>
+        Custom Link
+      </a>
+      <a href={link.shortenedLink} onClick={() => handleClick(link.id)}>
+        Shortened Link
+      </a>
     </>
   );
+};
+const handleClick = async (linkId: string) => {
+  try {
+    await fetch(`https://app-scissors-api.onrender.com/links/${linkId}/click`, {
+      method: "POST",
+    });
+  } catch (error) {
+    console.error("Error sending click to server:", error);
+  }
 };
 
 export default TrackLink;
