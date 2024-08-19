@@ -168,6 +168,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
 
   const handleDelete = async (enteredPassword: string) => {
     if (enteredPassword === user?.password) {
+      setLoading(true);
       try {
         const response = await fetch(
           `https://app-scissors-api.onrender.com/users/${user?.id}`,
@@ -176,27 +177,37 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
             headers: {
               "Content-Type": "application/json",
             },
+
+            body: JSON.stringify({ id: user?.id, email: user?.email }),
           }
         );
         if (response.ok) {
           console.log("Account deleted successfully");
           setMessage("Your account has been successfully deleted.");
           localStorage.removeItem("user");
+          setLoading(false);
           window.location.href = "/dashboard";
           setIsModalOpen(false);
         } else {
+          console.error("Failed to delete account. Status:", response.status);
+          const errorData = await response.json();
+          setMessage(
+            errorData.message ||
+              "Failed to delete your account. Please try again."
+          );
           setIsModalOpen(false);
-          console.error("Failed to delete account");
-          setMessage("Failed to delete your account. Please try again.");
+          setLoading(false);
         }
       } catch (error) {
-        setIsModalOpen(false);
         console.error("Error deleting account:", error);
         setMessage("An error occurred. Please try again.");
+        setIsModalOpen(false);
+        setLoading(false);
       }
     } else {
-      setIsModalOpen(false);
       setMessage("Password is incorrect. Account not deleted.");
+      setIsModalOpen(false);
+      setLoading(false);
     }
   };
 

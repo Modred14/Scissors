@@ -36,6 +36,11 @@ const ForgetPassword: React.FC = () => {
     }
   }, [message]);
 
+const sendEmail = async () => {
+  await sendPasswordResetEmail(auth, email);
+  setMessage("Another password reset email has been sent to your email. Kindly check your email.");
+}
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -124,6 +129,11 @@ const ForgetPassword: React.FC = () => {
               We have sent a password reset link to your email address{" "}
               <b>&quot;{email}&quot;</b>. Please check your inbox and follow the
               instructions to reset your password.
+            </p>
+            <br />
+            <p className="text-gray-600 text-center max-w-xl mx-2">
+              Click this <a className="underline hover:no-underline" onClick={sendEmail}>link</a> if
+              you didn't receive the email to request another one.
             </p>
           </div>
         )}

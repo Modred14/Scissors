@@ -40,7 +40,7 @@ const SettingsParent: React.FC = () => {
 
   const auth = getAuth();
   const userPassword = user?.password || "";
-  const handleEmailChange = async (newEmail: string) => {
+  const handleEmailChange = async (email: string) => {
     const user = auth.currentUser;
 
     if (!user) {
@@ -62,9 +62,9 @@ const SettingsParent: React.FC = () => {
         user.email!,
         userPassword
       );
+      
       await reauthenticateWithCredential(user, credential);
-
-      await updateEmail(user, newEmail);
+      await updateEmail(user, email);
       await sendEmailVerification(user);
       console.log("Email updated and verification email sent.");
       setMessage("Verification email sent. Please verify your new email.");
@@ -78,13 +78,23 @@ const SettingsParent: React.FC = () => {
         setMessage(
           "The credentials are invalid. Please check your email and password."
         );
-      } else {
+      } else if (error.code === "auth/requires-recent-login") {
         setMessage(
-          "Failed to update email. Kindly verify your old email before changing it."
+          "This operation requires recent authentication. Please log in again and try."
         );
+      } else if (error.code === "auth/email-already-in-use") {
+        setMessage(
+          "The new email address is already in use by another account."
+        );
+      } else if (error.code === "auth/invalid-email") {
+        setMessage(
+          "The email address is not valid. Please check and try again."
+        );
+      } else {
+        setMessage(`Failed to update email: ${error.message}`);
       }
 
-      return false; 
+      return false;
     }
   };
 
@@ -150,7 +160,7 @@ const SettingsParent: React.FC = () => {
           const auth = getAuth();
           const userUpdate = auth.currentUser;
           const newPassword = updatedUser.password || user?.password || "";
-          
+
           if (userUpdate) {
             updatePassword(userUpdate, newPassword)
               .then(() => {
