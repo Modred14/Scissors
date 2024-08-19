@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "./firebaseConfig";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import "./login.css";
 import "./style.css";
 import Loading from "./Loading";
@@ -88,9 +92,18 @@ const Login: React.FC = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
+    setMessage("");
+
     try {
+     
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      console.log("Firebase login successful:", userCredential.user);
+
       const response = await fetch(
         "https://app-scissors-api.onrender.com/login",
         {
@@ -103,13 +116,22 @@ const Login: React.FC = () => {
       );
 
       const data = await response.json();
+
       if (response.ok) {
-        console.log("Login successful:", data);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setMessage("Login successful");
-        navigate("/dashboard");
+        console.log("API login successful:", data);
+
+        const combinedUser = {
+          ...data.user,
+          firebaseUser: userCredential.user, 
+        };
+        localStorage.setItem("user", JSON.stringify(combinedUser));
+
+        setMessage("Login successful!");
+        setTimeout(() => {
+          navigate("/dashboard"); 
+        }, 1000);
       } else {
-        setMessage(data.message);
+        setMessage(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during login:", error);

@@ -7,6 +7,7 @@ import {
   sendEmailVerification,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
 
 interface User {
@@ -83,7 +84,7 @@ const SettingsParent: React.FC = () => {
         );
       }
 
-      return false; // Return false to indicate failure
+      return false; 
     }
   };
 
@@ -146,7 +147,19 @@ const SettingsParent: React.FC = () => {
               body: JSON.stringify(updatedUser),
             }
           );
-
+          const auth = getAuth();
+          const userUpdate = auth.currentUser;
+          const newPassword = updatedUser.password || user?.password || "";
+          
+          if (userUpdate) {
+            updatePassword(userUpdate, newPassword)
+              .then(() => {
+                console.log("Password updated successfully!");
+              })
+              .catch((error) => {
+                console.error("Error updating password:", error);
+              });
+          }
           if (response.ok) {
             const data = await response.json();
             console.log("Updated user:", data);

@@ -8,6 +8,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendEmailVerification,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { IoEyeOff, IoEye } from "react-icons/io5";
 
@@ -169,56 +170,68 @@ const Signup: React.FC = () => {
   const handleDetailsSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
+
     if (!validatePassword(password)) {
       setMessage(
         "Password must be greater than six characters, and contain a symbol, one number, one lowercase, and one uppercase letter."
       );
+      setLoading(false);
       return;
     }
+
     if (password !== confirmPassword) {
       setMessage(
         "Passwords do not match. Password and confirm password must be the same."
       );
+      setLoading(false);
       return;
     }
 
-    const response = await fetch(
-      "https://app-scissors-api.onrender.com/users",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ firstName, lastName, email, password }),
-      }
-    );
-    const data = await response.json();
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const firebaseUser = userCredential.user;
+      console.log("User signed up:", firebaseUser);
 
-    if (response.ok) {
-      console.log("Sign Up successful:", data);
-      localStorage.setItem("user", JSON.stringify(data));
-      setLoading(false);
-      const user = auth.currentUser;
-      setMessage("You have successfully created an account!");
-      if (user) {
+      const response = await fetch(
+        "https://app-scissors-api.onrender.com/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ firstName, lastName, email, password }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Sign Up successful:", data);
+
         const combinedUser = {
           ...data,
-          firebaseUser: user,
+          firebaseUser,
         };
 
         localStorage.setItem("user", JSON.stringify(combinedUser));
 
-        sendEmailVerification(user);
+        await sendEmailVerification(firebaseUser);
         setMessage("Verification email sent. Please check your inbox.");
 
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
-        setLoading(false);
+      } else {
+        setMessage("Oops, an error occurred during signup. Couldn't sign up.");
       }
-    } else {
+    } catch (err: any) {
+      setMessage(err.message);
+    } finally {
       setLoading(false);
-      setMessage("Oops, an error occur during signup. Couldn't sign up.");
     }
   };
 
