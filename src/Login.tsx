@@ -96,7 +96,6 @@ const Login: React.FC = () => {
     setMessage("");
 
     try {
-     
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -122,22 +121,20 @@ const Login: React.FC = () => {
 
         const combinedUser = {
           ...data.user,
-          firebaseUser: userCredential.user, 
+          firebaseUser: userCredential.user,
         };
         localStorage.setItem("user", JSON.stringify(combinedUser));
 
         setMessage("Login successful!");
         setTimeout(() => {
-          navigate("/dashboard"); 
+          navigate("/dashboard");
         }, 1000);
       } else {
         setMessage(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      setMessage(
-        "An error occurred during login. Check your internet connection and try again."
-      );
+      setMessage(`An error occurred during login. Invalid credentials.`);
     } finally {
       setLoading(false);
     }
