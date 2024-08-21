@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { doc, onSnapshot, getFirestore } from "firebase/firestore";
-import AnalyticsDashboard from "../src/services/Analytics";
+import AnalyticsDashboard from "../src/services/AnalysticsDashboard";
 import "@testing-library/jest-dom";
 
 jest.mock("firebase/firestore", () => ({
