@@ -28,9 +28,9 @@ const DateRangePicker = ({
       : new Date(validDate.getTime() + 86400000);
 
   return (
-    <div className="flex gap-1 sm:justify-end ">
-      <div className="flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-800 p-2 rounded-lg shadow-md">
-        <div className="relative">
+    <div className="flex gap-1 sm:justify-end w-full">
+      <div className="flex items-center w-full gap-2 bg-gradient-to-r from-gray-700 to-gray-800 p-2 rounded-lg shadow-md">
+        <div className="relative w-full">
           <DatePicker
             className="px-2 w-20 text-sm bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             selected={startDate}
@@ -41,7 +41,7 @@ const DateRangePicker = ({
           />
         </div>
         <div className="text-white font-semibold">to</div>
-        <div className="relative">
+        <div className="relative w-full">
           <DatePicker
             className="px-2 w-20 text-sm bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             selected={endDate}
