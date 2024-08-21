@@ -28,8 +28,8 @@ const DateRangePicker = ({
       : new Date(validDate.getTime() + 86400000);
 
   return (
-    <div className="flex gap-1 sm:justify-end w-full justify-center">
-      <div className="flex items-center w-full gap-2 bg-gradient-to-r from-gray-700 to-gray-800 p-2 rounded-lg shadow-md">
+    <div className="flex gap-1 justify-center-end">
+      <div className="flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-800 p-2 rounded-lg shadow-md">
         <div className="relative w-full">
           <DatePicker
             className="px-2 w-20 text-sm bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"

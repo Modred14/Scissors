@@ -20,7 +20,9 @@
 .all2 {
   display: none;
 }
-
+.justify-center-end{
+  justify-content: flex-end;
+}
 .show-link {
   display: block;
   width: 70px;
@@ -279,6 +281,9 @@
   }
   .m-30 {
     padding-top: 8px;
+  }
+  .justify-center-end{
+    justify-content: center
   }
 }
 @media screen and (max-width: 620px) {
