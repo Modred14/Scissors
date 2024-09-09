@@ -19,7 +19,7 @@ import SmallLoading from "./SmallLoading";
 import axios from "axios";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "./firebaseConfig";
-import TrackLink from "./TrackLink";
+// import TrackLink from "./TrackLink";
 import AnalyticsDashboard from "./Analytics";
 import Footer from "./Footer";
 
@@ -829,7 +829,7 @@ const LinkDetails: React.FC = () => {
                 </div>
                 <div className="bg-white shadow-sm p-7 pb-0 mb-16 grid md:grid-flow-col rounded-md mt-7">
                   <div className="hidden">
-                    <TrackLink link={link} />
+                    {/* <TrackLink link={link} /> */}
                   </div>
                   <div>
                     <p className=" text-center text-3xl mb-2 font-extrabold flex">
