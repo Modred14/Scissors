@@ -193,7 +193,7 @@ const EditLink: React.FC = () => {
   }, [customLink]);
 
   const userId = user?.id;
-
+const uniqueId = id
   useEffect(() => {
     const fetchLinkData = async () => {
       if (isLoggedIn) {
@@ -315,7 +315,7 @@ const EditLink: React.FC = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ longUrl, customLink: domain }),
+          body: JSON.stringify({ longUrl, customLink: domain, uniqueId }),
         }
       );
 
