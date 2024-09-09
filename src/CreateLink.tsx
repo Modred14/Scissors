@@ -299,7 +299,7 @@ const CreateLink: React.FC = () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ longUrl, shortUrl: randomString }),
+        body: JSON.stringify({ longUrl, shortUrl: randomString, uniqueId }),
       }
     );
     let customLinkDomain = null;
@@ -310,7 +310,7 @@ const CreateLink: React.FC = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ longUrl, customLink: domain }),
+          body: JSON.stringify({ longUrl, customLink: domain, uniqueId }),
         }
       );
 
