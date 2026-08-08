@@ -1,5 +1,7 @@
+// File: src/Dashboard.tsx
 import React, { useEffect, useState } from "react";
 import "./style.css";
+import "./landing.css";
 import {
   Disclosure,
   DisclosureButton,
@@ -10,6 +12,15 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  PlusCircleIcon,
+  FolderIcon,
+  LinkIcon,
+  ChartBarIcon,
+  QrCodeIcon,
+  PencilSquareIcon,
+  ArrowUpRightIcon,
+} from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
 import Footer from "./Footer";
@@ -36,9 +47,60 @@ const navigation = (isLoggedIn: boolean) => [
     : []),
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
+
+type DashTile = {
+  to: string;
+  icon: React.ElementType;
+  title: string;
+  text: string;
+  primary?: boolean;
+};
+
+const primaryTiles: DashTile[] = [
+  {
+    to: "/create-link",
+    icon: PlusCircleIcon,
+    title: "Create New Link",
+    text: "Shorten a URL and get a shareable link in seconds.",
+    primary: true,
+  },
+  {
+    to: "/links",
+    icon: FolderIcon,
+    title: "View All Saved Links",
+    text: "Browse, search, and manage everything you've created.",
+  },
+  {
+    to: "/create-link",
+    icon: LinkIcon,
+    title: "Shorten a Link",
+    text: "Turn a long URL into a clean, memorable one.",
+  },
+];
+
+const secondaryTiles: DashTile[] = [
+  {
+    to: "/links",
+    icon: ChartBarIcon,
+    title: "View Links Analytics",
+    text: "See clicks and performance across your links.",
+  },
+  {
+    to: "/create-link",
+    icon: QrCodeIcon,
+    title: "Generate QR Code for Links",
+    text: "Create a scannable QR code for any link you own.",
+  },
+  {
+    to: "/links",
+    icon: PencilSquareIcon,
+    title: "Edit Saved Links",
+    text: "Update aliases, destinations, and link details.",
+  },
+];
 
 const Dashboard: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -83,317 +145,184 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return <Loading />;
   }
+
+  const avatarSrc =
+    isLoggedIn && user && user.profileImg
+      ? user.profileImg
+      : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+  const renderTile = (tile: DashTile, key: string) => {
+    const Icon = tile.icon;
+    return (
+      <Link
+        to={tile.to}
+        key={key}
+        className={classNames("sl-dash-tile", tile.primary && "sl-dash-tile--primary")}
+      >
+        <ArrowUpRightIcon className="sl-dash-tile-arrow" aria-hidden="true" />
+        <div className="sl-dash-tile-icon">
+          <Icon aria-hidden="true" />
+        </div>
+        <div>
+          <div className="sl-dash-tile-title">{tile.title}</div>
+          <div className="sl-dash-tile-text">{tile.text}</div>
+        </div>
+      </Link>
+    );
+  };
+
   return (
-    <>
-      <div className="fixed header-grid w-full min-w-fit">
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto px-2 md:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
-              <div className="logo-placement">
-                <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link to="/">
-                      <img
-                        alt="Scissors"
-                        src="/Scissors_logo.png"
-                        className="h-8 w-auto"
-                      />
-                    </Link>
-                  </div>
-                  <div className="hidden md:ml-6 md:block">
-                    <div className="flex space-x-4">
-                      {navigation(isLoggedIn).map((item) => (
-                        <Link to={item.href}>
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            aria-current={item.current ? "page" : undefined}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation                                                      */}
+      {/* ---------------------------------------------------------------- */}
+      <Disclosure as="div" className="sl-nav-wrap" style={{ zIndex: 1200 }}>
+        {({ open }) => (
+          <>
+            <nav className="sl-nav" aria-label="Primary">
+              <Link to="/" className="sl-nav-brand">
+                <img alt="Scissors" src="/Scissors_logo.png" />
+                Scissors
+              </Link>
+
+              <div className="sl-nav-links">
+                {navigation(isLoggedIn).map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                      "sl-nav-link",
+                      item.current && "sl-nav-link--current"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                {isLoggedIn ? (
-                  <>
-                    <div className="place-self-end flex space-x-4 ">
-                      <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                        <button
-                          type="button"
-                          className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="h-6 w-6" />
-                        </button>
 
-                        {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                          <div className="profile-picture">
-                            <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                              <span className="absolute -inset-1.5" />
-                              <span className="sr-only">Open user menu</span>
-                              {user && user.profileImg && (
-                                <img
-                                  src={user.profileImg}
-                                  alt="User profile"
-                                  className="h-8 w-8 rounded-full"
-                                />
-                              )}
-                            </MenuButton>
-                          </div>
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <MenuItem>
-                              <Link to="/profile">
-                                <a
-                                  href="/profile"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Your Profile
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="/settings">
-                                <a
-                                  href="/settings"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Settings
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="#">
-                                <a
-                                  href="#"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                  onClick={handleSignOut}
-                                >
-                                  Sign out
-                                </a>
-                              </Link>
-                            </MenuItem>
-                          </MenuItems>
-                        </Menu>
-                        {/* Mobile menu button*/}
-                        <div className="bar">
-                          <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <span className="absolute -inset-0.5" />
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon
-                              aria-hidden="true"
-                              className="block h-6 w-6 group-data-[open]:hidden"
-                            />
-                            <XMarkIcon
-                              aria-hidden="true"
-                              className="hidden h-6 w-6 group-data-[open]:block"
-                            />
-                          </DisclosureButton>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="place-self-end flex space-x-4 ">
-                    <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                      <button
-                        type="button"
-                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                      >
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon aria-hidden="true" className="h-6 w-6" />
-                      </button>
+              <div className="sl-nav-actions">
+                <button
+                  type="button"
+                  className="sl-nav-icon-btn"
+                  aria-label="View notifications"
+                >
+                  <BellIcon aria-hidden="true" />
+                </button>
 
-                      {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div className="profile-picture">
-                          <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="absolute -inset-1.5" />
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              alt="Default profile"
-                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                              className="h-8 w-8 rounded-full"
-                            />
-                          </MenuButton>
-                        </div>
-                        <MenuItems
-                          transition
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                        >
-                          <MenuItem>
-                            <Link to="/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
-                            </Link>
-                          </MenuItem>
-                          <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
-                            </Link>
-                          </MenuItem>
-                        </MenuItems>
-                      </Menu>
-                      {/* Mobile menu button*/}
-                      <div className="bar">
-                        <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                          <span className="absolute -inset-0.5" />
-                          <span className="sr-only">Open main menu</span>
-                          <Bars3Icon
-                            aria-hidden="true"
-                            className="block h-6 w-6 group-data-[open]:hidden"
-                          />
-                          <XMarkIcon
-                            aria-hidden="true"
-                            className="hidden h-6 w-6 group-data-[open]:block"
-                          />
-                        </DisclosureButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <Menu as="div" style={{ position: "relative" }}>
+                  <MenuButton className="sl-nav-avatar-btn">
+                    <span className="sr-only">Open user menu</span>
+                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                  </MenuButton>
+                  <MenuItems transition className="sl-menu-items">
+                    <MenuItem>
+                      <Link to="/profile" className="sl-menu-item">
+                        Your Profile
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/settings" className="sl-menu-item">
+                        Settings
+                      </Link>
+                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem>
+                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    )}
+                  </MenuItems>
+                </Menu>
+
+                <DisclosureButton
+                  className="sl-mobile-toggle"
+                  aria-label="Toggle main menu"
+                >
+                  {open ? (
+                    <XMarkIcon aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon aria-hidden="true" />
+                  )}
+                </DisclosureButton>
               </div>
-            </div>
-          </div>
+            </nav>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            <DisclosurePanel transition className="sl-mobile-panel">
               {navigation(isLoggedIn).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={Link}
+                  to={item.href}
                   aria-current={item.current ? "page" : undefined}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
+                  className="sl-mobile-link"
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-      </div>
-      <div style={{ minHeight: "100vh", marginTop: "65px" }}>
-        <header className="bg-white shadow lg:-mr-6 min-w-full">
-          <div className="max-w-9xl mx-auto px-4  py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl max-w-8xl font-bold tracking-tight text-gray-900">
-              Dashboard
-            </h1>
-          </div>
-        </header>
-        <main>
-          <div className="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
-            {isLoggedIn ? (
-              <>
-                <div>
-                  <p className="text-2xl font-bold">
-                    Welcome back, {user?.firstName}.
-                  </p>
-                  <p className="text-xl pt-3">
-                    What would you like to do on Scissors today?
-                  </p>
-                </div>
-              </>
-            ) : (
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
+
+      <main>
+        {/* -------------------------------------------------------------- */}
+        {/* Welcome header                                                */}
+        {/* -------------------------------------------------------------- */}
+        <section className="sl-dash-hero">
+          <div className="sl-grid-overlay" aria-hidden="true" />
+          <div
+            className="sl-orb sl-orb--green"
+            style={{ width: 420, height: 420, top: "-20%", right: "-10%" }}
+            aria-hidden="true"
+          />
+          <div className="sl-container">
+            <div className="sl-dash-hero-row">
               <div>
-                <p className="text-2xl font-bold">
-                  Hi there, Welcome to Scissors.
+                <span className="sl-eyebrow">Dashboard</span>
+                <h1 className="sl-dash-hero-title">
+                  {isLoggedIn && user
+                    ? `Welcome back, ${user.firstName}.`
+                    : "Hi there, welcome to Scissors."}
+                </h1>
+                <p className="sl-dash-hero-sub">
+                  {isLoggedIn
+                    ? "What would you like to do on Scissors today?"
+                    : "Here's what you can do on Scissors."}
                 </p>
-                <p className="text-xl pt-3">
-                  Below are what you can do on Scissors
-                </p>
               </div>
-            )}
-            <div className="mt-6 ">
-              <div className="md:grid md:grid-cols-3 md:h-64 max-w-full md:gap-10 lg:gap-20 mxx-10 md:m-0 mx-20">
-                <Link to="/create-link">
-                  <div className="bg-white shadow hover:shadow-2xl flex flex-col items-center rounded-lg md:w-auto h-64 mb-10 justify-center">
-                    <p className="text-xl p-5 text-gray-500 flex gap-1 font-light text-center mb-4">
-                      <span className="material-icons">add</span>Create New Link
-                    </p>
-                  </div>
-                </Link>
-                <Link to="/links">
-                  <div className="bg-white shadow hover:shadow-2xl flex flex-col items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 p-5 flex gap-2 font-light text-center mb-4">
-                      <span className="material-icons">save</span> View all
-                      Saved Links
-                    </p>
-                  </div>
-                </Link>
-                <Link to="/create-link">
-                  <div className="bg-white shadow flex flex-col hover:shadow-2xl items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
-                      <span className="material-icons">content_cut</span>
-                      Shorten a Link
-                    </p>
-                  </div>
-                </Link>
-              </div>
-              <div className="md:grid md:pt-12 lg:pt-12  md:grid-cols-3 md:h-64 max-w-full md:gap-10 lg:gap-20 mxx-10 md:m-0 mx-20">
-                <Link to="/links">
-                  <div className="bg-white shadow flex hover:shadow-2xl flex-col items-center rounded-lg md:w-auto h-64 mb-10 justify-center">
-                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
-                      <span className="material-icons">analytics</span> View
-                      Links Analytics
-                    </p>
-                  </div>
-                </Link>
-                <Link to="/create-link">
-                  <div className="bg-white shadow flex flex-col hover:shadow-2xl items-center rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl text-gray-500 flex gap-2 p-5 font-light text-center mb-4">
-                      <span className="material-icons">qr_code</span> Generate
-                      Qr code for Links
-                    </p>
-                  </div>
-                </Link>
-                <Link to="/links">
-                  <div className="bg-white shadow flex flex-col items-center hover:shadow-2xl rounded-lg md:w-64 h-64 mb-10 justify-center w-auto">
-                    <p className="text-xl flex gap-2 text-gray-500 p-5 font-light text-center mb-4">
-                      <span className="material-icons text-md ">edit</span> Edit
-                      Saved Links
-                    </p>
-                  </div>
-                </Link>
-              </div>
+              <Link to="/create-link" className="sl-btn sl-btn--primary">
+                <PlusCircleIcon width={18} height={18} /> New link
+              </Link>
             </div>
           </div>
-        </main>
-      </div>
-      <div className="mt-20">
-        <Footer />
-      </div>
-    </>
+        </section>
+
+        {/* -------------------------------------------------------------- */}
+        {/* Action tiles                                                  */}
+        {/* -------------------------------------------------------------- */}
+        <section className="sl-dash-section">
+          <div className="sl-container">
+            <p className="sl-dash-section-title">Create &amp; manage</p>
+            <div className="sl-dash-grid">
+              {primaryTiles.map((tile, i) => renderTile(tile, `primary-${i}`))}
+            </div>
+
+            <p className="sl-dash-section-title" style={{ marginTop: 40 }}>
+              Analyze &amp; brand
+            </p>
+            <div className="sl-dash-grid">
+              {secondaryTiles.map((tile, i) => renderTile(tile, `secondary-${i}`))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
   );
 };
 
