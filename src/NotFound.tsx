@@ -1,6 +1,6 @@
 // Route: * (catch-all / 404)
 import React, { useState } from "react";
-import "./style.css";
+import "./landing.css";
 import {
   Disclosure,
   DisclosureButton,
@@ -10,7 +10,7 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BellIcon, XMarkIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 
 interface User {
@@ -35,7 +35,7 @@ const navigation = (isLoggedIn: boolean) => [
     : []),
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -60,258 +60,137 @@ const NotFound: React.FC = () => {
     window.location.reload();
   };
 
+  const avatarSrc =
+    isLoggedIn && user && user.profileImg
+      ? user.profileImg
+      : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
   return (
-    <>
-      <div
-        className="fixed header-grid w-full min-w-fit "
-        style={{ zIndex: 1000 }}
-      >
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto px-2 md:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
-              <div className="logo-placement">
-                <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link to="/">
-                      <img
-                        alt="Scissors"
-                        src="/Scissors_logo.png"
-                        className="h-8 w-auto"
-                      />
-                    </Link>
-                  </div>
-                  <div className="hidden md:ml-6 md:block">
-                    <div className="flex space-x-4">
-                      {navigation(isLoggedIn).map((item) => (
-                        <Link to={item.href}>
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            aria-current={item.current ? "page" : undefined}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation                                                      */}
+      {/* ---------------------------------------------------------------- */}
+      <Disclosure as="div" className="sl-nav-wrap" style={{ zIndex: 1200 }}>
+        {({ open }) => (
+          <>
+            <nav className="sl-nav" aria-label="Primary">
+              <Link to="/" className="sl-nav-brand">
+                <img alt="Scissors" src="/Scissors_logo.png" />
+                Scissors
+              </Link>
+
+              <div className="sl-nav-links">
+                {navigation(isLoggedIn).map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                      "sl-nav-link",
+                      item.current && "sl-nav-link--current"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                {isLoggedIn ? (
-                  <>
-                    <div className="place-self-end flex space-x-4 ">
-                      <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                        <button
-                          type="button"
-                          className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="h-6 w-6" />
-                        </button>
 
-                        {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                          <div className="profile-picture">
-                            <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                              <span className="absolute -inset-1.5" />
-                              <span className="sr-only">Open user menu</span>
-                              {user && user.profileImg && (
-                                <img
-                                  src={user.profileImg}
-                                  alt="User profile"
-                                  className="h-8 w-8 rounded-full"
-                                />
-                              )}
-                            </MenuButton>
-                          </div>
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <MenuItem>
-                              <Link to="/profile">
-                                <a
-                                  href="/profile"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Your Profile
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="/settings">
-                                <a
-                                  href="/settings"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Settings
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="#">
-                                <a
-                                  href="#"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                  onClick={handleSignOut}
-                                >
-                                  Sign out
-                                </a>
-                              </Link>
-                            </MenuItem>
-                          </MenuItems>
-                        </Menu>
-                        {/* Mobile menu button*/}
-                        <div className="bar">
-                          <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <span className="absolute -inset-0.5" />
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon
-                              aria-hidden="true"
-                              className="block h-6 w-6 group-data-[open]:hidden"
-                            />
-                            <XMarkIcon
-                              aria-hidden="true"
-                              className="hidden h-6 w-6 group-data-[open]:block"
-                            />
-                          </DisclosureButton>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="place-self-end flex space-x-4 ">
-                    <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                      <button
-                        type="button"
-                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                      >
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon aria-hidden="true" className="h-6 w-6" />
-                      </button>
+              <div className="sl-nav-actions">
+                <button
+                  type="button"
+                  className="sl-nav-icon-btn"
+                  aria-label="View notifications"
+                >
+                  <BellIcon aria-hidden="true" />
+                </button>
 
-                      {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div className="profile-picture">
-                          <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="absolute -inset-1.5" />
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              alt="Default profile"
-                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                              className="h-8 w-8 rounded-full"
-                            />
-                          </MenuButton>
-                        </div>
-                        <MenuItems
-                          transition
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                        >
-                          <MenuItem>
-                            <Link to="/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
-                            </Link>
-                          </MenuItem>
-                          <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
-                            </Link>
-                          </MenuItem>
-                        </MenuItems>
-                      </Menu>
-                      {/* Mobile menu button*/}
-                      <div className="bar">
-                        <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                          <span className="absolute -inset-0.5" />
-                          <span className="sr-only">Open main menu</span>
-                          <Bars3Icon
-                            aria-hidden="true"
-                            className="block h-6 w-6 group-data-[open]:hidden"
-                          />
-                          <XMarkIcon
-                            aria-hidden="true"
-                            className="hidden h-6 w-6 group-data-[open]:block"
-                          />
-                        </DisclosureButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <Menu as="div" style={{ position: "relative" }}>
+                  <MenuButton className="sl-nav-avatar-btn">
+                    <span className="sr-only">Open user menu</span>
+                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                  </MenuButton>
+                  <MenuItems transition className="sl-menu-items">
+                    <MenuItem>
+                      <Link to="/profile" className="sl-menu-item">
+                        Your Profile
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/settings" className="sl-menu-item">
+                        Settings
+                      </Link>
+                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem>
+                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    )}
+                  </MenuItems>
+                </Menu>
+
+                <DisclosureButton
+                  className="sl-mobile-toggle"
+                  aria-label="Toggle main menu"
+                >
+                  {open ? (
+                    <XMarkIcon aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon aria-hidden="true" />
+                  )}
+                </DisclosureButton>
               </div>
-            </div>
-          </div>
+            </nav>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            <DisclosurePanel transition className="sl-mobile-panel">
               {navigation(isLoggedIn).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={Link}
+                  to={item.href}
                   aria-current={item.current ? "page" : undefined}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
+                  className="sl-mobile-link"
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-      </div>
-      <div
-        style={{ minHeight: "100vh", marginTop: "0px" }}
-        className="background-notfound"
-      >
-        <main>
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
+
+      <main>
+        <section className="sl-notfound">
+          <div className="sl-grid-overlay" aria-hidden="true" />
           <div
-            className="flex flex-col items-center justify-center min-h-full notfound"
-            style={{ minHeight: "100vh", marginTop: "0px" }}
-          >
-            <div className="p-3 md:p-9">
-              <p className="justify-center notfound-header text-white font-extrabold text-7xl py-5 max-w-5xl text-center">
-                We looked everywhere
-              </p>
-              <p className="justify-center notfound-body text-white font-bold text-5xl max-w-5xl text-center">
-                Oops, it seems like you&apos;ve bumped into a route that
-                doesn&apos;t exist.
-              </p>
-              <div className="rounded-lg flex flex-col items-center justify-center ">
-                <Link to="/">
-                  <button className=" justify-self-center animate-bounce justify-center outline outline-black bg-gray-100 shadow-xl text-lg text-green-600 rounded-lg transition-colors py-2  px-2 mt-12 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                    Go back to homepage
-                  </button>
-                </Link>
-              </div>
+            className="sl-orb sl-orb--green"
+            style={{ width: 460, height: 460, top: "-10%", left: "50%", transform: "translateX(-50%)" }}
+            aria-hidden="true"
+          />
+
+          <div className="sl-notfound-content">
+            <p className="sl-notfound-code">404</p>
+            <h1 className="sl-notfound-title">We looked everywhere</h1>
+            <p className="sl-notfound-text">
+              Oops, it seems like you&apos;ve bumped into a route that
+              doesn&apos;t exist. Let&apos;s get you back on track.
+            </p>
+            <div className="sl-notfound-actions">
+              <Link to="/" className="sl-btn sl-btn--primary">
+                <HomeIcon width={18} height={18} /> Go back home
+              </Link>
+              <Link to="/links" className="sl-btn sl-btn--ghost">
+                <LinkIcon width={18} height={18} /> View your links
+              </Link>
             </div>
           </div>
-        </main>
-      </div>
-    </>
+        </section>
+      </main>
+    </div>
   );
 };
+
 export default NotFound;

@@ -7,10 +7,10 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import "./login.css";
-import "./style.css";
+import "./landing.css";
 import Loading from "./Loading";
 import { IoEyeOff, IoEye } from "react-icons/io5";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -148,156 +148,119 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-coln body">
-      <div
-        className="max-w-screen-md w-full min-w-fit form-size"
-        style={{ maxWidth: "100%" }}
-      >
-        <form onSubmit={handleEmailLogin} className="">
-          <div className="mt-32 grid grid-flow-col w-40">
-            <Link to="/">
-              <img
-                alt="Scissors"
-                src="/Scissors_logo.png"
-                className="h-8 w-auto"
-              />
-            </Link>
-            <p className="font-black text-2xl rotate-0 mb-10 spacious">
-              Scissors
-            </p>
-          </div>
-          <p className="text-4xl mb-5 font-extrabold text-green-700 text-center">
-            Sign in
-          </p>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      <section className="sl-auth-shell">
+        <div className="sl-grid-overlay" aria-hidden="true" />
+        <div
+          className="sl-orb sl-orb--green"
+          style={{ width: 420, height: 420, top: "-14%", left: "-12%" }}
+          aria-hidden="true"
+        />
+
+        <div className="sl-auth-card">
+          <Link to="/" className="sl-auth-logo">
+            <img alt="Scissors" src="/Scissors_logo.png" />
+            Scissors
+          </Link>
+
+          <h1 className="sl-auth-title">Sign in</h1>
+          <p className="sl-auth-subtitle">Welcome back, let&apos;s get you in.</p>
 
           <button
-            className="mt-4 shadow h-12 w-full  text-center my-7 font-medium active:bg-green-700 hover:bg-green-700 text-green hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none focus:text-white focus:bg-green-700 active:ring-green-600 text-xl"
+            type="button"
+            className="sl-google-btn"
             onClick={googleSignIn}
           >
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z" />
+              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z" />
+              <path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5c-2 1.5-4.6 2.5-7.6 2.5-5.2 0-9.6-3.3-11.3-7.9l-6.6 5.1C9.6 39.6 16.2 44 24 44z" />
+              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.2 5.7l6.5 5.5C41.9 35.7 44 30.2 44 24c0-1.3-.1-2.7-.4-3.5z" />
+            </svg>
             Continue with Google
           </button>
 
-          <div className="m-space">
-            <div className="inline">
-              <div className="line"></div>
-              <div className="line correct-line"></div>
-              <div className="text-center">OR</div>
-            </div>
-          </div>
-        </form>
-        <form onSubmit={handleEmailLogin} className="mb-10">
+          <div className="sl-divider">or</div>
+
           {message && (
             <div
-              className={`flex justify-center transition-opacity duration-500 ${
-                isFadingOut ? "opacity-0" : "opacity-100"
-              }`}
+              className="sl-alert"
+              style={{
+                marginBottom: 16,
+                opacity: isFadingOut ? 0 : 1,
+                transition: "opacity 0.5s var(--sl-ease)",
+              }}
             >
-              <div
-                className="fixed animate-message bg-black p-4 mx-4 rounded"
-                style={{ top: "10%" }}
-              >
-                <p className=" text-red-100">{message}</p>
-              </div>{" "}
+              <ExclamationTriangleIcon aria-hidden="true" />
+              <span>{message}</span>
             </div>
-          )}{" "}
-          {/* Display login message */}
-          <label className="block">
-            <span className="block text-base font-bold text-slate-700">
-              Email address
-            </span>
-            <input
-              type="email"
-              placeholder="email"
-              value={email}
-              required
-              onChange={(e) => setEmail(e.target.value)}
-              className={`peer h-12 mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                  ${
-                    email && !hasAt && hasEmailSymbol
-                      ? "border-pink-500 text-pink-600"
-                      : "border-slate-300"
-                  } rounded-sm text-m shadow-sm placeholder-slate-400
-                    focus:outline-none  focus:ring-gray-400 focus:ring-1 
-                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                    ${
-                      email && !hasAt && hasEmailSymbol
-                        ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                        : ""
-                    }`}
-            />
-            {email && !hasAt && hasEmailSymbol && (
-              <p className="mt-1 -mb-2 peer-invalid:visible text-pink-600 text-sm">
-                Please provide a valid email address.
-              </p>
-            )}
-          </label>
-          <label className="block mt-4">
-            <div className="grid grid-flow-col">
-              <span className="block text-base font-bold text-slate-700">
-                Password
-              </span>
-              <div
-                className="cursor-pointer flex flex-end mt-1 mr-4 justify-end"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <div className="grid grid-flow-col gap-1">
-                    <IoEyeOff size={17} />{" "}
-                    <p className="font-bold -mt-1 text-green-700">hide</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-flow-col gap-1">
-                    <IoEye size={18} />{" "}
-                    <p className="font-bold -mt-1 text-green-700">show</p>
-                  </div>
-                )}
+          )}
+
+          <form onSubmit={handleEmailLogin} className="sl-auth-form">
+            <div className="sl-field">
+              <label className="sl-label" htmlFor="email">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                required
+                onChange={(e) => setEmail(e.target.value)}
+                className={`sl-input${
+                  email && !hasAt && hasEmailSymbol ? " sl-input--error" : ""
+                }`}
+              />
+              {email && !hasAt && hasEmailSymbol && (
+                <p className="sl-field-error">
+                  Please provide a valid email address.
+                </p>
+              )}
+            </div>
+
+            <div className="sl-field">
+              <div className="sl-field-row-head">
+                <label className="sl-label" htmlFor="password">
+                  Password
+                </label>
+                <Link to="/forget-password" className="sl-forgot-link" style={{ marginTop: 0 }}>
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="sl-input-wrap">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Your password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="sl-input"
+                />
+                <button
+                  type="button"
+                  className="sl-eye-btn"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <IoEyeOff /> : <IoEye />}
+                </button>
               </div>
             </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 h-12 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-              disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-             "
-            />
-          </label>
-          <a
-            className="block mt-2 text-right text-sky-500 hover:underline"
-            href="/forget-password"
-          >
-            Forgot password?
-          </a>
-          <button
-            type="submit"
-            className="mt-4 h-12 w-full text-center my-7 font-medium bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-xl"
-          >
-            Sign in
-          </button>
-          <div className="center">
-            <div className="mt-5 justify-center items-center text-center place-content-center">
-              <p className="place-content-center">
-                Don&apos;t have an account?{" "}
-                <Link to="/signup">
-                  <a>Sign up</a>
-                </Link>
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center animate-pulse">
-            <img
-              src="/Scissors_logo.png"
-              alt="Scissors"
-              className="h-32 my-8"
-            />
-          </div>
-          <p className="mb-10 pb-20 text-center">© 2024 Scissors</p>
-        </form>
-      </div>
-      <div className="scissors-background"></div>
+
+            <button type="submit" className="sl-btn sl-btn--primary sl-btn--block">
+              Sign in
+            </button>
+          </form>
+
+          <p className="sl-auth-switch">
+            Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+          </p>
+        </div>
+      </section>
     </div>
   );
 };

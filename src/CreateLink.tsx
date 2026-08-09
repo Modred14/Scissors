@@ -1,7 +1,7 @@
 // Route: /create-link
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
-import "./style.css";
+import "./landing.css";
 import {
   Disclosure,
   DisclosureButton,
@@ -11,13 +11,10 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BellIcon, XMarkIcon, CameraIcon as CameraOutlineIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import QRCode from "qrcode.react";
-import ToggleButton from "./ToggleButton";
-import Tooltip from "./Tooltip";
-import styled from "styled-components";
 import html2canvas from "html2canvas";
 import { v4 as uuidv4 } from "uuid";
 import { logEvent } from "firebase/analytics";
@@ -62,7 +59,7 @@ const navigation = (isLoggedIn: boolean) => [
     : []),
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -433,589 +430,376 @@ const CreateLink: React.FC = () => {
     window.location.reload();
   };
 
+  const avatarSrc =
+    isLoggedIn && user && user.profileImg
+      ? user.profileImg
+      : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
   if (loading) {
     return <Loading />;
   }
+
   return (
-    <>
-      <div
-        className="fixed header-grid w-full min-w-fit "
-        style={{ zIndex: 1000 }}
-      >
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto px-2 md:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
-              <div className="logo-placement">
-                <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link to="/">
-                      <img
-                        alt="Scissors"
-                        src="/Scissors_logo.png"
-                        className="h-8 w-auto"
-                      />
-                    </Link>
-                  </div>
-                  <div className="hidden md:ml-6 md:block">
-                    <div className="flex space-x-4">
-                      {navigation(isLoggedIn).map((item) => (
-                        <Link to={item.href}>
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            aria-current={item.current ? "page" : undefined}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation                                                      */}
+      {/* ---------------------------------------------------------------- */}
+      <Disclosure as="div" className="sl-nav-wrap" style={{ zIndex: 1200 }}>
+        {({ open }) => (
+          <>
+            <nav className="sl-nav" aria-label="Primary">
+              <Link to="/" className="sl-nav-brand">
+                <img alt="Scissors" src="/Scissors_logo.png" />
+                Scissors
+              </Link>
+
+              <div className="sl-nav-links">
+                {navigation(isLoggedIn).map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                      "sl-nav-link",
+                      item.current && "sl-nav-link--current"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                {isLoggedIn ? (
-                  <>
-                    <div className="place-self-end flex space-x-4 ">
-                      <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                        <button
-                          type="button"
-                          className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="h-6 w-6" />
-                        </button>
 
-                        {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                          <div className="profile-picture">
-                            <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                              <span className="absolute -inset-1.5" />
-                              <span className="sr-only">Open user menu</span>
-                              {user && user.profileImg && (
-                                <img
-                                  src={user.profileImg}
-                                  alt="User profile"
-                                  className="h-8 w-8 rounded-full"
-                                />
-                              )}
-                            </MenuButton>
-                          </div>
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <MenuItem>
-                              <Link to="/profile">
-                                <a
-                                  href="/profile"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Your Profile
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="/settings">
-                                <a
-                                  href="/settings"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Settings
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="#">
-                                <a
-                                  href="#"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                  onClick={handleSignOut}
-                                >
-                                  Sign out
-                                </a>
-                              </Link>
-                            </MenuItem>
-                          </MenuItems>
-                        </Menu>
-                        {/* Mobile menu button*/}
-                        <div className="bar">
-                          <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <span className="absolute -inset-0.5" />
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon
-                              aria-hidden="true"
-                              className="block h-6 w-6 group-data-[open]:hidden"
-                            />
-                            <XMarkIcon
-                              aria-hidden="true"
-                              className="hidden h-6 w-6 group-data-[open]:block"
-                            />
-                          </DisclosureButton>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="place-self-end flex space-x-4 ">
-                    <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                      <button
-                        type="button"
-                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                      >
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon aria-hidden="true" className="h-6 w-6" />
-                      </button>
+              <div className="sl-nav-actions">
+                <button
+                  type="button"
+                  className="sl-nav-icon-btn"
+                  aria-label="View notifications"
+                >
+                  <BellIcon aria-hidden="true" />
+                </button>
 
-                      {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div className="profile-picture">
-                          <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="absolute -inset-1.5" />
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              alt="Default profile"
-                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                              className="h-8 w-8 rounded-full"
-                            />
-                          </MenuButton>
-                        </div>
-                        <MenuItems
-                          transition
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                        >
-                          <MenuItem>
-                            <Link to="/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
-                            </Link>
-                          </MenuItem>
-                          <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
-                            </Link>
-                          </MenuItem>
-                        </MenuItems>
-                      </Menu>
-                      {/* Mobile menu button*/}
-                      <div className="bar">
-                        <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                          <span className="absolute -inset-0.5" />
-                          <span className="sr-only">Open main menu</span>
-                          <Bars3Icon
-                            aria-hidden="true"
-                            className="block h-6 w-6 group-data-[open]:hidden"
-                          />
-                          <XMarkIcon
-                            aria-hidden="true"
-                            className="hidden h-6 w-6 group-data-[open]:block"
-                          />
-                        </DisclosureButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <Menu as="div" style={{ position: "relative" }}>
+                  <MenuButton className="sl-nav-avatar-btn">
+                    <span className="sr-only">Open user menu</span>
+                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                  </MenuButton>
+                  <MenuItems transition className="sl-menu-items">
+                    <MenuItem>
+                      <Link to="/profile" className="sl-menu-item">
+                        Your Profile
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/settings" className="sl-menu-item">
+                        Settings
+                      </Link>
+                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem>
+                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    )}
+                  </MenuItems>
+                </Menu>
+
+                <DisclosureButton
+                  className="sl-mobile-toggle"
+                  aria-label="Toggle main menu"
+                >
+                  {open ? (
+                    <XMarkIcon aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon aria-hidden="true" />
+                  )}
+                </DisclosureButton>
               </div>
-            </div>
-          </div>
+            </nav>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            <DisclosurePanel transition className="sl-mobile-panel">
               {navigation(isLoggedIn).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={Link}
+                  to={item.href}
                   aria-current={item.current ? "page" : undefined}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
+                  className="sl-mobile-link"
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-      </div>
-      <div style={{ minHeight: "100vh", marginTop: "65px" }}>
-        {message && (
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
+
+      {message && (
+        <div className="sl-toast-wrap" style={{ opacity: isFadingOut ? 0 : 1 }}>
+          <div className="sl-toast">{message}</div>
+        </div>
+      )}
+
+      {!isLoggedIn && (
+        <div
+          className={classNames(
+            "sl-usage-badge",
+            "sl-usage-pill",
+            links.length >= 3 && "sl-usage-badge--full"
+          )}
+        >
+          Used: <span className="sl-usage-badge-count">{links.length}/3</span>
+        </div>
+      )}
+
+      <main>
+        <section className="sl-page-hero">
+          <div className="sl-grid-overlay" aria-hidden="true" />
           <div
-            className={`flex justify-center transition-opacity duration-500 ${
-              isFadingOut ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            <div
-              className="fixed animate-message bg-black p-4 mx-4 rounded"
-              style={{ zIndex: "1500", top: "10%" }}
-            >
-              <p className=" text-red-100">{message}</p>
-            </div>{" "}
+            className="sl-orb sl-orb--green"
+            style={{ width: 380, height: 380, top: "-18%", right: "-10%" }}
+            aria-hidden="true"
+          />
+          <div className="sl-container">
+            <span className="sl-eyebrow">New link</span>
+            <h1 className="sl-page-title">Create new link</h1>
+            <p className="sl-page-sub">
+              Shorten a long URL, add an optional custom domain, and generate
+              a QR code — all in one place.
+            </p>
           </div>
-        )}
-        {!isLoggedIn && (
-          <div className="rounded-full">
-            <div
-              className="fixed  shadow-2xl outline outline-1  bg-gray-100 font-bold"
-              style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-            >
-              {links.length < 3 ? (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                    {links.length}/3
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-full  inline text-2xl px-3">
-                  <div className="inline font-comic">Used:</div>
-                  <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                    {links.length}/3
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <main className="px-100 main">
-            <div className="pt-20">
-              <p className="text-3xl font-bold tracking-tight p-0 pb-6 text-gray-900">
-                Create New Link
-              </p>
-              <p className="text-xl font-semibold pb-3">Long Link</p>
-              <div className="grid grid-flow-col">
-                <label className="text-md flex font-bold" htmlFor="longUrl">
-                  Destination
-                </label>
-                {longUrl && (
-                  <div className="text-sm flex justify-end font-semibold hidden-block">
-                    <p className="inline ">
-                      Hit{" "}
-                      <p className="inline  bg-gray-300 font-bold px-2 py-1 rounded-md text-sm">
-                        Enter
-                      </p>{" "}
-                      to quick create
+        </section>
+
+        <section className="sl-page-section">
+          <div className="sl-container" style={{ maxWidth: 900 }}>
+            <form onSubmit={handleSubmit}>
+              <div className="sl-link-form-grid">
+                <div>
+                  <div className="sl-form-card">
+                    <p className="sl-form-section-title">Long link</p>
+                    <p className="sl-form-section-sub">
+                      Paste the destination URL you want to shorten.
                     </p>
-                  </div>
-                )}
-              </div>
-              <input
-                type="text"
-                id="longUrl"
-                placeholder="https://your-long-url.com"
-                required
-                value={longUrl}
-                onChange={(e) => setLongUrl(e.target.value)}
-                className={`peer h-12 mt-1 block w-full px-3 py-2 bg-white border ${
-                  !validLongUrl && longUrl && isSubmitted
-                    ? "border-pink-500 text-pink-600"
-                    : "border-slate-300"
-                } rounded-sm text-m shadow-sm placeholder-slate-400
-                  focus:outline-none  focus:ring-gray-400 focus:ring-1 
-                  disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                  ${
-                    !validLongUrl && longUrl && isSubmitted
-                      ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                      : ""
-                  }
-                `}
-              />
-              {!validLongUrl && longUrl && isSubmitted && (
-                <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we&apos;ll need a valid URL, like
-                  &quot;https://yourlonglink.com&quot;.
-                </p>
-              )}
-              <label htmlFor="title">
-                <div className="grid grid-flow-col pt-8 w-28">
-                  <p className="text-md font-bold">Title</p>{" "}
-                  <p className="text-md font-light">(optional)</p>
-                </div>
-              </label>
-              <input
-                id="title"
-                type="text"
-                value={link.title || ""}
-                onChange={(e) => setLink({ ...link, title: e.target.value })}
-                placeholder="Enter your link title"
-                className=" h-12 mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-sm text-m shadow-sm placeholder-slate-400
-              focus:outline-none  focus:ring-gray-400 focus:ring-1
-            "
-              />
-              <hr
-                className="my-12 mx-0"
-                style={{
-                  height: "1px",
-                  backgroundColor: "rgb(83, 83, 83, 0.5)",
-                  border: "none",
-                }}
-              />
-              <p className="text-2xl font-bold tracking-tight p-0 pb-2 text-gray-900">
-                Ways to share
-              </p>
-              <p className="text-xl font-semibold">Short Link</p>
-              <div className="grid grid-flow-col pt-3 w-56">
-                <p className="text-md font-bold">Custom Domain</p>{" "}
-                <p className="text-md font-light">(optional)</p>{" "}
-                <Tooltip info="A short link will be automatically generated for you if the custom domain field is left blank." />
-              </div>
-              <input
-                type="text"
-                value={customLink}
-                onChange={(e) => setCustomLink(e.target.value)}
-                placeholder="https://your-custom-link.com"
-                className={`peer h-12 mt-1 block w-full px-3 pt-2 bg-white border ${
-                  !validCustomLink && customLink && isSubmitted
-                    ? "border-pink-500 text-pink-600"
-                    : "border-slate-300"
-                } rounded-sm text-m shadow-sm placeholder-slate-400
-                  focus:outline-none  focus:ring-gray-400 focus:ring-1 
-                  disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                  ${
-                    !validCustomLink && customLink && isSubmitted
-                      ? "focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                      : ""
-                  }
-                `}
-              />
-              {!validCustomLink && customLink && isSubmitted && (
-                <p className="mt-1  peer-invalid:visible text-pink-600 text-sm">
-                  Invalid link. Please, we&apos;ll need a valid URL, like
-                  &quot;https://yourcustomshortlink.com&quot;.
-                </p>
-              )}
-              {validCustomLink && smallLoading ? (
-                <div className="mt-1 text-sm">Please wait ...</div>
-              ) : (
-                !smallLoading &&
-                validCustomLink &&
-                isAvailable != null && (
-                  <div>
-                    <p
-                      className={`mt-1 text-sm m-0 ${
-                        isAvailable ? "text-green-600" : "text-pink-600"
-                      }`}
-                    >
-                      {isAvailable
-                        ? "Domain is available!"
-                        : "Domain is occupied."}
-                    </p>
-                  </div>
-                )
-              )}
-              <div className="pt-12">
-                <button
-                  type="submit"
-                  className="mt-5 shadow-2xl h-12 w-full text-center hidden  font-bold  bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-                >
-                  Create
-                </button>{" "}
-              </div>
-            </div>
-            <div className="grid grid-flow-col pt-0 w-44">
-              <p className="text-xl font-semibold">QR Code</p>{" "}
-              <p className="text-lg font-light">(optional)</p>
-            </div>
-            <div className="grid w-120 grid-flow-col pt-3">
-              <ToggleButton
-                toggleState={isPreviewVisible}
-                onToggle={() => setIsPreviewVisible(!isPreviewVisible)}
-              />
-              <p className="text-md mb-4 pl-2 font-light">
-                Generate a QR Code that is faster and easier to use.
-              </p>
-            </div>
-            {isPreviewVisible && (
-              <div className="shadow flex-qr p-5 max-w-4xl grid-qrcode bg-gray-300 ">
-                <Container>
-                  <div className="pt-120">
-                    <div className="pl-120 sm:p-3">
-                      <p className="text-md font-semibold">Code Color</p>
+
+                    <div className="sl-field">
+                      <div className="sl-field-label-row">
+                        <label className="sl-label" htmlFor="longUrl">
+                          Destination
+                        </label>
+                        {longUrl && (
+                          <span className="sl-hint-row">
+                            Hit <span className="sl-kbd">Enter</span> to quick create
+                          </span>
+                        )}
+                      </div>
                       <input
-                        type="color"
-                        id="color"
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
-                        placeholder="Choose Color"
+                        type="text"
+                        id="longUrl"
+                        placeholder="https://your-long-url.com"
+                        required
+                        value={longUrl}
+                        onChange={(e) => setLongUrl(e.target.value)}
+                        className={`sl-input${
+                          !validLongUrl && longUrl && isSubmitted
+                            ? " sl-input--error"
+                            : ""
+                        }`}
+                      />
+                      {!validLongUrl && longUrl && isSubmitted && (
+                        <p className="sl-field-error">
+                          Invalid link. Please, we&apos;ll need a valid URL, like
+                          &quot;https://yourlonglink.com&quot;.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="sl-field" style={{ marginTop: 18 }}>
+                      <div className="sl-field-label-row">
+                        <label className="sl-label" htmlFor="title">
+                          Title
+                        </label>
+                        <span className="sl-optional-tag">(optional)</span>
+                      </div>
+                      <input
+                        id="title"
+                        type="text"
+                        value={link.title || ""}
+                        onChange={(e) => setLink({ ...link, title: e.target.value })}
+                        placeholder="Enter your link title"
+                        className="sl-input"
                       />
                     </div>
-                    <div className="sm:p-3 sm:pt-0">
-                      <p className="text-md pt-3 pb-0 mb-0 font-semibold">
-                        QR Code Logo
-                      </p>
-                      <LogoContainer>
-                        <Label htmlFor="file-input">
-                          {logo ? (
-                            <LogoPreview src={logo} alt="Logo Preview" />
-                          ) : (
-                            <Placeholder>
-                              <CameraIcon
-                                src="https://img.icons8.com/ios-filled/50/000000/camera.png"
-                                alt="Camera Icon"
-                              />
-                              <Text>Add Logo</Text>
-                            </Placeholder>
-                          )}
-                        </Label>
-                        <FileInput
-                          id="file-input"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoChange}
-                        />
-                      </LogoContainer>
-                    </div>
-                  </div>
-                </Container>
-                <div className="align-div">
-                  <div className="bg-white qr-width p-7 shadow mt-6 sm:m-3">
-                    <p className="text-md font-bold text-center">Preview</p>
 
-                    <div className="pp bg-white  w-auto justify-center items-center justify-self-center shadow outline m-3 outline-1">
-                      <div ref={qrRef}>
-                        <QRCode
-                          value={longUrl || "scissors.netlify.app"}
-                          size={150}
-                          fgColor={color}
-                          level={"H"}
-                          includeMargin={true}
-                          imageSettings={
-                            logo
-                              ? {
-                                  src: logo,
-                                  x: undefined,
-                                  y: undefined,
-                                  height: 40,
-                                  width: 40,
-                                  excavate: true,
-                                }
-                              : undefined
-                          }
-                        />
+                    <hr className="sl-form-divider" />
+
+                    <p className="sl-form-section-title">Custom domain</p>
+                    <p className="sl-form-section-sub">
+                      A short link is generated automatically if left blank.
+                    </p>
+
+                    <div className="sl-field">
+                      <div className="sl-field-label-row">
+                        <label className="sl-label" htmlFor="customLink">
+                          Custom domain
+                        </label>
+                        <span className="sl-optional-tag">(optional)</span>
                       </div>
+                      <input
+                        id="customLink"
+                        type="text"
+                        value={customLink}
+                        onChange={(e) => setCustomLink(e.target.value)}
+                        placeholder="https://your-custom-link.com"
+                        className={`sl-input${
+                          !validCustomLink && customLink && isSubmitted
+                            ? " sl-input--error"
+                            : ""
+                        }`}
+                      />
+                      {!validCustomLink && customLink && isSubmitted && (
+                        <p className="sl-field-error">
+                          Invalid link. Please, we&apos;ll need a valid URL, like
+                          &quot;https://yourcustomshortlink.com&quot;.
+                        </p>
+                      )}
+                      {validCustomLink && smallLoading ? (
+                        <p className="sl-status-text sl-status-text--muted">
+                          Please wait ...
+                        </p>
+                      ) : (
+                        !smallLoading &&
+                        validCustomLink &&
+                        isAvailable != null && (
+                          <p
+                            className={`sl-status-text ${
+                              isAvailable
+                                ? "sl-status-text--ok"
+                                : "sl-status-text--bad"
+                            }`}
+                          >
+                            {isAvailable
+                              ? "Domain is available!"
+                              : "Domain is occupied."}
+                          </p>
+                        )
+                      )}
+                    </div>
+
+                    <hr className="sl-form-divider" />
+
+                    <p className="sl-form-section-title">QR code</p>
+                    <p className="sl-form-section-sub">(optional)</p>
+
+                    <div className="sl-toggle-row">
+                      <button
+                        type="button"
+                        className={classNames(
+                          "sl-toggle",
+                          isPreviewVisible && "sl-toggle--on"
+                        )}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsPreviewVisible(!isPreviewVisible);
+                        }}
+                        aria-pressed={isPreviewVisible}
+                        aria-label="Toggle QR code generation"
+                      >
+                        <span className="sl-toggle-knob" />
+                      </button>
+                      <span className="sl-toggle-text">
+                        Generate a QR code that is faster and easier to use.
+                      </span>
+                    </div>
+
+                    {isPreviewVisible && (
+                      <div className="sl-qr-panel">
+                        <div className="sl-qr-panel-col">
+                          <div className="sl-field" style={{ gap: 8 }}>
+                            <label className="sl-label" htmlFor="color">
+                              Code color
+                            </label>
+                            <input
+                              type="color"
+                              id="color"
+                              value={color}
+                              onChange={(e) => setColor(e.target.value)}
+                              className="sl-qr-color-input"
+                            />
+                          </div>
+                          <div className="sl-field" style={{ gap: 8 }}>
+                            <label className="sl-label" htmlFor="file-input">
+                              QR code logo
+                            </label>
+                            <label htmlFor="file-input" className="sl-qr-logo-upload">
+                              {logo ? (
+                                <img src={logo} alt="Logo preview" />
+                              ) : (
+                                <>
+                                  <CameraOutlineIcon aria-hidden="true" />
+                                  <span>Add logo</span>
+                                </>
+                              )}
+                            </label>
+                            <input
+                              id="file-input"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoChange}
+                              style={{ display: "none" }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="sl-qr-preview-wrap">
+                          <p className="sl-form-section-title" style={{ margin: 0 }}>
+                            Preview
+                          </p>
+                          <div className="sl-qr-preview-box">
+                            <div ref={qrRef}>
+                              <QRCode
+                                value={longUrl || "scissors.netlify.app"}
+                                size={140}
+                                fgColor={color}
+                                level={"H"}
+                                includeMargin={true}
+                                imageSettings={
+                                  logo
+                                    ? {
+                                        src: logo,
+                                        x: undefined,
+                                        y: undefined,
+                                        height: 36,
+                                        width: 36,
+                                        excavate: true,
+                                      }
+                                    : undefined
+                                }
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="sl-form-actions">
+                      <Link to="/dashboard" className="sl-btn sl-btn--ghost">
+                        Cancel
+                      </Link>
+                      <button type="submit" className="sl-btn sl-btn--primary">
+                        Create
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
-            <div className="md:p-14"></div>
-            <div className="pt-12">
-              <button
-                type="submit"
-                className="mt-5 shadow-2xl h-12 w-full text-center md:hidden  font-bold  bg-green-700 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-              >
-                Create
-              </button>{" "}
-              <Link to="/dashboard">
-                <button className="mt-5 mb-14 h-12 w-full md:hidden outline-green-800 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
-                  Cancel
-                </button>
-              </Link>
-            </div>
-          </main>
-          <div
-            className=" md:bg-white md:fixed header-grid md:w-full
-         md:top-auto md:shadow lg:-mr-6 md:min-w-full hidden md:block"
-            style={{ zIndex: 1000, top: "91%" }}
-          >
-            <div className="max-w-9xl flex justify-end mx-auto p-4">
-              <Link to="/dashboard">
-                <button className="outline-green-800 mx-3 hover:text-green-100 hover:bg-red-600 text-green-600 text-center bg-gray-100 font-bold py-2 px-4 rounded-md transition-colors duration-1000 outline outline-1 focus:outline-none shadow-2xl text-md">
-                  Cancel
-                </button>
-              </Link>
-              <button
-                type="submit"
-                className="font-bold  bg-green-700 mx-3 hover:bg-green-800 text-white hover:text-white py-2 px-4 rounded-md transition-colors duration-1000 focus:outline-none focus:ring-2 focus:ring-green-600 active:ring-green-600 text-md"
-              >
-                Create
-              </button>
-            </div>
+            </form>
           </div>
-        </form>
-      </div>
-    </>
+        </section>
+      </main>
+    </div>
   );
 };
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-`;
 
-const LogoContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: -5px 0;
-`;
-
-const Label = styled.label`
-  display: inline-block;
-  padding: 20px 20px;
-  background-color: #f0f0f0;
-  color: #000;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const FileInput = styled.input`
-  display: none;
-`;
-
-const LogoPreview = styled.img`
-  max-width: 100px;
-  max-height: 100px;
-  border-radius: 5px;
-`;
-
-const Placeholder = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100px;
-  height: 100px;
-  border: 2px dashed #ccc;
-  border-radius: 5px;
-  padding: 10px;
-`;
-
-const CameraIcon = styled.img`
-  width: 24px;
-  height: 24px;
-`;
-
-const Text = styled.span`
-  margin-top: 5px;
-  font-size: 12px;
-  color: #888;
-`;
 export default CreateLink;
