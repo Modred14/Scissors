@@ -45,13 +45,7 @@ const navigation = (isLoggedIn: boolean) => [
   { name: "Home", href: "/", current: false },
   { name: "Dashboard", href: "/dashboard", current: false },
   { name: "Links", href: "/links", current: false },
-  ...(!isLoggedIn
-    ? [
-        { name: "Sign In", href: "/login", current: false },
-        { name: "Sign Up", href: "/signup", current: false },
-      ]
-    : []),
-];
+  ];
 
 function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -166,39 +160,45 @@ const Profile: React.FC = () => {
               </div>
 
               <div className="sl-nav-actions">
-                <button
-                  type="button"
-                  className="sl-nav-icon-btn"
-                  aria-label="View notifications"
-                >
-                  <BellIcon aria-hidden="true" />
-                </button>
+                {isLoggedIn ? (
+                  <>
+                    <button
+                      type="button"
+                      className="sl-nav-icon-btn"
+                      aria-label="View notifications"
+                    >
+                      <BellIcon aria-hidden="true" />
+                    </button>
 
-                <Menu as="div" style={{ position: "relative" }}>
-                  <MenuButton className="sl-nav-avatar-btn">
-                    <span className="sr-only">Open user menu</span>
-                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
-                  </MenuButton>
-                  <MenuItems transition className="sl-menu-items">
-                    <MenuItem>
-                      <Link to="/profile" className="sl-menu-item">
-                        Your Profile
-                      </Link>
-                    </MenuItem>
-                    <MenuItem>
-                      <Link to="/settings" className="sl-menu-item">
-                        Settings
-                      </Link>
-                    </MenuItem>
-                    {isLoggedIn && (
-                      <MenuItem>
-                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
-                          Sign out
-                        </a>
-                      </MenuItem>
-                    )}
-                  </MenuItems>
-                </Menu>
+                    <Menu as="div" style={{ position: "relative" }}>
+                      <MenuButton className="sl-nav-avatar-btn">
+                        <span className="sr-only">Open user menu</span>
+                        <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                      </MenuButton>
+                      <MenuItems transition className="sl-menu-items">
+                        <MenuItem>
+                          <Link to="/profile" className="sl-menu-item">
+                            Your Profile
+                          </Link>
+                        </MenuItem>
+                        <MenuItem>
+                          <Link to="/settings" className="sl-menu-item">
+                            Settings
+                          </Link>
+                        </MenuItem>
+                        <MenuItem>
+                          <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                            Sign out
+                          </a>
+                        </MenuItem>
+                      </MenuItems>
+                    </Menu>
+                  </>
+                ) : (
+                  <Link to="/signup" className="sl-btn sl-btn--primary sl-btn--sm sl-nav-cta">
+                    Get Started
+                  </Link>
+                )}
 
                 <DisclosureButton
                   className="sl-mobile-toggle"
