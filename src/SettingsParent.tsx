@@ -1,4 +1,7 @@
+// File: src/SettingsParent.tsx
 import React, { useState, useEffect } from "react";
+import "./landing.css";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import Settings from "./Settings";
 import Loading from "./Loading";
 import {
@@ -217,19 +220,16 @@ const SettingsParent: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="sl">
       {message && (
         <div
-          className={`flex justify-center transition-opacity duration-500 ${
-            isFadingOut ? "opacity-0" : "opacity-100"
-          }`}
+          className="sl-toast-wrap"
+          style={{ opacity: isFadingOut ? 0 : 1 }}
         >
-          <div
-            className="fixed animate-message bg-black p-4 mx-4 rounded"
-            style={{ top: "10%" }}
-          >
-            <p className=" text-red-100">{message}</p>
-          </div>{" "}
+          <div className="sl-toast">
+            <CheckIcon aria-hidden="true" />
+            {message}
+          </div>
         </div>
       )}
       <Settings user={user} onUpdate={handleUpdate} />

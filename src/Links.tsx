@@ -1,5 +1,7 @@
+// File: src/Links.tsx
 import React, { useEffect, useState } from "react";
 import "./style.css";
+import "./landing.css";
 import {
   Disclosure,
   DisclosureButton,
@@ -10,6 +12,13 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  PlusCircleIcon,
+  CalendarIcon,
+  DocumentDuplicateIcon,
+  PencilSquareIcon,
+  CheckIcon,
+} from "@heroicons/react/24/outline";
 import Loading from "./Loading";
 import { Link } from "react-router-dom";
 import TruncatedWord from "./TruncatedWord";
@@ -48,7 +57,7 @@ const navigation = (isLoggedIn: boolean) => [
     : []),
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -60,6 +69,7 @@ const Links: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [smallLoading, setSmallLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const handleCopyClick = async (index: number) => {
     try {
@@ -67,7 +77,8 @@ const Links: React.FC = () => {
       await navigator.clipboard.writeText(textToCopy);
       console.log(textToCopy);
       setMessage("You have successfully copied the link.");
-      // alert("Text copied to clipboard!");
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex((i) => (i === index ? null : i)), 1600);
     } catch (err) {
       console.error("Failed to copy: ", err);
       setMessage("Oops!! Couldn't copy the link.");
@@ -100,7 +111,7 @@ const Links: React.FC = () => {
       fetchLinksFromLocalStorage();
     }
   }, []);
-  
+
   const windowWidth = useWindowWidth();
 
   const getMaxLength = (width: number): number => {
@@ -199,445 +210,274 @@ const Links: React.FC = () => {
     return <Loading />;
   }
 
+  const avatarSrc =
+    isLoggedIn && user && user.profileImg
+      ? user.profileImg
+      : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
   return (
-    <>
-      <div className="fixed header-grid w-full" style={{ zIndex: 1000 }}>
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto px-2 md:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
-              <div className="logo-placement">
-                <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link to="/">
-                      <img
-                        alt="Scissors"
-                        src="/Scissors_logo.png"
-                        className="h-8 w-auto"
-                      />
-                    </Link>
-                  </div>
-                  <div className="hidden md:ml-6 md:block">
-                    <div className="flex space-x-4">
-                      {navigation(isLoggedIn).map((item) => (
-                        <Link to={item.href}>
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            aria-current={item.current ? "page" : undefined}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation                                                      */}
+      {/* ---------------------------------------------------------------- */}
+      <Disclosure as="div" className="sl-nav-wrap" style={{ zIndex: 1200 }}>
+        {({ open }) => (
+          <>
+            <nav className="sl-nav" aria-label="Primary">
+              <Link to="/" className="sl-nav-brand">
+                <img alt="Scissors" src="/Scissors_logo.png" />
+                Scissors
+              </Link>
+
+              <div className="sl-nav-links">
+                {navigation(isLoggedIn).map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                      "sl-nav-link",
+                      item.current && "sl-nav-link--current"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                {isLoggedIn ? (
-                  <>
-                    <div className="place-self-end flex space-x-4 ">
-                      <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                        <button
-                          type="button"
-                          className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="h-6 w-6" />
-                        </button>
 
-                        {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                          <div className="profile-picture">
-                            <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                              <span className="absolute -inset-1.5" />
-                              <span className="sr-only">Open user menu</span>
-                              {user && user.profileImg && (
-                                <img
-                                  src={user.profileImg}
-                                  alt="User profile"
-                                  className="h-8 w-8 rounded-full"
-                                />
-                              )}
-                            </MenuButton>
-                          </div>
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <MenuItem>
-                              <Link to="/profile">
-                                <a
-                                  href="/profile"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Your Profile
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="/settings">
-                                <a
-                                  href="/settings"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Settings
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="#">
-                                <a
-                                  href="#"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                  onClick={handleSignOut}
-                                >
-                                  Sign out
-                                </a>
-                              </Link>
-                            </MenuItem>
-                          </MenuItems>
-                        </Menu>
-                        {/* Mobile menu button*/}
-                        <div className="bar">
-                          <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <span className="absolute -inset-0.5" />
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon
-                              aria-hidden="true"
-                              className="block h-6 w-6 group-data-[open]:hidden"
-                            />
-                            <XMarkIcon
-                              aria-hidden="true"
-                              className="hidden h-6 w-6 group-data-[open]:block"
-                            />
-                          </DisclosureButton>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="place-self-end flex space-x-4 ">
-                    <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                      <button
-                        type="button"
-                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                      >
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon aria-hidden="true" className="h-6 w-6" />
-                      </button>
+              <div className="sl-nav-actions">
+                <button
+                  type="button"
+                  className="sl-nav-icon-btn"
+                  aria-label="View notifications"
+                >
+                  <BellIcon aria-hidden="true" />
+                </button>
 
-                      {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div className="profile-picture">
-                          <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="absolute -inset-1.5" />
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              alt="Default profile"
-                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                              className="h-8 w-8 rounded-full"
-                            />
-                          </MenuButton>
-                        </div>
-                        <MenuItems
-                          transition
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                        >
-                          <MenuItem>
-                            <Link to="/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
-                            </Link>
-                          </MenuItem>
-                          <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
-                            </Link>
-                          </MenuItem>
-                        </MenuItems>
-                      </Menu>
-                      {/* Mobile menu button*/}
-                      <div className="bar">
-                        <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                          <span className="absolute -inset-0.5" />
-                          <span className="sr-only">Open main menu</span>
-                          <Bars3Icon
-                            aria-hidden="true"
-                            className="block h-6 w-6 group-data-[open]:hidden"
-                          />
-                          <XMarkIcon
-                            aria-hidden="true"
-                            className="hidden h-6 w-6 group-data-[open]:block"
-                          />
-                        </DisclosureButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <Menu as="div" style={{ position: "relative" }}>
+                  <MenuButton className="sl-nav-avatar-btn">
+                    <span className="sr-only">Open user menu</span>
+                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                  </MenuButton>
+                  <MenuItems transition className="sl-menu-items">
+                    <MenuItem>
+                      <Link to="/profile" className="sl-menu-item">
+                        Your Profile
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/settings" className="sl-menu-item">
+                        Settings
+                      </Link>
+                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem>
+                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    )}
+                  </MenuItems>
+                </Menu>
+
+                <DisclosureButton
+                  className="sl-mobile-toggle"
+                  aria-label="Toggle main menu"
+                >
+                  {open ? (
+                    <XMarkIcon aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon aria-hidden="true" />
+                  )}
+                </DisclosureButton>
               </div>
-            </div>
-          </div>
+            </nav>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            <DisclosurePanel transition className="sl-mobile-panel">
               {navigation(isLoggedIn).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={Link}
+                  to={item.href}
                   aria-current={item.current ? "page" : undefined}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
+                  className="sl-mobile-link"
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-      </div>
-      <div style={{ minHeight: "100vh", marginTop: "65px" }}>
-        <header className="bg-white shadow lg:-mr-6 min-w-full">
-          <div className="max-w-9xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl max-w-8xl font-bold tracking-tight text-gray-900">
-              Links
-            </h1>
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
+
+      {message && (
+        <div
+          className="sl-toast-wrap"
+          style={{ opacity: isFadingOut ? 0 : 1 }}
+        >
+          <div className="sl-toast">
+            <CheckIcon aria-hidden="true" />
+            {message}
           </div>
-        </header>
-        <main>
-          {message && (
-            <div
-              className={`flex justify-center transition-opacity duration-500 ${
-                isFadingOut ? "opacity-0" : "opacity-100"
-              }`}
-            >
-              <div
-                className="fixed animate-message bg-black p-4 mx-4 rounded"
-                style={{ zIndex: "1500", top: "10%" }}
-              >
-                <p className=" text-red-100">{message}</p>
-              </div>{" "}
-            </div>
-          )}
-          {!isLoggedIn && (
-            <div className="rounded-full">
-              <div
-                className="fixed  shadow-2xl outline outline-1  bg-gray-100 font-bold"
-                style={{ top: "93.5%", left: "5%", zIndex: "1500" }}
-              >
-                {links.length < 3 ? (
-                  <div className="rounded-full  inline text-2xl px-3">
-                    <div className="inline font-comic">Used:</div>
-                    <div className="rounded-full inline pl-1 text-2xl text-green-500">
-                      {links.length}/3
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-full  inline text-2xl px-3">
-                    <div className="inline font-comic">Used:</div>
-                    <div className="rounded-full inline pl-1 text-2xl text-red-500">
-                      {links.length}/3
-                    </div>
-                  </div>
-                )}
+        </div>
+      )}
+
+      <main>
+        {/* -------------------------------------------------------------- */}
+        {/* Page header                                                   */}
+        {/* -------------------------------------------------------------- */}
+        <section className="sl-page-hero">
+          <div className="sl-grid-overlay" aria-hidden="true" />
+          <div
+            className="sl-orb sl-orb--green"
+            style={{ width: 380, height: 380, top: "-18%", right: "-10%" }}
+            aria-hidden="true"
+          />
+          <div className="sl-container">
+            <div className="sl-page-hero-row">
+              <div>
+                <span className="sl-eyebrow">Links</span>
+                <h1 className="sl-page-title">Your links</h1>
+                <p className="sl-page-sub">
+                  Every link you&apos;ve created, in one place. Track, copy,
+                  edit, or remove them any time.
+                </p>
               </div>
+              <Link to="/create-link" className="sl-btn sl-btn--primary">
+                <PlusCircleIcon width={18} height={18} /> New link
+              </Link>
             </div>
-          )}
-          <div className="mx-auto py-6 max-w-8xl px-4 sm:px-6 lg:px-8">
-            <div>
-              <p className="mb-3 text-xl font-extrabold">
-                Active ({links.length})
-              </p>
-            </div>
-            <div>
-              {smallLoading ? (
-                <div
-                  className="bg-white shadow flex flex-col items-center justify-center"
-                  style={{ height: "500px" }}
-                >
-                  <SmallLoading />
-                </div>
-              ) : links.length > 0 ? (
-                <ul
-                  className="bg-white shadow p-7 pt-1"
-                  style={{ minHeight: "500px" }}
-                >
-                  {links
-                    .sort(
-                      (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime()
-                    )
-                    .map((link: LinkProps, index: number) => (
-                      <li
-                        key={link.id}
-                        className="border sm:m-4 mt-6 sm:mt-10 pl-0  sm:pl-4 p-4 h-auto bg-gray-100"
-                      >
-                        <div className="grid grid-flow-row lg:grid-flow-col">
-                          <div className="flex sm:pb-0 pb-2 gap-4">
-                            <div>
-                              {" "}
-                              <img
-                                src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.mainLink}&size=32`}
-                                className="show-link rounded-3xl"
-                                alt="link"
-                              />
-                            </div>
-                            <div>
-                              <Link
-                                to={`/link/${link.id}`}
-                                className="text-black hover:underline hover:text-black text-xl font-bold"
-                              >
-                                <TruncatedWord
-                                  word={link.title}
-                                  maxLength={maxLength}
-                                />
-                              </Link>
-                              <a
-                                className="hover:underline font-semibold"
-                                href={link.mainLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <TruncatedWord
-                                  word={link.mainLink}
-                                  maxLength={maxLinkLength}
-                                />
-                              </a>
-                              {link.customLink ? (
-                                <p>
-                                  {" "}
-                                  <a
-                                    className="hover:underline  font-semibold"
-                                    href={link.customLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <TruncatedWord
-                                      word={link.customLink}
-                                      maxLength={maxLinkLength}
-                                    />
-                                  </a>
-                                </p>
-                              ) : (
-                                <p>
-                                  {" "}
-                                  <a
-                                    className="hover:underline font-semibold"
-                                    href={link.shortenedLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <TruncatedWord
-                                      word={link.shortenedLink}
-                                      maxLength={maxLinkLength}
-                                    />
-                                  </a>
-                                </p>
-                              )}
-                              <div className="flex gap-2 text-sm pt-3">
-                                <span className="material-icons text-sm">
-                                  calendar_today
-                                </span>
-                                {new Date(link.createdAt).toLocaleString()}
-                              </div>
-                            </div>
-                            <hr
-                              className="my-5 mx-0 md:hidden"
-                              style={{
-                                height: "0.5px",
-                                backgroundColor: "rgb(83, 83, 83, 0.5)",
-                                border: "none",
-                              }}
+          </div>
+        </section>
+
+        {!isLoggedIn && (
+          <div
+            className={classNames(
+              "sl-usage-badge",
+              links.length >= 3 && "sl-usage-badge--full"
+            )}
+            style={{ position: "fixed", left: 20, bottom: 20, zIndex: 1400 }}
+          >
+            Used: <span className="sl-usage-badge-count">{links.length}/3</span>
+          </div>
+        )}
+
+        {/* -------------------------------------------------------------- */}
+        {/* Links list                                                    */}
+        {/* -------------------------------------------------------------- */}
+        <section className="sl-page-section">
+          <div className="sl-container">
+            <p className="sl-dash-section-title">Active ({links.length})</p>
+
+            {smallLoading ? (
+              <div className="sl-loading-panel">
+                <SmallLoading />
+              </div>
+            ) : links.length > 0 ? (
+              <ul className="sl-link-list">
+                {links
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
+                  )
+                  .map((link: LinkProps, index: number) => (
+                    <li key={link.id} className="sl-link-row">
+                      <div className="sl-link-row-main">
+                        <img
+                          src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.mainLink}&size=32`}
+                          className="sl-link-favicon"
+                          alt=""
+                          aria-hidden="true"
+                        />
+                        <div style={{ minWidth: 0 }}>
+                          <Link to={`/link/${link.id}`} className="sl-link-title">
+                            <TruncatedWord word={link.title} maxLength={maxLength} />
+                          </Link>
+                          <a
+                            className="sl-link-url"
+                            href={link.mainLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <TruncatedWord
+                              word={link.mainLink}
+                              maxLength={maxLinkLength}
                             />
-                          </div>
-                          <div className="flex justify-end">
-                            <div className="relative inline-block">
-                              <div className="flex gap-2">
-                                <button
-                                  className="px-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
-                                  onClick={() => handleCopyClick(index)}
-                                >
-                                  <span className="material-icons pt-2 text-sm font-extrabold">
-                                    content_copy
-                                  </span>
-                                  <p className="pt-2 px-1">Copy</p>
-                                </button>
-                                <Link to={`/edit-link/${link.id}`}>
-                                  <button className="px-2 text-black hover:text-black py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded">
-                                    <span className="material-icons text-sm">
-                                      edit
-                                    </span>
-                                  </button>
-                                </Link>
-                                <LinkOptions
-                                  id={link.id}
-                                  userId={user?.id ?? ""}
-                                  isLoggedIn={isLoggedIn}
-                                  setMessage={setMessage}
-                                  customLink={link.customLink}
-                                  userPassword={user?.password ?? " "}
-                                  smallLoading={smallLoading}
-                                  setSmallLoading={setSmallLoading}
-                                  setLinks={setLinks}
-                                />
-                              </div>
-                            </div>
+                          </a>
+                          <a
+                            className="sl-link-short"
+                            href={link.customLink || link.shortenedLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <TruncatedWord
+                              word={link.customLink || link.shortenedLink}
+                              maxLength={maxLinkLength}
+                            />
+                          </a>
+                          <div className="sl-link-date">
+                            <CalendarIcon aria-hidden="true" />
+                            {new Date(link.createdAt).toLocaleString()}
                           </div>
                         </div>
-                      </li>
-                    ))}
-                </ul>
-              ) : (
-                <div
-                  className="bg-white shadow flex flex-col items-center justify-center"
-                  style={{ height: "500px" }}
-                >
-                  <p className="text-xl font-bold text-center mb-4">
-                    No link is available
-                  </p>
-                  <div>
-                    <Link to="/create-link">
-                      <a href="/create-link">
-                        <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
-                          Create New
+                      </div>
+
+                      <div className="sl-link-actions">
+                        <button
+                          className="sl-icon-btn"
+                          onClick={() => handleCopyClick(index)}
+                        >
+                          {copiedIndex === index ? (
+                            <CheckIcon aria-hidden="true" />
+                          ) : (
+                            <DocumentDuplicateIcon aria-hidden="true" />
+                          )}
+                          <span>{copiedIndex === index ? "Copied" : "Copy"}</span>
                         </button>
-                      </a>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+                        <Link to={`/edit-link/${link.id}`}>
+                          <button
+                            className="sl-icon-btn sl-icon-btn--square"
+                            aria-label="Edit link"
+                          >
+                            <PencilSquareIcon aria-hidden="true" />
+                          </button>
+                        </Link>
+                        <LinkOptions
+                          id={link.id}
+                          userId={user?.id ?? ""}
+                          isLoggedIn={isLoggedIn}
+                          setMessage={setMessage}
+                          customLink={link.customLink}
+                          userPassword={user?.password ?? " "}
+                          smallLoading={smallLoading}
+                          setSmallLoading={setSmallLoading}
+                          setLinks={setLinks}
+                        />
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <div className="sl-empty-panel">
+                <p className="sl-empty-panel-text">No link is available</p>
+                <Link to="/create-link" className="sl-btn sl-btn--primary">
+                  <PlusCircleIcon width={18} height={18} /> Create new
+                </Link>
+              </div>
+            )}
+
+            {links.length > 0 && (
+              <div className="sl-list-end">
+                -- You&apos;ve reached the end of your links --
+              </div>
+            )}
           </div>
-        </main>
-        <div className="my-10 mt-8 pb-5 flex justify-center text-gray-500  text-xl">
-          -- You&apos;ve reached the end of your links --
-        </div>
-      </div>
-    </>
+        </section>
+      </main>
+    </div>
   );
 };
 

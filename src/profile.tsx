@@ -1,5 +1,7 @@
+// File: src/profile.tsx
 import React, { useEffect, useState } from "react";
 import "./style.css";
+import "./landing.css";
 import {
   Disclosure,
   DisclosureButton,
@@ -10,6 +12,7 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { LockClosedIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Loading from "./Loading";
 import TruncatedWord from "./TruncatedWord";
@@ -51,7 +54,7 @@ const navigation = (isLoggedIn: boolean) => [
     : []),
 ];
 
-function classNames(...classes: string[]) {
+function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -149,496 +152,267 @@ const Profile: React.FC = () => {
     return <Loading />;
   }
 
+  const avatarSrc =
+    isLoggedIn && user && user.profileImg
+      ? user.profileImg
+      : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
   return (
-    <>
-      <div
-        className="fixed header-grid w-full min-w-fit "
-        style={{ zIndex: 1000 }}
-      >
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto px-2 md:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center md:hidden"></div>
-              <div className="logo-placement">
-                <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link to="/">
-                      <img
-                        alt="Scissors"
-                        src="/Scissors_logo.png"
-                        className="h-8 w-auto"
-                      />
-                    </Link>
-                  </div>
-                  <div className="hidden md:ml-6 md:block">
-                    <div className="flex space-x-4">
-                      {navigation(isLoggedIn).map((item) => (
-                        <Link to={item.href}>
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            aria-current={item.current ? "page" : undefined}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+    <div className="sl">
+      <div className="sl-noise" aria-hidden="true" />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation                                                      */}
+      {/* ---------------------------------------------------------------- */}
+      <Disclosure as="div" className="sl-nav-wrap" style={{ zIndex: 1200 }}>
+        {({ open }) => (
+          <>
+            <nav className="sl-nav" aria-label="Primary">
+              <Link to="/" className="sl-nav-brand">
+                <img alt="Scissors" src="/Scissors_logo.png" />
+                Scissors
+              </Link>
+
+              <div className="sl-nav-links">
+                {navigation(isLoggedIn).map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={item.current ? "page" : undefined}
+                    className={classNames(
+                      "sl-nav-link",
+                      item.current && "sl-nav-link--current"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                {isLoggedIn ? (
-                  <>
-                    <div className="place-self-end flex space-x-4 ">
-                      <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                        <button
-                          type="button"
-                          className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="h-6 w-6" />
-                        </button>
 
-                        {/* Profile dropdown */}
-                        <Menu as="div" className="relative ml-3">
-                          <div className="profile-picture">
-                            <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                              <span className="absolute -inset-1.5" />
-                              <span className="sr-only">Open user menu</span>
-                              {user && user.profileImg && (
-                                <img
-                                  src={user.profileImg}
-                                  alt="User profile"
-                                  className="h-8 w-8 rounded-full"
-                                />
-                              )}
-                            </MenuButton>
-                          </div>
-                          <MenuItems
-                            transition
-                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                          >
-                            <MenuItem>
-                              <Link to="/profile">
-                                <a
-                                  href="/profile"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Your Profile
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="/settings">
-                                <a
-                                  href="/settings"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                >
-                                  Settings
-                                </a>
-                              </Link>
-                            </MenuItem>
-                            <MenuItem>
-                              <Link to="#">
-                                <a
-                                  href="#"
-                                  className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                                  onClick={handleSignOut}
-                                >
-                                  Sign out
-                                </a>
-                              </Link>
-                            </MenuItem>
-                          </MenuItems>
-                        </Menu>
-                        {/* Mobile menu button*/}
-                        <div className="bar">
-                          <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <span className="absolute -inset-0.5" />
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon
-                              aria-hidden="true"
-                              className="block h-6 w-6 group-data-[open]:hidden"
-                            />
-                            <XMarkIcon
-                              aria-hidden="true"
-                              className="hidden h-6 w-6 group-data-[open]:block"
-                            />
-                          </DisclosureButton>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="place-self-end flex space-x-4 ">
-                    <div className="absolute inset-y-0 right-10 flex items-center pr-2 md:static md:inset-auto md:ml-6 md:pr-0">
-                      <button
-                        type="button"
-                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                      >
-                        <span className="absolute -inset-1.5" />
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon aria-hidden="true" className="h-6 w-6" />
-                      </button>
+              <div className="sl-nav-actions">
+                <button
+                  type="button"
+                  className="sl-nav-icon-btn"
+                  aria-label="View notifications"
+                >
+                  <BellIcon aria-hidden="true" />
+                </button>
 
-                      {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div className="profile-picture">
-                          <MenuButton className="md:w-8 relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="absolute -inset-1.5" />
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              alt="Default profile"
-                              src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-                              className="h-8 w-8 rounded-full"
-                            />
-                          </MenuButton>
-                        </div>
-                        <MenuItems
-                          transition
-                          className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                        >
-                          <MenuItem>
-                            <Link to="/profile">
-                              <a
-                                href="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Your Profile
-                              </a>
-                            </Link>
-                          </MenuItem>
-                          <MenuItem>
-                            <Link to="/settings">
-                              <a
-                                href="/settings"
-                                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
-                              >
-                                Settings
-                              </a>
-                            </Link>
-                          </MenuItem>
-                        </MenuItems>
-                      </Menu>
-                      {/* Mobile menu button*/}
-                      <div className="bar">
-                        <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                          <span className="absolute -inset-0.5" />
-                          <span className="sr-only">Open main menu</span>
-                          <Bars3Icon
-                            aria-hidden="true"
-                            className="block h-6 w-6 group-data-[open]:hidden"
-                          />
-                          <XMarkIcon
-                            aria-hidden="true"
-                            className="hidden h-6 w-6 group-data-[open]:block"
-                          />
-                        </DisclosureButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <Menu as="div" style={{ position: "relative" }}>
+                  <MenuButton className="sl-nav-avatar-btn">
+                    <span className="sr-only">Open user menu</span>
+                    <img alt="User profile" src={avatarSrc} className="sl-nav-avatar" />
+                  </MenuButton>
+                  <MenuItems transition className="sl-menu-items">
+                    <MenuItem>
+                      <Link to="/profile" className="sl-menu-item">
+                        Your Profile
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/settings" className="sl-menu-item">
+                        Settings
+                      </Link>
+                    </MenuItem>
+                    {isLoggedIn && (
+                      <MenuItem>
+                        <a href="#" className="sl-menu-item" onClick={handleSignOut}>
+                          Sign out
+                        </a>
+                      </MenuItem>
+                    )}
+                  </MenuItems>
+                </Menu>
+
+                <DisclosureButton
+                  className="sl-mobile-toggle"
+                  aria-label="Toggle main menu"
+                >
+                  {open ? (
+                    <XMarkIcon aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon aria-hidden="true" />
+                  )}
+                </DisclosureButton>
               </div>
-            </div>
-          </div>
+            </nav>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+            <DisclosurePanel transition className="sl-mobile-panel">
               {navigation(isLoggedIn).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={Link}
+                  to={item.href}
                   aria-current={item.current ? "page" : undefined}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium"
-                  )}
+                  className="sl-mobile-link"
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-      </div>
-      <div style={{ minHeight: "80vh", marginTop: "65px" }}>
-        <main className="px-110 ">
-          <div className="pt-7">
-            <p className="font-extrabold text-4xl"> Profile</p>
-          </div>
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
 
-          {isLoggedIn ? (
-            <div>
-              <div className="bg-white mb-10 h-full w-full shadow-sm p-7 mt-8 pt-10">
-                <p className="text-3xl -mt-3 pb-5 font-extrabold flex justify-center">
-                  User details
-                </p>
-                <div className="grid md:grid-flow-col gap-7  items-center just">
-                  <div className="grid md:grid-flow-col gap-7  items-center just">
-                    <div className="flex items-center justify-center w-full">
-                      <img
-                        src={user?.profileImg}
-                        alt={user?.firstName}
-                        className="rounded-full max-h-44 w-44 outline-green-700 outline"
+      <main>
+        {/* -------------------------------------------------------------- */}
+        {/* Page header                                                   */}
+        {/* -------------------------------------------------------------- */}
+        <section className="sl-page-hero">
+          <div className="sl-grid-overlay" aria-hidden="true" />
+          <div
+            className="sl-orb sl-orb--green"
+            style={{ width: 360, height: 360, top: "-18%", right: "-10%" }}
+            aria-hidden="true"
+          />
+          <div className="sl-container">
+            <span className="sl-eyebrow">Profile</span>
+            <h1 className="sl-page-title">Your profile</h1>
+            <p className="sl-page-sub">
+              A quick look at your account details and the links you own.
+            </p>
+          </div>
+        </section>
+
+        <section className="sl-page-section">
+          <div className="sl-container" style={{ maxWidth: 780 }}>
+            {isLoggedIn ? (
+              <div>
+                <div className="sl-form-card">
+                  <p className="sl-form-card-title">User details</p>
+
+                  <div className="sl-avatar-row">
+                    <div
+                      className="sl-avatar-upload sl-avatar-upload--static"
+                      style={{ backgroundImage: `url(${user?.profileImg})` }}
+                      role="img"
+                      aria-label={user?.firstName}
+                    />
+                    <div>
+                      <p className="sl-avatar-row-name">
+                        {user?.firstName} {user?.lastName}
+                      </p>
+                      <p className="sl-avatar-row-text">
+                        This is how your account appears across Scissors.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sl-field-grid">
+                    <div className="sl-field">
+                      <label className="sl-label" htmlFor="firstName">
+                        First Name
+                      </label>
+                      <input
+                        id="firstName"
+                        disabled
+                        type="text"
+                        placeholder={user?.firstName}
+                        value={user?.firstName}
+                        className="sl-input"
+                        readOnly
                       />
                     </div>
-                    <div className="hidden2 sm:block">
-                      <div className="grid items-center justify-start w-full">
-                        <div className="grid grid-flow-row sm:gap-5 gap-2">
-                          <div className="sm:grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
-                            <div className=" justify-flex">
-                              <div>
-                                <p className="text-xl font-bold">First Name</p>
-                                <input
-                                  disabled
-                                  type="text"
-                                  placeholder={user?.firstName}
-                                  value={user?.firstName}
-                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                                />
-                              </div>
-                            </div>
-                            <div className="m-30 justify-flex">
-                              <div>
-                                <p className="text-xl font-bold  all">
-                                  Last Name
-                                </p>
-                                <input
-                                  disabled
-                                  type="text"
-                                  placeholder={user?.lastName}
-                                  value={user?.lastName}
-                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                                />
-                              </div>{" "}
-                            </div>
-                          </div>
-                          <div className="grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
-                            <div className="justify-flex">
-                              <div>
-                                <p className="text-xl font-bold  all">Email</p>
-                                <input
-                                  type="email"
-                                  placeholder="email"
-                                  disabled
-                                  value={user?.email}
-                                  className={`peer h-12 text-xl mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-            
-                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                   `}
-                                />
-                              </div>
-                            </div>
-                            <div className="justify-flex">
-                              <div>
-                                <p className="text-xl font-bold  all">
-                                  User Id
-                                </p>
-                                <input
-                                  disabled
-                                  type="text"
-                                  value={user?.id}
-                                  className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="sl-field">
+                      <label className="sl-label" htmlFor="lastName">
+                        Last Name
+                      </label>
+                      <input
+                        id="lastName"
+                        disabled
+                        type="text"
+                        placeholder={user?.lastName}
+                        value={user?.lastName}
+                        className="sl-input"
+                        readOnly
+                      />
+                    </div>
+                    <div className="sl-field">
+                      <label className="sl-label" htmlFor="email">
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder="email"
+                        disabled
+                        value={user?.email}
+                        className="sl-input"
+                        readOnly
+                      />
+                    </div>
+                    <div className="sl-field">
+                      <label className="sl-label" htmlFor="userId">
+                        User Id
+                      </label>
+                      <input
+                        id="userId"
+                        disabled
+                        type="text"
+                        value={user?.id}
+                        className="sl-input"
+                        readOnly
+                      />
                     </div>
                   </div>
                 </div>
-                <div className="sm:hidden pt-7">
-                  <div className=" w-full">
-                    <div className="grid grid-flow-row sm:gap-5 gap-2">
-                      <div className="sm:grid sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
-                        <div className="w-full">
-                          <div>
-                            <p className="text-xl font-bold">First Name</p>
-                            <input
-                              disabled
-                              type="text"
-                              placeholder={user?.firstName}
-                              value={user?.firstName}
-                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                            />
-                          </div>
-                        </div>
-                        <div className="m-30 ">
-                          <div>
-                            <p className="text-xl font-bold  all">Last Name</p>
-                            <input
-                              disabled
-                              type="text"
-                              placeholder={user?.lastName}
-                              value={user?.lastName}
-                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                            />
-                          </div>{" "}
-                        </div>
-                      </div>
-                      <div className=" sm:grid-flow-col sm:gap-7 gap-2 items-center justify-start w-full">
-                        <div className="">
-                          <div>
-                            <p className="text-xl font-bold  all">Email</p>
-                            <input
-                              type="email"
-                              placeholder="email"
-                              disabled
-                              value={user?.email}
-                              className={`peer h-12 text-xl mt-1 block w-full px-3 mb-2 py-2 bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none`}
-                            />
-                          </div>
-                        </div>
-                        <div className=" mt-5">
-                          <div>
-                            <p className="text-xl font-bold  all">User Id</p>
-                            <input
-                              disabled
-                              type="text"
-                              value={user?.id}
-                              className="peer h-12 mt-1 block w-full px-3 mb-4 py-2 text-xl bg-white border border-slate-300 rounded-md text-m shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500  disabled:border-slate-200 disabled:shadow-none
-              "
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+
+                <p className="sl-dash-section-title">Links ({links.length})</p>
+
+                {smallLoading ? (
+                  <div className="sl-loading-panel">
+                    <SmallLoading />
                   </div>
+                ) : links.length > 0 ? (
+                  <ul className="sl-link-list">
+                    {links
+                      .sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() -
+                          new Date(a.createdAt).getTime()
+                      )
+                      .map((link: Link) => (
+                        <li key={link.id} className="sl-simple-link-row">
+                          <Link to={`/link/${link.id}`} className="sl-link-title">
+                            <TruncatedWord word={link.title} maxLength={maxLength} />
+                          </Link>
+                        </li>
+                      ))}
+                  </ul>
+                ) : (
+                  <div className="sl-empty-panel">
+                    <p className="sl-empty-panel-text">No link is available</p>
+                    <Link to="/create-link" className="sl-btn sl-btn--primary">
+                      <PlusCircleIcon width={18} height={18} /> Create new
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="sl-gate">
+                <div className="sl-gate-icon">
+                  <LockClosedIcon aria-hidden="true" />
                 </div>
-                <div className="grid items-center justify-normal">
-                  <div className="flex mt-9 mb-2 justify-start text-xl font-extrabold">
-                    Links({links.length})
-                  </div>
-                  {smallLoading ? (
-                    <div
-                      className="mt-1 bg-gray-200 shadow flex flex-col items-center justify-center"
-                      style={{ height: "300px" }}
-                    >
-                      <SmallLoading />
-                    </div>
-                  ) : links.length > 0 ? (
-                    <ul className="bg-gray-200" style={{ minHeight: "300px" }}>
-                      {links
-                        .sort(
-                          (a, b) =>
-                            new Date(b.createdAt).getTime() -
-                            new Date(a.createdAt).getTime()
-                        )
-                        .map((link: Link) => (
-                          <li
-                            key={link.id}
-                            className="border m-2 p-4 h-auto bg-gray-100"
-                          >
-                            <div className="grid grid-flow-row lg:grid-flow-col">
-                              <div className="flex sm:pb-0 pb-2 gap-4">
-                                <div>
-                                  <Link
-                                    to={`/link/${link.id}`}
-                                    className="text-black hover:underline hover:text-black text-xl font-bold"
-                                  >
-                                    <TruncatedWord
-                                      word={link.title}
-                                      maxLength={maxLength}
-                                    />
-                                  </Link>
-                                </div>{" "}
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <div
-                      className="mt-1 bg-gray-200 flex flex-col items-center justify-center"
-                      style={{ height: "300px" }}
-                    >
-                      <p className="text-xl font-bold text-center mb-4">
-                        No link is available
-                      </p>
-                      <div>
-                        <Link to="/create-link">
-                          <a href="/create-link">
-                            <button className="bg-green-700 hover:bg-green-800 px-4 py-2 mt-0 font-medium text-white duration-500 transition-colors">
-                              Create New
-                            </button>
-                          </a>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                <p className="sl-gate-text">
+                  You need to log in or sign up first to view your profile
+                  details.
+                </p>
+                <div className="sl-gate-actions">
+                  <Link to="/login" className="sl-btn sl-btn--primary sl-btn--block">
+                    Login
+                  </Link>
+                  <Link to="/signup" className="sl-btn sl-btn--ghost sl-btn--block">
+                    Get Started ➔
+                  </Link>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div>
-              <div className="  grid ">
-                <div className=" bg-white h-full w-full shadow-sm p-7 pt-10 mt-8">
-                  {" "}
-                  <p className="flex items-center text-xl justify-center text-center font-bold">
-                    You need to log in or sign up first to view your profile
-                    details.
-                  </p>{" "}
-                  <Link to="/login">
-                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base text-white mt-12 rounded-none py-2 px-2  font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                      Login
-                    </button>
-                  </Link>
-                  <Link to="/signup">
-                    <button className="w-full shadow-2xl transition-colors bg-green-700 text-base mt-5 text-white rounded-none py-2 px-2 font-semibold hover:bg-green-800 duration-1000 hover:text-white">
-                      Get Started ➔
-                    </button>
-                  </Link>
-                </div>{" "}
-              </div>
-              <div></div>
-            </div>
-          )}
-          
-        </main>
-        {isLoggedIn ? (
-          <div className="mt-32">
-            <Footer />
+            )}
           </div>
-        ) : (
-          <div className="mt-64">
-            <Footer />
-          </div>
-        )}
-      </div>
-     
-    </>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
   );
 };
 export default Profile;

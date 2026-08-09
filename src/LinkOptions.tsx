@@ -1,5 +1,12 @@
+// File: src/LinkOptions.tsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import {
+  EllipsisVerticalIcon,
+  TrashIcon,
+  ChartBarIcon,
+  QrCodeIcon,
+} from "@heroicons/react/24/outline";
 import Confirm from "./Confirm";
 import axios from "axios";
 import SmallLoading from "./SmallLoading";
@@ -78,50 +85,57 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
   };
   const handleDelete = async (enteredPassword: string) => {
     setSmallLoading(true);
-    
+
     if (isLoggedIn) {
       if (enteredPassword === userPassword) {
         try {
           const deleteUrl = `https://app-scissors-api.onrender.com/users/${userId}/links/${id}`;
           console.log("Attempting to delete link:", deleteUrl);
-          
+
           const response = await fetch(deleteUrl, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
             },
           });
-  
+
           if (!response.ok) {
-            throw new Error(`Failed to delete link: ${response.status} ${response.statusText}`);
+            throw new Error(
+              `Failed to delete link: ${response.status} ${response.statusText}`
+            );
           }
-  
+
           console.log(`Removed link with ID ${id} from the server`);
-          if(customLink){
-          const domain = removeProtocol(customLink);
-          removeDomain(domain);
-          setIsModalOpen(false);
-        }
+          if (customLink) {
+            const domain = removeProtocol(customLink);
+            removeDomain(domain);
+            setIsModalOpen(false);
+          }
           const fetchUrl = `https://app-scissors-api.onrender.com/users/${userId}/links`;
           console.log("Fetching updated links from:", fetchUrl);
-  
+
           const responseData = await fetch(fetchUrl, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
           });
-  
+
           if (!responseData.ok) {
-            throw new Error(`Failed to fetch updated links: ${responseData.status} ${responseData.statusText}`);
+            throw new Error(
+              `Failed to fetch updated links: ${responseData.status} ${responseData.statusText}`
+            );
           }
-  
+
           const data = await responseData.json();
           setLinks(data || []);
           setMessage(`You have successfully deleted the link with ID ${id}`);
-        } catch (error: any) {
-          console.error("Error deleting link from the server:", error.message, error);
-          setMessage("An error occurred while deleting the link. Please try again later.");
+        } catch (error) {
+          const err = error as Error;
+          console.error("Error deleting link from the server:", err.message, err);
+          setMessage(
+            "An error occurred while deleting the link. Please try again later."
+          );
         } finally {
           setSmallLoading(false);
         }
@@ -129,7 +143,7 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         setIsModalOpen(false);
         setMessage("Incorrect password. Please try again.");
         setSmallLoading(false);
-      } 
+      }
     } else {
       const links = localStorage.getItem("links");
       if (links) {
@@ -184,7 +198,7 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
   }
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <Confirm
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -195,47 +209,33 @@ const LinkOptions: React.FC<LinkOptionsProps> = ({
         userPassword={userPassword}
       />
       <button
-        className="px-2 py-2 h-9 grid grid-flow-col font-bold bg-gray-200 text-sm hover:bg-gray-300 rounded"
+        className="sl-icon-btn sl-icon-btn--square"
         onClick={toggleOptions}
         ref={buttonRef}
+        aria-label="More options"
+        aria-haspopup="true"
+        aria-expanded={showOptions}
       >
-        <span className="material-icons text-sm">more_vert</span>
+        <EllipsisVerticalIcon aria-hidden="true" />
       </button>
       {showOptions && (
-        <div
-          ref={optionsRef}
-          className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-10"
-        >
+        <div ref={optionsRef} className="sl-link-options-menu">
           <button
-            className="w-full text-left px-2 py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100"
+            type="button"
+            className="sl-link-options-item sl-link-options-item--danger"
             onClick={() => {
-              setIsModalOpen(true); // Open modal to confirm deletion
-              setShowOptions(false); // Close options
+              setIsModalOpen(true);
+              setShowOptions(false);
             }}
           >
-            <div className="flex gap-3">
-              <span className="material-icons ">delete</span>{" "}
-              <p className="pt-1">Delete</p>
-            </div>
+            <TrashIcon aria-hidden="true" /> Delete
           </button>
 
-          <Link to={`/link/${id}`}>
-            <button className="w-full text-left px-2 text-black hover:text-black py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
-              {" "}
-              <div className="flex gap-3">
-                {" "}
-                <span className="material-icons">link</span> View link
-                analystics
-              </div>{" "}
-            </button>
+          <Link to={`/link/${id}`} className="sl-link-options-item">
+            <ChartBarIcon aria-hidden="true" /> View link analytics
           </Link>
-          <Link to={`/link/${id}`}>
-            {" "}
-            <button className="w-full text-left px-2 text-black hover:text-black py-2 font-bold grid grid-flow-col  text-sm hover:bg-gray-100">
-              <div className="flex gap-3">
-                <span className="material-icons">qr_code</span> View QR Code
-              </div>
-            </button>
+          <Link to={`/link/${id}`} className="sl-link-options-item">
+            <QrCodeIcon aria-hidden="true" /> View QR code
           </Link>
         </div>
       )}

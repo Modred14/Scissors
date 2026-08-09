@@ -1,4 +1,7 @@
+// File: src/ConfirmationModal.tsx
 import React from "react";
+import "./landing.css";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 type ConfirmProps = {
   isOpen: boolean;
@@ -9,7 +12,7 @@ type ConfirmProps = {
   onDelete: (password: string) => void;
 };
 
-const Confirm: React.FC<ConfirmProps> = ({
+const ConfirmationModal: React.FC<ConfirmProps> = ({
   isOpen,
   setMessage,
   isLoggedIn,
@@ -18,7 +21,7 @@ const Confirm: React.FC<ConfirmProps> = ({
   onDelete,
 }) => {
   const [password, setPassword] = React.useState("");
-  if (isLoggedIn &&isOpen && userPassword === "") {
+  if (isLoggedIn && isOpen && userPassword === "") {
     setMessage(
       `You will need to add a password to your account before deleting the account.`
     );
@@ -30,29 +33,32 @@ const Confirm: React.FC<ConfirmProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed  inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className=" mx-5">
-        <div className="bg-white p-5 rounded-md shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Confirm Account Deletion</h2>
-          <p className="mb-4">
+    <div className="sl">
+      <div className="sl-modal-overlay" role="dialog" aria-modal="true">
+        <div className="sl-modal-card">
+          <div className="sl-danger-zone-title" style={{ marginBottom: 4 }}>
+            <ExclamationTriangleIcon aria-hidden="true" />
+            <span className="sl-modal-title" style={{ marginBottom: 0 }}>
+              Confirm Account Deletion
+            </span>
+          </div>
+          <p className="sl-modal-text">
             Please enter your password to confirm account deletion:
           </p>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md mb-4"
+            className="sl-input"
+            style={{ width: "100%" }}
           />
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={onClose}
-              className="bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400"
-            >
+          <div className="sl-modal-actions">
+            <button onClick={onClose} className="sl-btn sl-btn--ghost sl-btn--sm">
               Cancel
             </button>
             <button
               onClick={() => onDelete(password)}
-              className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800"
+              className="sl-btn sl-btn--danger sl-btn--sm"
             >
               Delete
             </button>
@@ -63,4 +69,4 @@ const Confirm: React.FC<ConfirmProps> = ({
   );
 };
 
-export default Confirm;
+export default ConfirmationModal;
