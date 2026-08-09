@@ -11,6 +11,7 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { Squares2X2Icon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 
 interface User {
@@ -28,6 +29,13 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", current: false },
   { name: "Links", href: "/links", current: false },
 ];
+
+
+const mobileNavIcons: Record<string, React.ElementType> = {
+  Home: HomeIcon,
+  Dashboard: Squares2X2Icon,
+  Links: LinkIcon,
+};
 
 function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -127,7 +135,7 @@ const NotFound: React.FC = () => {
                     </Menu>
                   </>
                 ) : (
-                  <Link to="/signup" className="sl-btn sl-btn--primary sl-btn--sm sl-nav-cta">
+                  <Link to="/login" className="sl-btn sl-btn--primary sl-btn--sm sl-nav-cta">
                     Get Started
                   </Link>
                 )}
@@ -146,17 +154,41 @@ const NotFound: React.FC = () => {
             </nav>
 
             <DisclosurePanel transition className="sl-mobile-panel">
-              {navigation.map((item) => (
-                <DisclosureButton
-                  key={item.name}
-                  as={Link}
-                  to={item.href}
-                  aria-current={item.current ? "page" : undefined}
-                  className="sl-mobile-link"
-                >
-                  {item.name}
-                </DisclosureButton>
-              ))}
+              <div className="sl-mobile-nav-list">
+                {navigation.map((item) => {
+                  const Icon = mobileNavIcons[item.name] || HomeIcon;
+                  return (
+                    <DisclosureButton
+                      key={item.name}
+                      as={Link}
+                      to={item.href}
+                      aria-current={item.current ? "page" : undefined}
+                      className="sl-mobile-nav-item"
+                    >
+                      <Icon aria-hidden="true" />
+                      <span>{item.name}</span>
+                    </DisclosureButton>
+                  );
+                })}
+              </div>
+
+              {!isLoggedIn && (
+                <>
+                  <hr className="sl-mobile-divider" />
+                  <div className="sl-mobile-bottom-row">
+                    <span className="sl-mobile-avatar-circle">
+                      <UserCircleIcon aria-hidden="true" />
+                    </span>
+                    <DisclosureButton
+                      as={Link}
+                      to="/login"
+                      className="sl-btn sl-btn--primary sl-btn--sm"
+                    >
+                      Get Started
+                    </DisclosureButton>
+                  </div>
+                </>
+              )}
             </DisclosurePanel>
           </>
         )}

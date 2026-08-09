@@ -196,6 +196,8 @@
   right: 0;
   z-index: 1200;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   padding: 16px 20px 0;
   pointer-events: none;
@@ -383,17 +385,77 @@
   transform: translateY(-8px);
 }
 
-.sl-mobile-link {
-  padding: 12px 14px;
+.sl-mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sl-mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
   border-radius: 12px;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--sl-text-dim);
 }
 
-.sl-mobile-link:hover {
+.sl-mobile-nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--sl-text-faint);
+  transition: color 0.2s var(--sl-ease);
+}
+
+.sl-mobile-nav-item:hover,
+.sl-mobile-nav-item[aria-current="page"] {
   background: rgba(255, 255, 255, 0.06);
   color: var(--sl-text);
+}
+
+.sl-mobile-nav-item:hover svg {
+  color: var(--sl-green-light);
+}
+
+.sl-mobile-divider {
+  border: none;
+  height: 1px;
+  background: var(--sl-border);
+  margin: 8px 4px;
+}
+
+.sl-mobile-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px 4px;
+}
+
+.sl-mobile-avatar-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  color: var(--sl-green-light);
+  flex-shrink: 0;
+}
+
+.sl-mobile-avatar-circle svg {
+  width: 22px;
+  height: 22px;
+}
+
+.sl-mobile-bottom-row .sl-btn {
+  flex: 1;
+  justify-content: center;
 }
 
 .sl-nav-actions .sl-nav-cta {
@@ -402,18 +464,17 @@
 }
 
 @media (max-width: 860px) {
+  .sl-nav-actions .sl-nav-cta {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
   .sl-nav-links {
     display: none;
   }
   .sl-mobile-toggle {
     display: inline-flex;
-  }
-}
-
-@media (max-width: 380px) {
-  .sl-nav-actions .sl-nav-cta {
-    padding: 7px 13px;
-    font-size: 0.78rem;
   }
 }
 
