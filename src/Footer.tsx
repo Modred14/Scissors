@@ -11,7 +11,7 @@ import "./landing.css";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="sl sl-footer">
+    <footer className="sl-footer">
       <div className="sl-container">
         <div className="sl-footer-top">
           <div className="sl-footer-brand-col">
@@ -26,49 +26,21 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <p className="sl-footer-col-title">Solutions</p>
+            <p className="sl-footer-col-title">Product</p>
             <div className="sl-footer-links">
-              <a href="#">Healthcare</a>
-              <a href="#">Insurance</a>
-              <a href="#dashboard">Financial Services</a>
-              <a href="#">Education</a>
-              <a href="#">Professional Services</a>
-              <a href="#">Retail</a>
-              <a href="#">Consumer Packaged Goods</a>
-              <a href="#">Tech Software &amp; Hardware</a>
-              <a href="#">Media &amp; Entertainment</a>
+              <a href="/create-link">Shorten a link</a>
+              <a href="/links">Your links</a>
+              <a href="/dashboard">Dashboard</a>
             </div>
           </div>
 
           <div>
-            <p className="sl-footer-col-title">Products</p>
-            <div className="sl-footer-links">
-              <a href="/create-link">Url Shortner</a>
-              <a href="/create-link">Qr Code</a>
-              <a href="/create-link">Custom Domain</a>
-              <a href="/create-link">Analytics</a>
-            </div>
-          </div>
-
-          <div>
-            <p className="sl-footer-col-title">Scissors</p>
+            <p className="sl-footer-col-title">Account</p>
             <div className="sl-footer-links">
               <a href="/">Home</a>
-              <a href="/">About Us</a>
-              <a href="/dashboard">Services</a>
-              <a href="#">Contact</a>
-            </div>
-          </div>
-
-          <div>
-            <p className="sl-footer-col-title">Resources</p>
-            <div className="sl-footer-links">
-              <a href="#">Blog</a>
-              <a href="#">Resource Library</a>
-              <a href="#">Help Center</a>
-              <a href="#">Apps and Integrations</a>
-              <a href="#">Mobile App</a>
-              <a href="#">Developers</a>
+              <a href="/login">Sign in</a>
+              <a href="/signup">Sign up</a>
+              <a href="/settings">Settings</a>
             </div>
           </div>
 
@@ -76,11 +48,7 @@ const Footer: React.FC = () => {
             <p className="sl-footer-col-title">Legal</p>
             <div className="sl-footer-links">
               <a href="/privacy-policy">Privacy Policy</a>
-              <a href="#">Cookie Policy</a>
               <a href="/terms-of-service">Terms of Service</a>
-              <a href="#">Transparency Report</a>
-              <a href="#">Code of Conduct</a>
-              <a href="#">Developers</a>
             </div>
           </div>
         </div>
