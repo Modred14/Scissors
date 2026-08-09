@@ -1,4 +1,4 @@
-// File: src/Settings.tsx
+// Route: /settings (child of SettingsParent)
 import React, { useEffect, useState } from "react";
 import "./style.css";
 import "./landing.css";
@@ -19,7 +19,6 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import Loading from "./Loading";
 import ConfirmationModal from "./ConfirmationModal";
 import Footer from "./Footer";
 
@@ -47,6 +46,7 @@ type Link = {
 interface SettingsProps {
   user: User | null;
   onUpdate: (user: User) => void;
+  isSaving?: boolean;
 }
 
 const navigation = (isLoggedIn: boolean) => [
@@ -65,24 +65,34 @@ function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
+const Settings: React.FC<SettingsProps> = ({ onUpdate, isSaving = false }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(() => getStoredUser()?.email ?? "");
   const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState(() => getStoredUser()?.firstName ?? "");
+  const [lastName, setLastName] = useState(() => getStoredUser()?.lastName ?? "");
   const [password, setPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [userPassword] = useState(() => getStoredUser()?.password ?? "");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasAt = email.includes("@");
-  const [hasPassword, setHasPassword] = useState(false);
+  const [hasPassword] = useState(() => !!getStoredUser()?.password);
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
-  const [profileImg, setProfileImg] = useState("");
+  const [profileImg, setProfileImg] = useState(() => getStoredUser()?.profileImg ?? "");
   const [isHovered, setIsHovered] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,53 +136,12 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
     }
   }, [message]);
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const userData = JSON.parse(storedUserData);
-        setUser(userData);
-        setEmail(userData.email);
-        setFirstName(userData.firstName);
-        setProfileImg(userData.profileImg);
-        setLastName(userData.lastName);
-        setUserPassword(userData.password);
-        if (userData.password === "") {
-          setHasPassword(false);
-        } else {
-          setHasPassword(true);
-        }
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSignOut = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUser(null);
     window.location.reload();
   };
-  if (loading) {
-    return <Loading />;
-  }
 
   const handleDelete = async (enteredPassword: string) => {
     if (enteredPassword === user?.password) {
@@ -555,8 +524,9 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
                     type="submit"
                     className="sl-btn sl-btn--primary sl-btn--block"
                     style={{ marginTop: 26 }}
+                    disabled={isSaving}
                   >
-                    Update Settings
+                    {isSaving ? "Saving…" : "Update Settings"}
                   </button>
                 </div>
 
@@ -607,6 +577,7 @@ const Settings: React.FC<SettingsProps> = ({ onUpdate }) => {
               userPassword={user?.password}
               setMessage={setMessage}
               isLoggedIn={isLoggedIn}
+              isSubmitting={loading}
             />
           </div>
         </section>

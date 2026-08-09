@@ -1,3 +1,4 @@
+// Route: /signup
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
@@ -31,9 +32,10 @@ const Signup: React.FC = () => {
   const [message, setMessage] = useState("");
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [alreadyLoggedIn] = useState<boolean>(() => !!localStorage.getItem("user"));
 
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
@@ -105,13 +107,10 @@ const Signup: React.FC = () => {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
+    if (alreadyLoggedIn) {
       navigate("/dashboard");
-    } else {
-      setLoading(false);
     }
-  }, [navigate]);
+  }, [alreadyLoggedIn, navigate]);
 
   useEffect(() => {
     if (message) {
@@ -234,6 +233,10 @@ const Signup: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (alreadyLoggedIn) {
+    return null;
+  }
 
   if (loading) {
     return <Loading />;

@@ -1,4 +1,4 @@
-// File: src/LandingPage.tsx
+// Route: /
 import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import "./landing.css";
@@ -27,7 +27,6 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import Loading from "./Loading";
 import Footer from "./Footer";
 
 interface User {
@@ -302,48 +301,26 @@ const AnimatedStat: React.FC<{ target: number; suffix?: string; prefix?: string 
 /* Landing page                                                           */
 /* ---------------------------------------------------------------------- */
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const LandingPage: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleSignOut = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUser(null);
     window.location.reload();
   };
-
-  if (loading) {
-    return <Loading />;
-  }
 
   const avatarSrc =
     isLoggedIn && user && user.profileImg

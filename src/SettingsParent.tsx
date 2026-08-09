@@ -1,9 +1,8 @@
-// File: src/SettingsParent.tsx
+// Route: /settings
 import React, { useState, useEffect } from "react";
 import "./landing.css";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import Settings from "./Settings";
-import Loading from "./Loading";
 import {
   getAuth,
   updateEmail,
@@ -34,12 +33,22 @@ interface Link {
   createdAt: string;
 }
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const SettingsParent: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  const [email] = useState(() => getStoredUser()?.email ?? "");
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [message, setMessage] = useState("");
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const auth = getAuth();
   const userPassword = user?.password || "";
@@ -100,29 +109,6 @@ const SettingsParent: React.FC = () => {
       return false;
     }
   };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true);
-      try {
-        const storedUserData = localStorage.getItem("user");
-
-        if (storedUserData) {
-          const user = JSON.parse(storedUserData);
-          setUser(user);
-          setEmail(user.email);
-        } else {
-          console.error("Failed to fetch user data or no user data found");
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   const handleUpdate = async (updatedUser: User): Promise<void> => {
     setLoading(true);
@@ -215,10 +201,6 @@ const SettingsParent: React.FC = () => {
     }
   }, [message]);
 
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <div className="sl">
       {message && (
@@ -232,7 +214,7 @@ const SettingsParent: React.FC = () => {
           </div>
         </div>
       )}
-      <Settings user={user} onUpdate={handleUpdate} />
+      <Settings user={user} onUpdate={handleUpdate} isSaving={loading} />
     </div>
   );
 };

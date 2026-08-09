@@ -1,3 +1,4 @@
+// Route: /edit-link/:id
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import "./style.css";
@@ -66,9 +67,19 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const EditLink: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [loading, setLoading] = useState(true);
   const { id } = useParams<{ id: string }>();
   const [link, setLink] = useState<Partial<Link> | null>(null);
@@ -101,24 +112,6 @@ const EditLink: React.FC = () => {
 
   const checkDomain = removePrefix(customLink);
   const invalidDomainLink = checkDomain.includes("/");
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (message) {
@@ -226,6 +219,7 @@ const uniqueId = id
         setInitialLink(foundLink?.customLink || "");
         setColor(foundLink?.qrcodeColor || "#000000");
         setLogo(foundLink?.qrcodeLogo || null);
+        setLoading(false);
       }
     };
 
@@ -437,16 +431,6 @@ const uniqueId = id
       reader.readAsDataURL(event.target.files[0]);
     }
   };
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem("user");

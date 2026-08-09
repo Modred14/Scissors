@@ -1,4 +1,4 @@
-// File: src/ConfirmationModal.tsx
+// Route: not routed - modal used inside /settings
 import React from "react";
 import "./landing.css";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
@@ -10,6 +10,7 @@ type ConfirmProps = {
   userPassword?: string;
   isLoggedIn: boolean;
   onDelete: (password: string) => void;
+  isSubmitting?: boolean;
 };
 
 const ConfirmationModal: React.FC<ConfirmProps> = ({
@@ -19,6 +20,7 @@ const ConfirmationModal: React.FC<ConfirmProps> = ({
   userPassword,
   onClose,
   onDelete,
+  isSubmitting = false,
 }) => {
   const [password, setPassword] = React.useState("");
   if (isLoggedIn && isOpen && userPassword === "") {
@@ -53,14 +55,19 @@ const ConfirmationModal: React.FC<ConfirmProps> = ({
             style={{ width: "100%" }}
           />
           <div className="sl-modal-actions">
-            <button onClick={onClose} className="sl-btn sl-btn--ghost sl-btn--sm">
+            <button
+              onClick={onClose}
+              className="sl-btn sl-btn--ghost sl-btn--sm"
+              disabled={isSubmitting}
+            >
               Cancel
             </button>
             <button
               onClick={() => onDelete(password)}
               className="sl-btn sl-btn--danger sl-btn--sm"
+              disabled={isSubmitting}
             >
-              Delete
+              {isSubmitting ? "Deleting…" : "Delete"}
             </button>
           </div>
         </div>

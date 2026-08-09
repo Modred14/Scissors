@@ -1,3 +1,4 @@
+// Route: /create-link
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import "./style.css";
@@ -69,11 +70,21 @@ const generateUniqueId = (): string => {
   return uuidv4();
 };
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const CreateLink: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [customDomains, setCustomDomains] = useState<Domain[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [smallLoading, setSmallLoading] = useState(true);
   const [links, setLinks] = useState<LinkProps[]>([]);
   const [longUrl, setLongUrl] = useState("");
@@ -169,18 +180,10 @@ const CreateLink: React.FC = () => {
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
-    setLoading(false);
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      const userData = JSON.parse(user);
-      console.log(userData);
-      fetchUserData();
-    } else {
-      setLoading(false);
+    if (!isLoggedIn) {
       fetchLinksFromLocalStorage();
     }
   }, []);
@@ -420,34 +423,6 @@ const CreateLink: React.FC = () => {
         }
       };
       reader.readAsDataURL(event.target.files[0]);
-    }
-  };
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 

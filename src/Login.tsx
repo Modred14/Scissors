@@ -1,3 +1,4 @@
+// Route: /login
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "./firebaseConfig";
@@ -15,10 +16,11 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [alreadyLoggedIn] = useState<boolean>(() => !!localStorage.getItem("user"));
 
   const hasAt = email.includes("@");
   const hasEmailSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(email);
@@ -28,13 +30,10 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
+    if (alreadyLoggedIn) {
       navigate("/dashboard");
-    } else {
-      setLoading(false);
     }
-  }, [navigate]);
+  }, [alreadyLoggedIn, navigate]);
 
   const googleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +138,10 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (alreadyLoggedIn) {
+    return null;
+  }
 
   if (loading) {
     return <Loading />;

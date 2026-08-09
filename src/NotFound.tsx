@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// Route: * (catch-all / 404)
+import React, { useState } from "react";
 import "./style.css";
 import {
   Disclosure,
@@ -11,7 +12,6 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import Loading from "./Loading";
 
 interface User {
   id: string;
@@ -39,38 +39,19 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const NotFound: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -78,9 +59,6 @@ const NotFound: React.FC = () => {
     setUser(null);
     window.location.reload();
   };
-  if (loading) {
-    return <Loading />;
-  }
 
   return (
     <>

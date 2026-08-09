@@ -1,21 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Loading from "./Loading";
+// Route: /privacy-policy
+import React from "react";
 import Footer from "./Footer";
 
 const Policy: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <div>
       <p className="pt-12 text-center text-6xl text-gray-600 font-bold">

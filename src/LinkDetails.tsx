@@ -1,3 +1,4 @@
+// Route: /link/:id
 import React, { useEffect, useState } from "react";
 import "./style.css";
 import {
@@ -61,11 +62,21 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Error reading stored user:", error);
+    return null;
+  }
+};
+
 const LinkDetails: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getStoredUser());
   const [links, setLinks] = useState<LinkProps[]>([]);
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => getStoredUser());
   const [loading, setLoading] = useState(true);
   const [smallLoading, setSmallLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,19 +84,6 @@ const LinkDetails: React.FC = () => {
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const [link, setLink] = useState<LinkProps | null>(null);
   const [customDomains, setCustomDomains] = useState<Domain[]>([]);
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      const userData = JSON.parse(user);
-      console.log(userData);
-      fetchUserData();
-    } else {
-      setLoading(false);
-      fetchLinksFromLocalStorage();
-    }
-  }, []);
 
   const handleCopyClick = async (id: string) => {
     try {
@@ -251,16 +249,6 @@ const LinkDetails: React.FC = () => {
 
   const maxLinkLength = getMaxLinkLength(windowWidth);
   const maxOtherLinkLength = getOtherMaxLinkLength(windowWidth);
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
   const removeProtocol = (url: string) => {
     return url.replace(/^https?:\/\//, "");
   };
@@ -286,27 +274,11 @@ const LinkDetails: React.FC = () => {
     }
   };
 
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const storedUserData = localStorage.getItem("user");
-
-      if (storedUserData) {
-        const user = JSON.parse(storedUserData);
-        setUser(user);
-      } else {
-        console.error("Failed to fetch user data or no user data found");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (isLoggedIn) {
       fetchLinks();
+    } else {
+      fetchLinksFromLocalStorage();
     }
   }, [isLoggedIn]);
 
@@ -328,7 +300,6 @@ const LinkDetails: React.FC = () => {
     } catch (error) {
       console.error("Error fetching links:", error);
     } finally {
-      setLoading(false);
       setSmallLoading(false);
     }
   };
@@ -339,7 +310,6 @@ const LinkDetails: React.FC = () => {
       localStorage.getItem("links") || "[]"
     );
     setLinks(storedLinks);
-    setLoading(false);
     setSmallLoading(false);
   };
 
