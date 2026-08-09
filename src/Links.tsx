@@ -44,11 +44,11 @@ type LinkProps = {
   createdAt: string;
 };
 
-const navigation = (isLoggedIn: boolean) => [
+const navigation = [
   { name: "Home", href: "/", current: false },
   { name: "Dashboard", href: "/dashboard", current: false },
   { name: "Links", href: "/links", current: true },
-  ];
+];
 
 function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -204,7 +204,7 @@ const Links: React.FC = () => {
               </Link>
 
               <div className="sl-nav-links">
-                {navigation(isLoggedIn).map((item) => (
+                {navigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -274,7 +274,7 @@ const Links: React.FC = () => {
             </nav>
 
             <DisclosurePanel transition className="sl-mobile-panel">
-              {navigation(isLoggedIn).map((item) => (
+              {navigation.map((item) => (
                 <DisclosureButton
                   key={item.name}
                   as={Link}
